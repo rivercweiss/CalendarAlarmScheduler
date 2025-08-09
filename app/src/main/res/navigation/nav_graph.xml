@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_rules">
+
+    <fragment
+        android:id="@+id/nav_rules"
+        android:name="com.example.calendaralarmscheduler.ui.rules.RuleListFragment"
+        android:label="@string/nav_rules"
+        tools:layout="@layout/fragment_rule_list" >
+        
+        <action
+            android:id="@+id/action_rules_to_edit_rule"
+            app:destination="@id/nav_edit_rule" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_edit_rule"
+        android:name="com.example.calendaralarmscheduler.ui.rules.RuleEditFragment"
+        android:label="@string/nav_edit_rule"
+        tools:layout="@layout/fragment_rule_edit" >
+        
+        <argument
+            android:name="ruleId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_preview"
+        android:name="com.example.calendaralarmscheduler.ui.preview.EventPreviewFragment"
+        android:label="@string/nav_preview"
+        tools:layout="@layout/fragment_event_preview" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.calendaralarmscheduler.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

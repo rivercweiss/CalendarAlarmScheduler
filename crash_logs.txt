@@ -1,0 +1,49 @@
+08-08 19:53:55.353 18701 18701 I CalendarAlarmScheduler_Logger: [2025-08-08 19:53:55.350][I] Logger initialized - Debug: true, API: 36
+08-08 19:53:55.359 18701 18701 I CalendarAlarmScheduler_Application: [2025-08-08 19:53:55.358][I] Starting CalendarAlarmApplication initialization - Debug: true
+08-08 19:53:55.360 18701 18701 I CalendarAlarmScheduler_CrashHandler: [2025-08-08 19:53:55.360][I] Crash handler initialized
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: [2025-08-08 19:53:55.361][I] === System Info ===
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: API Level: 36
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: Brand: google
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: Model: sdk_gphone64_arm64
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: Manufacturer: Google
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: Available Memory: 188MB
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: Free Storage: 4436MB
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: === End System Info ===
+08-08 19:53:55.361 18701 18701 I CalendarAlarmScheduler_Application: 
+08-08 19:53:55.362 18701 18701 I CalendarAlarmScheduler_Performance_Application: [2025-08-08 19:53:55.362][I] Application.onCreate() took 19ms
+08-08 19:53:55.363 18701 18701 I CalendarAlarmScheduler_Application: [2025-08-08 19:53:55.363][I] CalendarAlarmApplication initialization completed successfully in 19ms
+08-08 19:53:55.409 18701 18701 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-08 19:53:55.405][D] onCreate - Starting MainActivity initialization
+08-08 19:53:55.424 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.423][D] super.onCreate() completed successfully
+08-08 19:53:55.426 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.425][D] Inflating ActivityMainBinding
+08-08 19:53:55.513 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.512][D] ActivityMainBinding inflated successfully
+08-08 19:53:55.514 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.514][D] Setting content view
+08-08 19:53:55.536 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.535][D] Content view set successfully
+08-08 19:53:55.537 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.537][D] Context dump: Activity: MainActivity, isFinishing: false
+08-08 19:53:55.538 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.538][D] Setting up navigation
+08-08 19:53:55.542 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.542][D] Finding NavHostFragment
+08-08 19:53:55.543 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.543][D] NavHostFragment found, getting NavController
+08-08 19:53:55.544 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.544][D] NavController obtained: androidx.navigation.NavHostController@5b3098a
+08-08 19:53:55.545 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.545][D] Setting up bottom navigation with NavController
+08-08 19:53:55.548 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.547][D] Bottom navigation setup completed
+08-08 19:53:55.549 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.548][D] Navigation setup completed
+08-08 19:53:55.550 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.549][D] Checking permissions and proceeding
+08-08 19:53:55.550 18701 18701 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.550][D] Checking critical permissions status
+08-08 19:53:55.553 18701 18701 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.552][I] Critical permissions status: true
+08-08 19:53:55.554 18701 18701 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.553][I] All critical permissions granted, proceeding normally
+08-08 19:53:55.555 18701 18701 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.554][I] onPermissionGranted called - app can function normally
+08-08 19:53:55.556 18701 18701 I CalendarAlarmScheduler_Performance_MainActivity: [2025-08-08 19:53:55.556][I] onCreate() took 151ms
+08-08 19:53:55.557 18701 18701 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-08 19:53:55.557][D] onCreate - Completed successfully in 151ms
+08-08 19:53:55.576 18701 18701 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.576][D] Starting database initialization
+08-08 19:53:55.578 18701 18701 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.577][D] Creating Room database builder
+08-08 19:53:55.579 18701 18701 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.578][D] Adding migrations and callbacks
+08-08 19:53:55.580 18701 18701 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.579][D] Building Room database instance
+08-08 19:53:55.581 18701 18701 I CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.581][I] Database instance created successfully
+08-08 19:53:55.582 18701 18701 I CalendarAlarmScheduler_Performance_AppDatabase: [2025-08-08 19:53:55.582][I] Database initialization took 6ms
+08-08 19:53:55.583 18701 18701 I CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.583][I] AppDatabase initialized successfully in 6ms
+08-08 19:53:55.584 18701 18701 I CalendarAlarmScheduler_RuleRepository: [2025-08-08 19:53:55.584][I] RuleRepository initialized
+08-08 19:53:55.597 18701 18701 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-08 19:53:55.596][D] onResume - Checking permissions on resume
+08-08 19:53:55.604 18701 18701 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.604][I] onResume permission check: true
+08-08 19:53:55.605 18701 18701 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:53:55.605][I] All permissions available on resume
+08-08 19:53:55.620 18701 18719 I CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.617][I] Database created successfully
+08-08 19:53:55.675 18701 18719 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.675][D] Database opened - version: 1
+08-08 19:53:55.711 18701 18719 V CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:53:55.709][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []

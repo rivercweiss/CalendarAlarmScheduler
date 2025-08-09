@@ -1,0 +1,582 @@
+08-08 19:51:37.664 18571 18571 V GraphicsEnvironment: com.example.calendaralarmscheduler is not listed in ANGLE allowlist or settings, returning default
+08-08 19:51:37.664 18571 18571 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+08-08 19:51:37.682 18571 18571 D WM-WrkMgrInitializer: Initializing WorkManager with default configuration.
+08-08 19:51:37.698 18571 18571 D WM-PackageManagerHelper: Skipping component enablement for androidx.work.impl.background.systemjob.SystemJobService
+08-08 19:51:37.698 18571 18571 D WM-Schedulers: Created SystemJobScheduler and enabled SystemJobService
+08-08 19:51:37.719 18571 18571 I CalendarAlarmScheduler_Logger: [2025-08-08 19:51:37.715][I] Logger initialized - Debug: true, API: 36
+08-08 19:51:37.721 18571 18571 I CalendarAlarmScheduler_Application: [2025-08-08 19:51:37.721][I] Starting CalendarAlarmApplication initialization - Debug: true
+08-08 19:51:37.722 18571 18571 I CalendarAlarmScheduler_CrashHandler: [2025-08-08 19:51:37.722][I] Crash handler initialized
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: [2025-08-08 19:51:37.726][I] === System Info ===
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: API Level: 36
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: Brand: google
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: Model: sdk_gphone64_arm64
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: Manufacturer: Google
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: Available Memory: 188MB
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: Free Storage: 4436MB
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: === End System Info ===
+08-08 19:51:37.727 18571 18571 I CalendarAlarmScheduler_Application: 
+08-08 19:51:37.728 18571 18571 I CalendarAlarmScheduler_Performance_Application: [2025-08-08 19:51:37.727][I] Application.onCreate() took 24ms
+08-08 19:51:37.729 18571 18571 I CalendarAlarmScheduler_Application: [2025-08-08 19:51:37.729][I] CalendarAlarmApplication initialization completed successfully in 24ms
+08-08 19:51:37.735   625  3061 I AppsFilter: interaction: PackageSetting{4118a0b com.example.calendaralarmscheduler/10214} -> PackageSetting{4cb4574 com.google.android.apps.nexuslauncher/10182} BLOCKED
+08-08 19:51:37.736   625  3061 W OptProp : Cannot read opt property android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS
+08-08 19:51:37.736 18571 18585 E ashmem  : Pinning is deprecated since Android Q. Please use trim or other methods.
+08-08 19:51:37.743   625   997 D BackgroundInstallControlService: Package event received: 0
+08-08 19:51:37.743   625   997 D BackgroundInstallControlService: Package event received: 0
+08-08 19:51:37.757 18571 18586 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+08-08 19:51:37.761 18571 18571 I ralarmscheduler: AssetManager2(0xb4000075d12285b8) locale list changing from [] to [en-US]
+08-08 19:51:37.781 18571 18571 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+08-08 19:51:37.782 18571 18571 I ralarmscheduler: AssetManager2(0xb4000075d1234a98) locale list changing from [] to [en-US]
+08-08 19:51:37.793 18571 18571 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-08 19:51:37.792][D] onCreate - Starting MainActivity initialization
+08-08 19:51:37.809 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.809][D] super.onCreate() completed successfully
+08-08 19:51:37.810 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.810][D] Inflating ActivityMainBinding
+08-08 19:51:37.911 18571 18586 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+08-08 19:51:37.911 18571 18586 I EGL_emulation: Opening libGLESv2_emulation.so
+08-08 19:51:37.930 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.929][D] ActivityMainBinding inflated successfully
+08-08 19:51:37.931 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.931][D] Setting content view
+08-08 19:51:37.933 18571 18586 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+08-08 19:51:37.933 18571 18586 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+08-08 19:51:37.938 18571 18571 D DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+08-08 19:51:37.955 18571 18571 I ralarmscheduler: hiddenapi: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (runtime_flags=0, domain=platform, api=unsupported) from Landroidx/appcompat/widget/ViewUtils; (domain=app) using reflection: allowed
+08-08 19:51:37.958 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.957][D] Content view set successfully
+08-08 19:51:37.960 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.959][D] Context dump: Activity: MainActivity, isFinishing: false
+08-08 19:51:37.961 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.960][D] Setting up navigation
+08-08 19:51:37.962 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.961][D] Finding NavHostFragment
+08-08 19:51:37.963 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.962][D] NavHostFragment found, getting NavController
+08-08 19:51:37.964 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.963][D] NavController obtained: androidx.navigation.NavHostController@5b3098a
+08-08 19:51:37.965 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.964][D] Setting up bottom navigation with NavController
+08-08 19:51:37.968 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.967][D] Bottom navigation setup completed
+08-08 19:51:37.968 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.968][D] Navigation setup completed
+08-08 19:51:37.969 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.969][D] Checking permissions and proceeding
+08-08 19:51:37.970 18571 18571 D CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.970][D] Checking critical permissions status
+08-08 19:51:37.973 18571 18571 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.972][I] Critical permissions status: true
+08-08 19:51:37.974 18571 18571 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.973][I] All critical permissions granted, proceeding normally
+08-08 19:51:37.975 18571 18571 I CalendarAlarmScheduler_MainActivity: [2025-08-08 19:51:37.974][I] onPermissionGranted called - app can function normally
+08-08 19:51:37.976 18571 18571 I CalendarAlarmScheduler_Performance_MainActivity: [2025-08-08 19:51:37.975][I] onCreate() took 183ms
+08-08 19:51:37.977 18571 18571 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-08 19:51:37.976][D] onCreate - Completed successfully in 183ms
+08-08 19:51:37.994 18571 18571 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:37.994][D] Starting database initialization
+08-08 19:51:37.995 18571 18571 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:37.995][D] Creating Room database builder
+08-08 19:51:37.996 18571 18571 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:37.996][D] Adding migrations and callbacks
+08-08 19:51:37.997 18571 18571 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:37.997][D] Building Room database instance
+08-08 19:51:37.999 18571 18571 D CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:37.999][D] Verifying database integrity
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:38.000][CRASH] FATAL: Database initialization failed after 5ms
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.007 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: [2025-08-08 19:51:38.013][E] Non-fatal exception: Database initialization failed
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.015 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.017 18571 18571 E CalendarAlarmScheduler_AppDatabase: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: [2025-08-08 19:51:38.020][E] === NON-FATAL EXCEPTION ===
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: Tag: AppDatabase
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: Message: Database initialization failed
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: Exception: java.lang.IllegalStateException
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: Exception Message: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: Stack Trace:
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.025 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 
+08-08 19:51:38.026 18571 18571 E CalendarAlarmScheduler_NON_FATAL: 
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: Failed to execute the transaction: tId:-1941611604 ClientTransaction{
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604   transactionItems=[
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604     LaunchActivityItem{activityToken=android.os.BinderProxy@11d649b,intent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 xflg=0x4 cmp=com.example.calendaralarmscheduler/.ui.MainActivity bnds=[824,1873][997,2068] },ident=63483229,info=ActivityInfo{4e0ae80 com.example.calendaralarmscheduler.ui.MainActivity},curConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h866dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2337) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.555 fontWeightAdjustment=0},overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h866dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2337) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.2 fontWeightAdjustment=0},deviceId=0,referrer=null,procState=2,state=null,persistentState=null,pendingResults=null,pendingNewIntents=null,sceneTransitionInfo=null,profilerInfo=null,assistToken=android.os.BinderProxy@8cd81bd,shareableActivityToken=android.os.BinderProxy@23603b2,activityWindowInfo=ActivityWindowInfo{isEmbedded=false, taskBounds=Rect(0, 0 - 1080, 2400), taskFragmentBounds=Rect(0, 0 - 1080, 2400)}}
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604     ResumeActivityItem{mActivityToken=android.os.BinderProxy@11d649b,procState=-1,isForward=true,shouldSendCompatFakeFocus=false}
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604     Target activity: com.example.calendaralarmscheduler.ui.MainActivity
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604   ]
+08-08 19:51:38.028 18571 18571 E TransactionExecutor: tId:-1941611604 }
+08-08 19:51:38.028 18571 18571 D AndroidRuntime: Shutting down VM
+--------- beginning of crash
+08-08 19:51:38.030 18571 18571 E AndroidRuntime: FATAL EXCEPTION: main
+--
+08-08 19:51:38.031 18571 18571 E AndroidRuntime: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.031 18571 18571 E AndroidRuntime: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.031 18571 18571 E AndroidRuntime: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.031 18571 18571 E AndroidRuntime: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.031 18571 18571 E AndroidRuntime: 	... 47 more
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: [2025-08-08 19:51:38.031][CRASH] UNCAUGHT EXCEPTION in thread main
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: java.lang.RuntimeException: Cannot create an instance of class com.example.calendaralarmscheduler.ui.rules.RuleListViewModel
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:315)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.033 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: Caused by: java.lang.reflect.InvocationTargetException
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	... 43 more
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: Caused by: java.lang.RuntimeException: Failed to initialize database
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:83)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	... 46 more
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: Caused by: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.035 18571 18571 E CalendarAlarmScheduler_CrashHandler: 	... 47 more
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: [2025-08-08 19:51:38.049][CRASH] === CRASH REPORT ===
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Timestamp: 2025-08-08 19:51:38.039
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Thread: main (ID: 2)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === DEVICE INFO ===
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Manufacturer: Google
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Brand: google
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Model: sdk_gphone64_arm64
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Product: sdk_gphone64_arm64
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: SDK: 36
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Release: 16
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === MEMORY INFO ===
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Max Memory: 192MB
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Total Memory: 192MB
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Free Memory: 184MB
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Available Memory: 184MB
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === EXCEPTION DETAILS ===
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Exception Type: java.lang.RuntimeException
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Message: Cannot create an instance of class com.example.calendaralarmscheduler.ui.rules.RuleListViewModel
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Stack Trace:
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: java.lang.RuntimeException: Cannot create an instance of class com.example.calendaralarmscheduler.ui.rules.RuleListViewModel
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:315)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.050 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.reflect.InvocationTargetException
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 43 more
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.RuntimeException: Failed to initialize database
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:83)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 46 more
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 47 more
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === CAUSED BY (Level 1) ===
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Exception Type: java.lang.reflect.InvocationTargetException
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Message: null
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Stack Trace:
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: java.lang.reflect.InvocationTargetException
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.RuntimeException: Failed to initialize database
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:83)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 46 more
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 47 more
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === CAUSED BY (Level 2) ===
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Exception Type: java.lang.RuntimeException
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Message: Failed to initialize database
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Stack Trace:
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: java.lang.RuntimeException: Failed to initialize database
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:83)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.051 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Caused by: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	... 47 more
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === CAUSED BY (Level 3) ===
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Exception Type: java.lang.IllegalStateException
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Message: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: Stack Trace:
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.assertNotMainThread(RoomDatabase.kt:439)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.beginTransaction(RoomDatabase.kt:508)
+08-08 19:51:38.052 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.room.RoomDatabase.runInTransaction(RoomDatabase.kt:583)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.data.database.AppDatabase$Companion.getInstance(AppDatabase.kt:63)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListViewModel.<init>(RuleListViewModel.kt:22)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:307)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:299)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$AndroidViewModelFactory.create(ViewModelProvider.android.kt:273)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.SavedStateViewModelFactory.create(SavedStateViewModelFactory.kt:128)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider$Factory.create(ViewModelProvider.android.kt:158)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:109)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.example.calendaralarmscheduler.ui.rules.RuleListFragment.onViewCreated(RuleListFragment.kt:34)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchViewCreated(FragmentManager.java:3227)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3153)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentStore.moveToExpectedState(FragmentStore.java:114)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.moveToState(FragmentManager.java:1684)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchStateChange(FragmentManager.java:3316)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentManager.dispatchActivityCreated(FragmentManager.java:3234)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentController.dispatchActivityCreated(FragmentController.java:263)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.fragment.app.FragmentActivity.onStart(FragmentActivity.java:350)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at androidx.appcompat.app.AppCompatActivity.onStart(AppCompatActivity.java:251)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Instrumentation.callActivityOnStart(Instrumentation.java:1696)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.Activity.performStart(Activity.java:9198)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.handleStartActivity(ActivityThread.java:4305)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.performLifecycleSequence(TransactionExecutor.java:214)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.cycleToPath(TransactionExecutor.java:194)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleItem(TransactionExecutor.java:166)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:101)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loopOnce(Looper.java:248)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.os.Looper.loop(Looper.java:338)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at java.lang.reflect.Method.invoke(Native Method)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: === END CRASH REPORT ===
+08-08 19:51:38.053 18571 18571 E CalendarAlarmScheduler_CRASH_REPORT: 
+08-08 19:51:38.062   625  1850 W ActivityTaskManager:   Force finishing activity com.example.calendaralarmscheduler/.ui.MainActivity
+08-08 19:51:38.065   625 18589 I DropBoxManagerService: add tag=data_app_crash isTagEnabled=true flags=0x2
+08-08 19:51:38.067   485   523 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+08-08 19:51:38.067  1307  1307 D VRI[NexusLauncherActivity]: visibilityChanged oldVisibility=false newVisibility=true
+08-08 19:51:38.068  1036  1118 V WindowManagerShell: Transition requested (#542): android.os.BinderProxy@cb116a5 TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=19 effectiveUid=10214 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.example.calendaralarmscheduler/.ui.MainActivity } baseActivity=ComponentInfo{com.example.calendaralarmscheduler/com.example.calendaralarmscheduler.ui.MainActivity} topActivity=ComponentInfo{com.example.calendaralarmscheduler/com.example.calendaralarmscheduler.ui.MainActivity} origActivity=null realActivity=ComponentInfo{com.example.calendaralarmscheduler/com.example.calendaralarmscheduler.ui.MainActivity} numActivities=1 lastActiveTime=3981610 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@4eb1a7a} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{e87a22b com.example.calendaralarmscheduler.ui.MainActivity} launchCookies=[android.os.BinderProxy@cb26c5b] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(284, 660 - 796, 1740) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2337) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange = null, flags = 16, debugId = 542 }
+08-08 19:51:38.070 18571 18571 I Process : Sending signal. PID: 18571 SIG: 9
+08-08 19:51:38.079   625  1074 I ActivityManager: Process com.example.calendaralarmscheduler (pid 18571) has died: fg  TOP 
+08-08 19:51:38.079  1393  1393 I adbd    : Remote process closed the socket (on MSG_PEEK)
+08-08 19:51:38.082   485   485 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+08-08 19:51:38.082   414   414 I Zygote  : Process 18571 exited due to signal 9 (Killed)
