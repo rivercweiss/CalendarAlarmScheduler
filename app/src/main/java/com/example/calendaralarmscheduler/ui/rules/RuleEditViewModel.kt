@@ -218,10 +218,28 @@ class RuleEditViewModel(application: Application) : AndroidViewModel(application
                         android.util.Log.e("RuleEditViewModel", "Failed to update rule '${rule.name}': ${result.message}")
                     }
                 } else {
-                    // Create new rule (no alarm management needed yet)
+                    // Create new rule with immediate alarm scheduling
                     ruleRepository.insertRule(rule)
-                    _statusMessage.value = "✅ Rule created successfully"
-                    _saveResult.value = SaveResult.Success
+                    
+                    if (rule.enabled) {
+                        // Schedule alarms for the newly created enabled rule
+                        val result = ruleAlarmManager.updateRuleEnabled(rule, true)
+                        
+                        if (result.success) {
+                            _statusMessage.value = "✅ ${result.message}"
+                            _saveResult.value = SaveResult.Success
+                            android.util.Log.i("RuleEditViewModel", "Rule '${rule.name}' created with immediate alarm scheduling: ${result.message}")
+                        } else {
+                            _statusMessage.value = "⚠️ Rule created but ${result.message}"
+                            _saveResult.value = SaveResult.Error("Rule created but ${result.message}")
+                            android.util.Log.e("RuleEditViewModel", "Rule '${rule.name}' created but alarm scheduling failed: ${result.message}")
+                        }
+                    } else {
+                        // Rule created but disabled - no alarm scheduling needed
+                        _statusMessage.value = "✅ Rule created successfully (disabled)"
+                        _saveResult.value = SaveResult.Success
+                        android.util.Log.i("RuleEditViewModel", "Rule '${rule.name}' created in disabled state")
+                    }
                 }
                 
             } catch (e: Exception) {
