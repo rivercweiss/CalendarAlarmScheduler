@@ -6,18 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.databinding.FragmentRuleListBinding
 import com.example.calendaralarmscheduler.data.database.entities.Rule
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RuleListFragment : Fragment() {
     private var _binding: FragmentRuleListBinding? = null
     private val binding get() = _binding!!
     
-    private lateinit var viewModel: RuleListViewModel
+    private val viewModel: RuleListViewModel by viewModels()
     private lateinit var ruleAdapter: RuleAdapter
 
     override fun onCreateView(
@@ -31,8 +33,6 @@ class RuleListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        viewModel = ViewModelProvider(this)[RuleListViewModel::class.java]
         
         setupRecyclerView()
         setupFab()

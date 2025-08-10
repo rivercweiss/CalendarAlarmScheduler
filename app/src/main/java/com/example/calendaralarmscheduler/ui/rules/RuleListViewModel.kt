@@ -1,27 +1,22 @@
 package com.example.calendaralarmscheduler.ui.rules
 
-import android.app.Application
-import android.app.AlarmManager
-import android.content.Context
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.calendaralarmscheduler.data.AlarmRepository
-import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
-import com.example.calendaralarmscheduler.data.database.AppDatabase
 import com.example.calendaralarmscheduler.data.database.entities.Rule
-import com.example.calendaralarmscheduler.domain.AlarmScheduler
-import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleAlarmManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RuleListViewModel(application: Application) : AndroidViewModel(application) {
-    
-    private val repository: RuleRepository
+@HiltViewModel
+class RuleListViewModel @Inject constructor(
+    private val repository: RuleRepository,
     private val ruleAlarmManager: RuleAlarmManager
+) : ViewModel() {
     
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -30,26 +25,8 @@ class RuleListViewModel(application: Application) : AndroidViewModel(application
     val statusMessage: LiveData<String?> = _statusMessage
     
     init {
-        val database = AppDatabase.getInstance(application)
-        repository = RuleRepository(database.ruleDao())
-        
-        // Initialize dependencies for RuleAlarmManager
-        val alarmRepository = AlarmRepository(database.alarmDao())
-        val calendarRepository = CalendarRepository(application)
-        val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmScheduler = AlarmScheduler(application, alarmManager)
-        val alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
-        
-        // Create and inject RuleAlarmManager
-        ruleAlarmManager = RuleAlarmManager(
-            repository,
-            alarmRepository,
-            alarmScheduler,
-            calendarRepository,
-            alarmSchedulingService
-        )
+        // Set up RuleAlarmManager in the repository
         repository.setRuleAlarmManager(ruleAlarmManager)
-        
         _isLoading.value = false
     }
     

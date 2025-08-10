@@ -2,7 +2,6 @@ package com.example.calendaralarmscheduler.ui.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
@@ -10,6 +9,8 @@ import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +20,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import javax.inject.Inject
 
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val workerManager: WorkerManager,
     private val alarmScheduler: AlarmScheduler,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     
     private val _refreshIntervalDescription = MutableStateFlow("")
@@ -271,21 +274,5 @@ class SettingsViewModel(
     override fun onCleared() {
         super.onCleared()
         Logger.d("SettingsViewModel", "SettingsViewModel cleared")
-    }
-}
-
-class SettingsViewModelFactory(
-    private val settingsRepository: SettingsRepository,
-    private val workerManager: WorkerManager,
-    private val alarmScheduler: AlarmScheduler,
-    private val context: Context
-) : ViewModelProvider.Factory {
-    
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            return SettingsViewModel(settingsRepository, workerManager, alarmScheduler, context) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

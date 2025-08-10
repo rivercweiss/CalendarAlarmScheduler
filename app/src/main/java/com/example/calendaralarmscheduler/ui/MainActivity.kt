@@ -12,10 +12,15 @@ import com.example.calendaralarmscheduler.ui.onboarding.PermissionOnboardingActi
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.CrashHandler
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val crashHandler by lazy { CrashHandler(this) }
+    
+    // Flag to prevent multiple onboarding launches
+    private var isOnboardingLaunched = false
 
     // Permission launcher for calendar permission
     private val calendarPermissionLauncher = registerForActivityResult(
@@ -120,27 +125,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isOnboardingCompleted(): Boolean {
+        val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        return sharedPrefs.getBoolean("onboarding_completed", false)
+    }
+    
     private fun checkPermissionsAndProceed() {
         try {
             Logger.d("MainActivity", "Checking critical permissions status")
             val hasCriticalPermissions = PermissionUtils.hasAllCriticalPermissions(this)
-            Logger.i("MainActivity", "Critical permissions status: $hasCriticalPermissions")
+            val isOnboardingDone = isOnboardingCompleted()
             
-            if (!hasCriticalPermissions) {
-                // Show onboarding if critical permissions are missing
-                Logger.w("MainActivity", "Critical permissions missing, launching onboarding")
+            Logger.i("MainActivity", "Critical permissions status: $hasCriticalPermissions")
+            Logger.i("MainActivity", "Onboarding completed status: $isOnboardingDone")
+            
+            if (!hasCriticalPermissions && !isOnboardingDone && !isOnboardingLaunched) {
+                // Show onboarding only if critical permissions are missing AND onboarding hasn't been completed
+                Logger.w("MainActivity", "Critical permissions missing and onboarding not completed, launching onboarding")
                 launchOnboarding()
             } else {
-                // All permissions granted, proceed normally
-                Logger.i("MainActivity", "All critical permissions granted, proceeding normally")
+                // Either permissions are granted or onboarding was already completed
+                Logger.i("MainActivity", "Proceeding normally - permissions: $hasCriticalPermissions, onboarding done: $isOnboardingDone")
                 onPermissionGranted()
             }
             
         } catch (e: Exception) {
             Logger.e("MainActivity", "Permission check failed", e)
             crashHandler.logNonFatalException("MainActivity", "Permission check failed", e)
-            // Default to showing onboarding on error
-            launchOnboarding()
+            // Default to showing onboarding on error, but only if not already launched
+            if (!isOnboardingLaunched) {
+                launchOnboarding()
+            }
         }
     }
 
@@ -154,12 +169,14 @@ class MainActivity : AppCompatActivity() {
         try {
             Logger.i("MainActivity", "Launching PermissionOnboardingActivity")
             val intent = Intent(this, PermissionOnboardingActivity::class.java)
+            isOnboardingLaunched = true
             startActivity(intent)
             Logger.i("MainActivity", "PermissionOnboardingActivity launched successfully")
             // Don't finish this activity - user can return after granting permissions
         } catch (e: Exception) {
             Logger.e("MainActivity", "Failed to launch onboarding", e)
             crashHandler.logNonFatalException("MainActivity", "Failed to launch onboarding", e)
+            isOnboardingLaunched = false // Reset flag on error
         }
     }
 
@@ -171,13 +188,31 @@ class MainActivity : AppCompatActivity() {
             // Check permissions again when returning from other activities
             // This handles the case where user grants permissions in system settings
             val hasCriticalPermissions = PermissionUtils.hasAllCriticalPermissions(this)
-            Logger.i("MainActivity", "onResume permission check: $hasCriticalPermissions")
+            val isOnboardingDone = isOnboardingCompleted()
             
-            if (!hasCriticalPermissions) {
-                Logger.w("MainActivity", "Still missing permissions on resume, showing onboarding")
+            Logger.i("MainActivity", "onResume permission check: $hasCriticalPermissions")
+            Logger.i("MainActivity", "onResume onboarding completed: $isOnboardingDone")
+            Logger.i("MainActivity", "onResume isOnboardingLaunched flag: $isOnboardingLaunched")
+            
+            // Only reset the flag if onboarding is completed or permissions are granted
+            // This prevents the immediate reset that was causing duplicate launches
+            if (isOnboardingDone || hasCriticalPermissions) {
+                Logger.d("MainActivity", "Resetting onboarding launched flag - onboarding completed or permissions granted")
+                isOnboardingLaunched = false
+            }
+            
+            // Only launch onboarding if:
+            // 1. Critical permissions are missing AND
+            // 2. Onboarding hasn't been completed AND  
+            // 3. We haven't already launched onboarding in this session
+            if (!hasCriticalPermissions && !isOnboardingDone && !isOnboardingLaunched) {
+                Logger.w("MainActivity", "Missing permissions and onboarding not completed on resume, showing onboarding")
                 launchOnboarding()
             } else {
-                Logger.i("MainActivity", "All permissions available on resume")
+                Logger.i("MainActivity", "Permissions OK or onboarding completed on resume - not launching onboarding")
+                if (isOnboardingDone && !hasCriticalPermissions) {
+                    Logger.w("MainActivity", "Onboarding completed but still missing critical permissions - user may need to grant them manually")
+                }
             }
         } catch (e: Exception) {
             Logger.e("MainActivity", "onResume permission check failed", e)

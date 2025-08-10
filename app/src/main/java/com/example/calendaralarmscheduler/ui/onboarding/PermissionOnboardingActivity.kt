@@ -8,7 +8,9 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.calendaralarmscheduler.databinding.ActivityPermissionOnboardingBinding
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PermissionOnboardingActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityPermissionOnboardingBinding
@@ -187,8 +189,9 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     
     private fun checkAllPermissionsAndProceed() {
         if (PermissionUtils.hasAllCriticalPermissions(this)) {
-            // All critical permissions granted, move to completion
-            binding.viewPager.currentItem = adapter.itemCount - 1
+            // All critical permissions granted, but let user manually proceed to completion
+            // Don't auto-advance to avoid confusion - let user click Next when ready
+            adapter.refreshCurrentStep()
         } else {
             // Some permissions still missing, refresh current page
             adapter.refreshCurrentStep()
@@ -202,18 +205,28 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     }
     
     private fun finishOnboarding() {
-        // Mark onboarding as completed
-        val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        sharedPrefs.edit().putBoolean("onboarding_completed", true).apply()
-        
-        // Close onboarding and return to main activity
-        finish()
+        try {
+            // Mark onboarding as completed
+            val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            sharedPrefs.edit().putBoolean("onboarding_completed", true).apply()
+            
+            // Log completion for debugging
+            val hasCriticalPermissions = PermissionUtils.hasAllCriticalPermissions(this)
+            android.util.Log.i("PermissionOnboarding", "Onboarding completed - Critical permissions: $hasCriticalPermissions")
+            
+            // Close onboarding and return to main activity
+            setResult(RESULT_OK)
+            finish()
+        } catch (e: Exception) {
+            android.util.Log.e("PermissionOnboarding", "Error finishing onboarding", e)
+            finish() // Still finish even on error
+        }
     }
     
     override fun onResume() {
         super.onResume()
         // Refresh permission status when returning from settings
+        // Don't auto-advance - let user control the flow
         adapter.refreshCurrentStep()
-        checkAllPermissionsAndProceed()
     }
 }

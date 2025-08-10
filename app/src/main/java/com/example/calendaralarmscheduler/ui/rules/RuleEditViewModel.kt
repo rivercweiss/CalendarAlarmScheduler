@@ -1,30 +1,29 @@
 package com.example.calendaralarmscheduler.ui.rules
 
-import android.app.AlarmManager
-import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
-import com.example.calendaralarmscheduler.data.database.AppDatabase
 import com.example.calendaralarmscheduler.data.database.entities.Rule
-import com.example.calendaralarmscheduler.domain.AlarmScheduler
-import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleAlarmManager
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.utils.PermissionUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Inject
 
-class RuleEditViewModel(application: Application) : AndroidViewModel(application) {
-    
-    private val ruleRepository: RuleRepository
-    private val calendarRepository: CalendarRepository
-    private val ruleAlarmManager: RuleAlarmManager
+@HiltViewModel
+class RuleEditViewModel @Inject constructor(
+    private val ruleRepository: RuleRepository,
+    private val calendarRepository: CalendarRepository,
+    private val ruleAlarmManager: RuleAlarmManager,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
     
     private val _rule = MutableLiveData<Rule?>()
     val rule: LiveData<Rule?> = _rule
@@ -51,24 +50,7 @@ class RuleEditViewModel(application: Application) : AndroidViewModel(application
     private var pendingCalendarIds: List<Long>? = null // For storing calendar IDs while calendars are loading
     
     init {
-        val database = AppDatabase.getInstance(application)
-        ruleRepository = RuleRepository(database.ruleDao())
-        calendarRepository = CalendarRepository(application)
-        
-        // Initialize dependencies for RuleAlarmManager
-        val alarmRepository = AlarmRepository(database.alarmDao())
-        val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmScheduler = AlarmScheduler(application, alarmManager)
-        val alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
-        
-        // Create and inject RuleAlarmManager
-        ruleAlarmManager = RuleAlarmManager(
-            ruleRepository,
-            alarmRepository,
-            alarmScheduler,
-            calendarRepository,
-            alarmSchedulingService
-        )
+        // Set up RuleAlarmManager in the repository
         ruleRepository.setRuleAlarmManager(ruleAlarmManager)
         
         // Set default values
@@ -151,7 +133,7 @@ class RuleEditViewModel(application: Application) : AndroidViewModel(application
             
             try {
                 // Check if all critical permissions are granted
-                val permissionStatus = PermissionUtils.getAllPermissionStatus(getApplication())
+                val permissionStatus = PermissionUtils.getAllPermissionStatus(context)
                 if (!permissionStatus.areAllGranted()) {
                     val missingPermissions = mutableListOf<String>()
                     if (!permissionStatus.hasCalendarPermission) missingPermissions.add("Calendar access")

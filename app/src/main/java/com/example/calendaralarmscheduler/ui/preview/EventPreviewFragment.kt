@@ -12,9 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.databinding.FragmentEventPreviewBinding
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class EventPreviewFragment : Fragment() {
     private var _binding: FragmentEventPreviewBinding? = null
     private val binding get() = _binding!!

@@ -1,46 +1,37 @@
 package com.example.calendaralarmscheduler
 
-import android.app.AlarmManager
 import android.app.Application
 import android.content.BroadcastReceiver
-import android.content.Context
-import com.example.calendaralarmscheduler.data.AlarmRepository
-import com.example.calendaralarmscheduler.data.CalendarRepository
-import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.data.SettingsRepository
-import com.example.calendaralarmscheduler.data.database.AppDatabase
-import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
+import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
+@HiltAndroidApp
 class CalendarAlarmApplication : Application() {
     
-    // Database
-    val database by lazy { AppDatabase.getInstance(this) }
+    // Injected dependencies needed for application logic
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
     
-    // Repositories
-    val ruleRepository by lazy { RuleRepository(database.ruleDao()) }
-    val alarmRepository by lazy { AlarmRepository(database.alarmDao()) }
-    val calendarRepository by lazy { CalendarRepository(this) }
-    val settingsRepository by lazy { 
-        SettingsRepository(
-            context = this,
-            onRefreshIntervalChanged = ::onRefreshIntervalChanged
-        ) 
-    }
+    @Inject
+    lateinit var workerManager: WorkerManager
     
-    // Domain services
-    val alarmScheduler by lazy { 
-        AlarmScheduler(
-            context = this,
-            alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        )
-    }
+    // Additional injected dependencies for legacy components (BootReceiver, CalendarRefreshWorker)
+    @Inject
+    lateinit var alarmRepository: com.example.calendaralarmscheduler.data.AlarmRepository
     
-    // Worker management
-    val workerManager by lazy { WorkerManager(this) }
+    @Inject
+    lateinit var alarmScheduler: com.example.calendaralarmscheduler.domain.AlarmScheduler
+    
+    @Inject
+    lateinit var calendarRepository: com.example.calendaralarmscheduler.data.CalendarRepository
+    
+    @Inject
+    lateinit var ruleRepository: com.example.calendaralarmscheduler.data.RuleRepository
     
     // Timezone change listener
     private var timezoneChangeReceiver: BroadcastReceiver? = null
@@ -106,6 +97,11 @@ class CalendarAlarmApplication : Application() {
             
             // Log system information
             Logger.dumpSystemInfo("Application")
+            
+            // Set up SettingsRepository callback for refresh interval changes
+            settingsRepository.setOnRefreshIntervalChanged { newIntervalMinutes ->
+                onRefreshIntervalChanged(newIntervalMinutes)
+            }
             
             // Schedule background calendar refresh worker with user-configured interval
             try {

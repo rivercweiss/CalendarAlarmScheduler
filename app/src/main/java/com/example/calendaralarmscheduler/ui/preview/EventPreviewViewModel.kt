@@ -1,19 +1,17 @@
 package com.example.calendaralarmscheduler.ui.preview
 
 import android.app.AlarmManager
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
-import com.example.calendaralarmscheduler.data.database.AppDatabase
 import com.example.calendaralarmscheduler.data.database.entities.Rule
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
@@ -22,6 +20,8 @@ import com.example.calendaralarmscheduler.domain.models.CalendarEvent
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
 import com.example.calendaralarmscheduler.receivers.AlarmReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
+import javax.inject.Inject
 
 data class EventWithAlarms(
     val event: CalendarEvent,
@@ -58,15 +59,18 @@ data class AlarmSchedulingFailure(
     val retryCount: Int
 )
 
-class EventPreviewViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class EventPreviewViewModel @Inject constructor(
+    private val calendarRepository: CalendarRepository,
+    private val ruleRepository: RuleRepository,
+    private val alarmRepository: AlarmRepository,
+    private val alarmScheduler: AlarmScheduler,
+    private val alarmManager: AlarmManager,
+    private val alarmSchedulingService: AlarmSchedulingService,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
     
-    private val calendarRepository = CalendarRepository(application)
-    private val ruleRepository: RuleRepository
-    private val alarmRepository: AlarmRepository
-    private val alarmScheduler: AlarmScheduler
-    private val alarmManager: AlarmManager
     private val ruleMatcher = RuleMatcher()
-    private val alarmSchedulingService: AlarmSchedulingService
     
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -87,13 +91,6 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
     val schedulingFailures: StateFlow<List<AlarmSchedulingFailure>> = _schedulingFailures.asStateFlow()
     
     init {
-        val database = AppDatabase.getInstance(application)
-        ruleRepository = RuleRepository(database.ruleDao())
-        alarmRepository = AlarmRepository(database.alarmDao())
-        alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmScheduler = AlarmScheduler(application, alarmManager)
-        alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
-        
         _isLoading.value = false
         
         // Observe rules and alarms and refresh when they change
@@ -111,7 +108,7 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
     val rules = ruleRepository.getAllRules().asLiveData()
     
     fun refreshEvents() {
-        if (!PermissionUtils.hasCalendarPermission(getApplication())) {
+        if (!PermissionUtils.hasCalendarPermission(context)) {
             _errorMessage.value = "Calendar permission is required to view events"
             return
         }
@@ -372,14 +369,14 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
     
     private fun isAlarmScheduledInSystem(alarm: com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm): Boolean {
         return try {
-            val intent = Intent(getApplication(), AlarmReceiver::class.java).apply {
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
                 putExtra("ALARM_ID", alarm.id)
                 putExtra("EVENT_TITLE", alarm.eventTitle)
                 putExtra("RULE_ID", alarm.ruleId)
             }
             
             val pendingIntent = PendingIntent.getBroadcast(
-                getApplication(),
+                context,
                 alarm.pendingIntentRequestCode,
                 intent,
                 PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE

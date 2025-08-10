@@ -22,11 +22,13 @@ import com.example.calendaralarmscheduler.receivers.AlarmReceiver
 import com.example.calendaralarmscheduler.utils.AlarmNotificationManager
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.*
 
+@AndroidEntryPoint
 class AlarmActivity : ComponentActivity() {
     
     private var mediaPlayer: MediaPlayer? = null

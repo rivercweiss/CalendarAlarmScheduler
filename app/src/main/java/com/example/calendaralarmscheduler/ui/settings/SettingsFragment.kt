@@ -14,40 +14,36 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.calendaralarmscheduler.CalendarAlarmApplication
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.databinding.FragmentSettingsBinding
 import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
 import com.example.calendaralarmscheduler.utils.DozeCompatibilityUtils
-import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     
-    private val viewModel: SettingsViewModel by viewModels {
-        SettingsViewModelFactory(
-            settingsRepository = (requireActivity().application as CalendarAlarmApplication).settingsRepository,
-            workerManager = WorkerManager(requireContext()),
-            alarmScheduler = (requireActivity().application as CalendarAlarmApplication).alarmScheduler,
-            context = requireContext()
-        )
-    }
+    private val viewModel: SettingsViewModel by viewModels()
+    
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
     
     // Track battery optimization attempts  
     private var batteryOptimizationLaunchTime = 0L
     private var lastBatteryOptimizationResult: PermissionUtils.BatteryOptimizationResult? = null
-    private lateinit var settingsRepository: SettingsRepository
     
     // Permission launcher for single permissions (calendar, notification)
     private val singlePermissionLauncher = registerForActivityResult(
@@ -147,7 +143,7 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        settingsRepository = SettingsRepository(requireContext())
+        // SettingsRepository is now injected via Hilt
         return binding.root
     }
 

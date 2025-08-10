@@ -11,19 +11,21 @@ import android.widget.Toast
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.databinding.FragmentRuleEditBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RuleEditFragment : Fragment(), MenuProvider {
     private var _binding: FragmentRuleEditBinding? = null
     private val binding get() = _binding!!
     
     private val args: RuleEditFragmentArgs by navArgs()
-    private lateinit var viewModel: RuleEditViewModel
+    private val viewModel: RuleEditViewModel by viewModels()
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +42,6 @@ class RuleEditFragment : Fragment(), MenuProvider {
         // Setup menu
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        
-        viewModel = ViewModelProvider(this)[RuleEditViewModel::class.java]
         
         setupViews()
         observeViewModel()
@@ -180,10 +180,6 @@ class RuleEditFragment : Fragment(), MenuProvider {
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when (menuItem.itemId) {
-            R.id.action_save -> {
-                saveRule()
-                true
-            }
             R.id.action_delete -> {
                 deleteRule()
                 true

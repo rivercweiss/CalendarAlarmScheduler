@@ -19,7 +19,7 @@ data class AllDayTime(
         val is24Hour = DateFormat.is24HourFormat(context)
         
         return if (is24Hour) {
-            String.format("%02d:%02d", hour, minute)
+            String.format(Locale.ROOT, "%02d:%02d", hour, minute)
         } else {
             val calendar = java.util.Calendar.getInstance().apply {
                 set(java.util.Calendar.HOUR_OF_DAY, hour)
@@ -33,7 +33,7 @@ data class AllDayTime(
 
 class SettingsRepository(
     private val context: Context,
-    private val onRefreshIntervalChanged: ((Int) -> Unit)? = null
+    private var onRefreshIntervalChanged: ((Int) -> Unit)? = null
 ) {
     
     companion object {
@@ -94,6 +94,14 @@ class SettingsRepository(
         handleSettingsMigration()
         
         Logger.i("SettingsRepository", "Initial StateFlow values - refresh: ${_refreshIntervalMinutes.value}min, all-day: ${_allDayTime.value.hour}:${_allDayTime.value.minute}")
+    }
+    
+    /**
+     * Set the callback for refresh interval changes (used by Hilt DI)
+     */
+    fun setOnRefreshIntervalChanged(callback: (Int) -> Unit) {
+        onRefreshIntervalChanged = callback
+        Logger.i("SettingsRepository", "Refresh interval change callback set")
     }
     
     // Refresh interval settings
@@ -236,7 +244,7 @@ class SettingsRepository(
     
     fun getAllDayDefaultTimeFormatted24Hour(): String {
         val time = _allDayTime.value
-        return String.format("%02d:%02d", time.hour, time.minute)
+        return String.format(Locale.ROOT, "%02d:%02d", time.hour, time.minute)
     }
     
     fun getRefreshIntervalDescription(): String {
