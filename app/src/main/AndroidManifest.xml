@@ -87,6 +87,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Alarm Dismiss Receiver for notification dismiss button -->
+        <receiver
+            android:name=".receivers.AlarmDismissReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.calendaralarmscheduler.DISMISS_ALARM" />
+            </intent-filter>
+        </receiver>
+
         <!-- Calendar Refresh Worker -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
