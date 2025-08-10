@@ -55,6 +55,8 @@ object BackgroundUsageDetector {
         
         // Method 2: App standby buckets (Android 9+)
         if (apiLevel >= Build.VERSION_CODES.P) {
+            // Suppress NewApi warning - we already check API level and method is @RequiresApi annotated
+            @Suppress("NewApi")
             detectionResults.add(checkAppStandbyBucket(context))
         }
         

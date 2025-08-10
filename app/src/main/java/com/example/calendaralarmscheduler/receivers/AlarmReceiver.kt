@@ -30,8 +30,20 @@ class AlarmReceiver : BroadcastReceiver() {
             // Log all extras for debugging
             intent.extras?.let { extras ->
                 for (key in extras.keySet()) {
-                    val value = extras.get(key)
-                    Logger.d("AlarmReceiver_onReceive", "Extra: $key = $value (${value?.javaClass?.simpleName})")
+                    // Use type-safe approach for debugging - try common types
+                    val value = when {
+                        extras.containsKey(key) -> {
+                            try {
+                                extras.getString(key) ?: extras.getLong(key, -1).takeIf { it != -1L } 
+                                    ?: extras.getBoolean(key, false).takeIf { it }
+                                    ?: "unknown type"
+                            } catch (e: Exception) {
+                                "error reading value"
+                            }
+                        }
+                        else -> null
+                    }
+                    Logger.d("AlarmReceiver_onReceive", "Extra: $key = $value")
                 }
             }
             

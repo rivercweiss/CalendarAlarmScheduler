@@ -75,7 +75,7 @@ class OnboardingStepFragment : Fragment() {
     }
     
     private fun updatePermissionStatus() {
-        if (!isAdded || requireContext() == null) return
+        if (!isAdded || context == null) return
         
         val status = when (step) {
             OnboardingStep.CALENDAR_PERMISSION -> {

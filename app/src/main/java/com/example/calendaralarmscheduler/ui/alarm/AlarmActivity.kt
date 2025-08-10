@@ -14,6 +14,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.lifecycleScope
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
 import com.example.calendaralarmscheduler.R
@@ -74,6 +75,15 @@ class AlarmActivity : ComponentActivity() {
         // Set up button listeners
         setupButtonListeners(alarmId)
         
+        // Set up back button handling - prevent dismissing alarm with back button
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Prevent back button from dismissing alarm
+                // User must use dismiss or snooze buttons
+                Logger.d("AlarmActivity_onBackPressed", "Back button pressed - ignoring")
+            }
+        })
+        
         // Start alarm sound and vibration
         startAlarmNotification()
         
@@ -82,19 +92,22 @@ class AlarmActivity : ComponentActivity() {
     }
     
     private fun setupFullScreenAlarm() {
-        // For Android 10 (API 29) and above
+        // Always keep screen on
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        
+        // For Android 10 (API 29) and above - use modern methods
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
+        } else {
+            // For older versions - use deprecated flags
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
         }
-        
-        // For older versions and additional compatibility
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-        )
         
         // Request to dismiss keyguard for newer versions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -321,10 +334,4 @@ class AlarmActivity : ComponentActivity() {
         stopAlarmNotification()
     }
     
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Prevent back button from dismissing alarm
-        // User must use dismiss or snooze buttons
-        Logger.d("AlarmActivity_onBackPressed", "Back button pressed - ignoring")
-    }
 }

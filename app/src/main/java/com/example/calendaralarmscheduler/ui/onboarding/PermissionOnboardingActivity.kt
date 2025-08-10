@@ -177,8 +177,8 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     
     private fun openBatteryOptimizationSettings() {
         try {
-            val intent = PermissionUtils.getBatteryOptimizationIntent(this)
-            startActivity(intent)
+            val result = PermissionUtils.getBestBatteryOptimizationIntent(this)
+            startActivity(result.intent)
         } catch (e: Exception) {
             // Fallback to app settings
             startActivity(PermissionUtils.getAppSettingsIntent(this))
