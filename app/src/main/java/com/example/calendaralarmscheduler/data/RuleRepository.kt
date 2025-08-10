@@ -2,6 +2,7 @@ package com.example.calendaralarmscheduler.data
 
 import com.example.calendaralarmscheduler.data.database.RuleDao
 import com.example.calendaralarmscheduler.data.database.entities.Rule
+import com.example.calendaralarmscheduler.domain.RuleAlarmManager
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import kotlinx.coroutines.flow.Flow
@@ -11,8 +12,19 @@ class RuleRepository(
 ) {
     private val crashHandler = CrashHandler()
     
+    // RuleAlarmManager will be injected when needed
+    private var ruleAlarmManager: RuleAlarmManager? = null
+    
     init {
         Logger.i("RuleRepository", "RuleRepository initialized")
+    }
+    
+    /**
+     * Inject the RuleAlarmManager for operations that require alarm management.
+     * This is set by the Application class or ViewModel.
+     */
+    fun setRuleAlarmManager(manager: RuleAlarmManager) {
+        ruleAlarmManager = manager
     }
     fun getAllRules(): Flow<List<Rule>> = ruleDao.getAllRules()
     
@@ -77,6 +89,57 @@ class RuleRepository(
     }
     
     suspend fun getAllRulesSync(): List<Rule> = ruleDao.getAllRulesSync()
+    
+    /**
+     * Updates a rule's enabled status with proper alarm management.
+     * When disabling: cancels all associated alarms.
+     * When enabling: schedules alarms for matching events.
+     */
+    suspend fun updateRuleEnabledWithAlarmManagement(rule: Rule, enabled: Boolean): RuleAlarmManager.RuleUpdateResult {
+        return ruleAlarmManager?.updateRuleEnabled(rule, enabled) ?: run {
+            // Fallback to simple update if RuleAlarmManager not available
+            Logger.w("RuleRepository", "RuleAlarmManager not available, falling back to simple rule update")
+            updateRule(rule.copy(enabled = enabled))
+            RuleAlarmManager.RuleUpdateResult(
+                success = true,
+                message = "Rule updated (no alarm management)",
+                alarmsAffected = 0
+            )
+        }
+    }
+    
+    /**
+     * Updates a rule with proper alarm management.
+     * Cancels old alarms and schedules new ones based on the updated rule.
+     */
+    suspend fun updateRuleWithAlarmManagement(oldRule: Rule, newRule: Rule): RuleAlarmManager.RuleUpdateResult {
+        return ruleAlarmManager?.updateRuleWithAlarmManagement(oldRule, newRule) ?: run {
+            // Fallback to simple update if RuleAlarmManager not available
+            Logger.w("RuleRepository", "RuleAlarmManager not available, falling back to simple rule update")
+            updateRule(newRule)
+            RuleAlarmManager.RuleUpdateResult(
+                success = true,
+                message = "Rule updated (no alarm management)",
+                alarmsAffected = 0
+            )
+        }
+    }
+    
+    /**
+     * Deletes a rule with proper alarm cleanup.
+     */
+    suspend fun deleteRuleWithAlarmCleanup(rule: Rule): RuleAlarmManager.RuleUpdateResult {
+        return ruleAlarmManager?.deleteRuleWithAlarmCleanup(rule) ?: run {
+            // Fallback to simple deletion if RuleAlarmManager not available
+            Logger.w("RuleRepository", "RuleAlarmManager not available, falling back to simple rule deletion")
+            deleteRule(rule)
+            RuleAlarmManager.RuleUpdateResult(
+                success = true,
+                message = "Rule deleted (no alarm cleanup)",
+                alarmsAffected = 0
+            )
+        }
+    }
     
     suspend fun createDefaultRules(): List<Rule> {
         try {

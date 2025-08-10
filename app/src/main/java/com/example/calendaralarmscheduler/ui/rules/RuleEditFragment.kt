@@ -123,6 +123,13 @@ class RuleEditFragment : Fragment(), MenuProvider {
                 }
             }
         }
+        
+        viewModel.statusMessage.observe(viewLifecycleOwner) { message ->
+            message?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                viewModel.clearStatusMessage()
+            }
+        }
     }
 
     private fun showCalendarPickerDialog() {

@@ -50,7 +50,6 @@ class SettingsRepository(
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val KEY_FIRST_LAUNCH = "first_launch"
         private const val KEY_LAST_SYNC_TIME = "last_sync_time"
-        private const val KEY_DUPLICATE_HANDLING_MODE = "duplicate_handling_mode"
         
         // Battery optimization tracking
         private const val KEY_BATTERY_OPTIMIZATION_SETUP_COMPLETED = "battery_optimization_setup_completed"
@@ -65,7 +64,6 @@ class SettingsRepository(
         private const val DEFAULT_REFRESH_INTERVAL = WorkerManager.DEFAULT_INTERVAL_MINUTES
         private const val DEFAULT_ALL_DAY_HOUR = 20 // 8:00 PM
         private const val DEFAULT_ALL_DAY_MINUTE = 0
-        private const val DEFAULT_DUPLICATE_HANDLING_MODE = "ALLOW_MULTIPLE"
     }
     
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -85,8 +83,6 @@ class SettingsRepository(
     private val _allDayDefaultMinute = MutableStateFlow(_allDayTime.value.minute)
     val allDayDefaultMinute: StateFlow<Int> = _allDayDefaultMinute.asStateFlow()
     
-    private val _duplicateHandlingMode = MutableStateFlow(getDuplicateHandlingMode())
-    val duplicateHandlingMode: StateFlow<com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode> = _duplicateHandlingMode.asStateFlow()
     
     private val _batteryOptimizationCompleted = MutableStateFlow(isBatteryOptimizationSetupCompleted())
     val batteryOptimizationCompleted: StateFlow<Boolean> = _batteryOptimizationCompleted.asStateFlow()
@@ -248,22 +244,6 @@ class SettingsRepository(
         return workerManager.getIntervalDescription(getRefreshIntervalMinutes())
     }
     
-    private fun getDuplicateHandlingMode(): com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode {
-        val value = prefs.getString(KEY_DUPLICATE_HANDLING_MODE, DEFAULT_DUPLICATE_HANDLING_MODE) ?: DEFAULT_DUPLICATE_HANDLING_MODE
-        return com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.fromValue(value)
-    }
-    
-    fun setDuplicateHandlingMode(mode: com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode) {
-        val oldMode = _duplicateHandlingMode.value
-        if (oldMode.value != mode.value) {
-            prefs.edit()
-                .putString(KEY_DUPLICATE_HANDLING_MODE, mode.value)
-                .apply()
-            
-            _duplicateHandlingMode.value = mode
-            Logger.i("SettingsRepository", "Duplicate handling mode updated: ${oldMode.displayName} -> ${mode.displayName}")
-        }
-    }
     
     fun resetToDefaults() {
         Logger.i("SettingsRepository", "Resetting all settings to defaults")
@@ -272,7 +252,6 @@ class SettingsRepository(
             .putInt(KEY_REFRESH_INTERVAL_MINUTES, DEFAULT_REFRESH_INTERVAL)
             .putInt(KEY_ALL_DAY_DEFAULT_HOUR, DEFAULT_ALL_DAY_HOUR)
             .putInt(KEY_ALL_DAY_DEFAULT_MINUTE, DEFAULT_ALL_DAY_MINUTE)
-            .putString(KEY_DUPLICATE_HANDLING_MODE, DEFAULT_DUPLICATE_HANDLING_MODE)
             .apply()
         
         Logger.i("SettingsRepository", "Settings reset completed")
@@ -289,8 +268,6 @@ class SettingsRepository(
             "refreshIntervalDescription" to getRefreshIntervalDescription(),
             "lastSyncTime" to getLastSyncTime(),
             "hasEverSynced" to hasEverSynced(),
-            "duplicateHandlingMode" to getDuplicateHandlingMode().value,
-            "duplicateHandlingModeDisplayName" to getDuplicateHandlingMode().displayName
         )
     }
     

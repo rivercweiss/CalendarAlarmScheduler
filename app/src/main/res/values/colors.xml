@@ -19,4 +19,14 @@
     <color name="warning">@color/warning_orange</color>
     <color name="text_primary">#FF212121</color>
     <color name="text_secondary">#FF757575</color>
+    
+    <!-- Fallback colors for theme robustness (light mode) -->
+    <color name="fallback_on_surface">#FF1C1B1F</color>
+    <color name="fallback_on_surface_variant">#FF49454F</color>
+    <color name="fallback_surface">#FFFDFCFF</color>
+    <color name="fallback_surface_variant">#FFE7E0EC</color>
+    <color name="fallback_primary">#FF6750A4</color>
+    <color name="fallback_on_primary">#FFFFFFFF</color>
+    <color name="fallback_secondary">#FF625B71</color>
+    <color name="fallback_on_secondary">#FFFFFFFF</color>
 </resources>

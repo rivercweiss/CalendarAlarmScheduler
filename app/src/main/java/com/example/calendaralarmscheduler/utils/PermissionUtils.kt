@@ -2,6 +2,7 @@ package com.example.calendaralarmscheduler.utils
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
 
 object PermissionUtils {
 
@@ -34,6 +36,36 @@ object PermissionUtils {
             alarmManager.canScheduleExactAlarms()
         } else {
             // Pre-Android 12, no special permission needed
+            true
+        }
+    }
+
+    /**
+     * Check if we have notification permission (Android 13+)
+     * This is required for showing notifications including alarm notifications
+     */
+    fun hasNotificationPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // Pre-Android 13, notifications work without runtime permission
+            true
+        }
+    }
+
+    /**
+     * Check if we have full-screen intent permission (Android 14+)
+     * This is required for full-screen intent notifications to bypass BAL restrictions
+     */
+    fun hasFullScreenIntentPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.canUseFullScreenIntent()
+        } else {
+            // Pre-Android 14, full-screen intents work without special permission
             true
         }
     }
@@ -78,7 +110,9 @@ object PermissionUtils {
     fun getAllPermissionStatus(context: Context): PermissionStatus {
         return PermissionStatus(
             hasCalendarPermission = hasCalendarPermission(context),
+            hasNotificationPermission = hasNotificationPermission(context),
             hasExactAlarmPermission = hasExactAlarmPermission(context),
+            hasFullScreenIntentPermission = hasFullScreenIntentPermission(context),
             isBatteryOptimizationWhitelisted = isBatteryOptimizationWhitelisted(context)
         )
     }
@@ -90,6 +124,17 @@ object PermissionUtils {
         launcher: ActivityResultLauncher<String>
     ) {
         launcher.launch(Manifest.permission.READ_CALENDAR)
+    }
+
+    /**
+     * Request notification permission using the provided ActivityResultLauncher (Android 13+)
+     */
+    fun requestNotificationPermission(
+        launcher: ActivityResultLauncher<String>
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     /**
@@ -109,6 +154,34 @@ object PermissionUtils {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Intent().apply {
                 action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                data = Uri.parse("package:${context.packageName}")
+            }
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Get an intent to open notification settings
+     */
+    fun getNotificationSettingsIntent(context: Context): Intent {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent().apply {
+                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            }
+        } else {
+            getAppSettingsIntent(context)
+        }
+    }
+
+    /**
+     * Get an intent to open full-screen intent settings (Android 14+)
+     */
+    fun getFullScreenIntentSettingsIntent(context: Context): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            Intent().apply {
+                action = Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
                 data = Uri.parse("package:${context.packageName}")
             }
         } else {
@@ -805,6 +878,20 @@ object PermissionUtils {
     }
 
     /**
+     * Check if we should show notification permission rationale (Android 13+)
+     */
+    fun shouldShowNotificationPermissionRationale(activity: androidx.fragment.app.FragmentActivity): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                activity,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        } else {
+            false
+        }
+    }
+
+    /**
      * Get user-friendly permission status messages
      */
     fun getPermissionStatusMessage(context: Context): List<PermissionMessage> {
@@ -816,6 +903,17 @@ object PermissionUtils {
                 PermissionMessage(
                     title = "Calendar Access Required",
                     message = "The app needs access to read your calendar events to schedule alarms. This permission is essential for the app to function.",
+                    actionText = "Grant Permission",
+                    isError = true
+                )
+            )
+        }
+
+        if (!status.hasNotificationPermission) {
+            messages.add(
+                PermissionMessage(
+                    title = "Notification Permission Required",
+                    message = "Android 13+ requires permission to show notifications including alarm notifications. This is essential for alarms to work properly.",
                     actionText = "Grant Permission",
                     isError = true
                 )
@@ -863,7 +961,7 @@ object PermissionUtils {
      */
     fun hasAllCriticalPermissions(context: Context): Boolean {
         val status = getAllPermissionStatus(context)
-        return status.hasCalendarPermission && status.hasExactAlarmPermission
+        return status.hasCalendarPermission && status.hasNotificationPermission && status.hasExactAlarmPermission
     }
 
     /**
@@ -876,6 +974,10 @@ object PermissionUtils {
             missingPermissions.add(Manifest.permission.READ_CALENDAR)
         }
         
+        if (!hasNotificationPermission(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            missingPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        
         // Note: SCHEDULE_EXACT_ALARM can't be requested via ActivityResultLauncher,
         // it requires opening system settings
         
@@ -884,15 +986,17 @@ object PermissionUtils {
 
     data class PermissionStatus(
         val hasCalendarPermission: Boolean,
+        val hasNotificationPermission: Boolean,
         val hasExactAlarmPermission: Boolean,
+        val hasFullScreenIntentPermission: Boolean,
         val isBatteryOptimizationWhitelisted: Boolean
     ) {
         fun areAllGranted(): Boolean {
-            return hasCalendarPermission && hasExactAlarmPermission
+            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && hasFullScreenIntentPermission
         }
         
         fun areAllOptimal(): Boolean {
-            return hasCalendarPermission && hasExactAlarmPermission && isBatteryOptimizationWhitelisted
+            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && hasFullScreenIntentPermission && isBatteryOptimizationWhitelisted
         }
     }
 

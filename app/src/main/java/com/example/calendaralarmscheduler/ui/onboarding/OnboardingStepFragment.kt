@@ -58,6 +58,9 @@ class OnboardingStepFragment : Fragment() {
                 OnboardingStep.CALENDAR_PERMISSION -> {
                     imageIcon.setImageResource(android.R.drawable.ic_menu_my_calendar)
                 }
+                OnboardingStep.NOTIFICATION_PERMISSION -> {
+                    imageIcon.setImageResource(android.R.drawable.ic_popup_reminder)
+                }
                 OnboardingStep.EXACT_ALARM_PERMISSION -> {
                     imageIcon.setImageResource(android.R.drawable.ic_lock_idle_alarm)
                 }
@@ -80,6 +83,13 @@ class OnboardingStepFragment : Fragment() {
                     "✅ Calendar permission granted"
                 } else {
                     "❌ Calendar permission needed"
+                }
+            }
+            OnboardingStep.NOTIFICATION_PERMISSION -> {
+                if (PermissionUtils.hasNotificationPermission(requireContext())) {
+                    "✅ Notification permission granted"
+                } else {
+                    "❌ Notification permission needed"
                 }
             }
             OnboardingStep.EXACT_ALARM_PERMISSION -> {

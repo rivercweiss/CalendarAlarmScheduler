@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
+import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,7 @@ class CalendarRefreshWorker(
             val alarmScheduler = app.alarmScheduler
             val settingsRepository = app.settingsRepository
             val ruleMatcher = RuleMatcher()
+            val alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
             val errorNotificationManager = com.example.calendaralarmscheduler.utils.ErrorNotificationManager(applicationContext)
             
             // Get last sync time for efficient change detection
@@ -111,116 +113,21 @@ class CalendarRefreshWorker(
             val filteredMatches = ruleMatcher.filterOutDismissedAlarms(matchResults, existingAlarms)
             Logger.d("CalendarRefreshWorker_doWork", "After filtering dismissed alarms: ${filteredMatches.size} matches")
             
-            // Resolve conflicts based on user preference for duplicate handling
-            val duplicateHandlingMode = settingsRepository.duplicateHandlingMode.value
-            val resolvedMatches = ruleMatcher.resolveConflicts(filteredMatches, duplicateHandlingMode)
-            Logger.d("CalendarRefreshWorker_doWork", "After conflict resolution (${duplicateHandlingMode.displayName}): ${resolvedMatches.size} matches")
+            // Use all filtered matches (no conflict resolution - create alarms for all matching rules)
+            val resolvedMatches = filteredMatches
+            Logger.d("CalendarRefreshWorker_doWork", "Ready to schedule alarms for all matching rules: ${resolvedMatches.size} matches")
             
-            var scheduledCount = 0
-            var updatedCount = 0
-            var skippedCount = 0
-            var failedCount = 0
-            val failedEvents = mutableListOf<String>()
+            // Use the shared scheduling service to process all matches
+            val schedulingResult = alarmSchedulingService.processMatchesAndScheduleAlarms(
+                resolvedMatches,
+                logPrefix = "CalendarRefreshWorker"
+            )
             
-            // Process each match
-            for (match in resolvedMatches) {
-                val event = match.event
-                val rule = match.rule
-                val newAlarm = match.scheduledAlarm
-                
-                // Check if alarm already exists for this event/rule combination
-                val existingAlarm = alarmRepository.getAlarmByEventAndRule(event.id, rule.id)
-                
-                if (existingAlarm != null) {
-                    // Check if event was modified - this resets dismissal status for modified events
-                    val eventWasModified = event.lastModified > existingAlarm.lastEventModified
-                    val alarmWasDismissed = existingAlarm.userDismissed
-                    
-                    if (eventWasModified) {
-                        Logger.d("CalendarRefreshWorker_doWork", "Event modified: ${event.title}, lastModified: ${event.lastModified} > ${existingAlarm.lastEventModified}")
-                        
-                        // If event was modified, reset dismissal status (treat as new event)
-                        if (alarmWasDismissed) {
-                            Logger.i("CalendarRefreshWorker_doWork", "Resetting dismissal status for modified event: ${event.title}")
-                        }
-                        
-                        // Convert existing database alarm to domain model for AlarmScheduler
-                        val existingDomainAlarm = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
-                            id = existingAlarm.id,
-                            eventId = existingAlarm.eventId,
-                            ruleId = existingAlarm.ruleId,
-                            eventTitle = existingAlarm.eventTitle,
-                            eventStartTimeUtc = existingAlarm.eventStartTimeUtc,
-                            alarmTimeUtc = existingAlarm.alarmTimeUtc,
-                            scheduledAt = existingAlarm.scheduledAt,
-                            userDismissed = existingAlarm.userDismissed,
-                            pendingIntentRequestCode = existingAlarm.pendingIntentRequestCode,
-                            lastEventModified = existingAlarm.lastEventModified
-                        )
-                        
-                        // Cancel old alarm and schedule new one
-                        val cancelResult = alarmScheduler.cancelAlarm(existingDomainAlarm)
-                        if (cancelResult.success) {
-                            val scheduleResult = alarmScheduler.scheduleAlarm(newAlarm)
-                            if (scheduleResult.success) {
-                                // Update in database and reset dismissal status
-                                alarmRepository.updateAlarmForChangedEvent(
-                                    eventId = event.id,
-                                    ruleId = rule.id,
-                                    eventTitle = event.title,
-                                    eventStartTimeUtc = event.startTimeUtc,
-                                    leadTimeMinutes = rule.leadTimeMinutes,
-                                    lastEventModified = event.lastModified
-                                )
-                                
-                                // Reset dismissal status for modified events
-                                if (alarmWasDismissed) {
-                                    alarmRepository.undismissAlarm(existingAlarm.id)
-                                    Logger.i("CalendarRefreshWorker_doWork", "Reset dismissal status for modified event: ${event.title}")
-                                }
-                                
-                                updatedCount++
-                                Logger.d("CalendarRefreshWorker_doWork", "Updated alarm for modified event: ${event.title}")
-                            } else {
-                                Logger.w("CalendarRefreshWorker_doWork", "Failed to reschedule alarm for ${event.title}: ${scheduleResult.message}")
-                                failedCount++
-                                failedEvents.add(event.title)
-                            }
-                        } else {
-                            Logger.w("CalendarRefreshWorker_doWork", "Failed to cancel old alarm for ${event.title}: ${cancelResult.message}")
-                        }
-                    } else if (alarmWasDismissed) {
-                        skippedCount++
-                        Logger.d("CalendarRefreshWorker_doWork", "Skipped dismissed alarm for unmodified event: ${event.title}")
-                    } else {
-                        skippedCount++
-                        Logger.d("CalendarRefreshWorker_doWork", "Skipped existing alarm for unmodified event: ${event.title}")
-                    }
-                } else {
-                    // New alarm - schedule it
-                    val scheduleResult = alarmScheduler.scheduleAlarm(newAlarm)
-                    if (scheduleResult.success) {
-                        // Save to database
-                        alarmRepository.scheduleAlarmForEvent(
-                            eventId = event.id,
-                            ruleId = rule.id,
-                            eventTitle = event.title,
-                            eventStartTimeUtc = event.startTimeUtc,
-                            leadTimeMinutes = rule.leadTimeMinutes,
-                            lastEventModified = event.lastModified
-                        )
-                        scheduledCount++
-                        Logger.d("CalendarRefreshWorker_doWork", "Scheduled new alarm for event: ${event.title}")
-                    } else {
-                        Logger.w("CalendarRefreshWorker_doWork", "Failed to schedule alarm for ${event.title}: ${scheduleResult.message}")
-                        failedCount++
-                        failedEvents.add(event.title)
-                    }
-                }
-            }
-            
-            // Clean up old/expired alarms
-            alarmRepository.cleanupOldAlarms()
+            val scheduledCount = schedulingResult.scheduledCount
+            val updatedCount = schedulingResult.updatedCount
+            val skippedCount = schedulingResult.skippedCount
+            val failedCount = schedulingResult.failedCount
+            val failedEvents = schedulingResult.failedEvents
             
             // Update last sync time
             settingsRepository.updateLastSyncTime()

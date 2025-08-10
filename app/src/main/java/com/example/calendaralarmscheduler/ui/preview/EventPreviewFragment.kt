@@ -22,7 +22,6 @@ class EventPreviewFragment : Fragment() {
     private val viewModel: EventPreviewViewModel by viewModels()
     private lateinit var adapter: EventPreviewAdapter
     
-    private var isFilterVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,31 +58,13 @@ class EventPreviewFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
-        binding.fabFilter.setOnClickListener {
-            toggleFilterVisibility()
-        }
-        
         binding.fabRefresh.setOnClickListener {
             viewModel.refreshEvents()
         }
         
-        binding.btnFilterRule.setOnClickListener {
-            showRuleFilterDialog()
-        }
-        
-        binding.btnFilterCalendar.setOnClickListener {
-            showCalendarFilterDialog()
-        }
-        
-        binding.switchShowPast.setOnCheckedChangeListener { _, isChecked ->
-            val currentFilter = viewModel.currentFilter.value
-            viewModel.updateFilter(currentFilter.copy(showPastEvents = isChecked))
-        }
-        
-        binding.btnClearFilters.setOnClickListener {
-            viewModel.clearFilter()
-            binding.switchShowPast.isChecked = false
-            updateFilterButtonText()
+        binding.switchFilterMatching.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleMatchingRulesFilter()
+            viewModel.refreshEvents()
         }
         
         // Long press on refresh FAB for test alarm
@@ -118,8 +99,7 @@ class EventPreviewFragment : Fragment() {
         // Observe filter state
         lifecycleScope.launch {
             viewModel.currentFilter.collect { filter ->
-                binding.switchShowPast.isChecked = filter.showPastEvents
-                updateFilterButtonText()
+                binding.switchFilterMatching.isChecked = filter.showOnlyMatchingRules
             }
         }
         
@@ -149,101 +129,16 @@ class EventPreviewFragment : Fragment() {
         
         // Update empty message based on filter state
         val filter = viewModel.currentFilter.value
-        val hasActiveFilter = filter.ruleId != null || filter.calendarId != null
         
-        val message = if (hasActiveFilter) {
-            "No events match the selected filters.\n\nTry adjusting your filter criteria or clearing filters."
+        val message = if (filter.showOnlyMatchingRules) {
+            "No events matching your rules in the next 2 days.\n\nTry toggling off the filter to see all upcoming events."
         } else {
-            "No upcoming events found.\n\nMake sure you have calendar events and rules configured."
+            "No upcoming events found in the next 2 days.\n\nMake sure you have calendar events scheduled."
         }
         
         binding.textEmptyMessage.text = message
     }
     
-    private fun toggleFilterVisibility() {
-        isFilterVisible = !isFilterVisible
-        binding.cardFilters.visibility = if (isFilterVisible) View.VISIBLE else View.GONE
-        
-        // Update FAB text
-        binding.fabFilter.text = if (isFilterVisible) "Hide Filters" else "Filter"
-    }
-    
-    private fun showRuleFilterDialog() {
-        viewModel.rules.value?.let { rules ->
-            val ruleNames = listOf("All Rules") + rules.map { it.name }
-            val currentFilter = viewModel.currentFilter.value
-            val selectedIndex = if (currentFilter.ruleId == null) 0 else {
-                rules.indexOfFirst { it.id == currentFilter.ruleId } + 1
-            }
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Filter by Rule")
-                .setSingleChoiceItems(ruleNames.toTypedArray(), selectedIndex) { dialog, which ->
-                    val ruleId = if (which == 0) null else rules[which - 1].id
-                    viewModel.setRuleFilter(ruleId)
-                    updateFilterButtonText()
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-    }
-    
-    private fun showCalendarFilterDialog() {
-        lifecycleScope.launch {
-            val calendars = viewModel.getCalendarsWithNames()
-            if (calendars.isEmpty()) {
-                Toast.makeText(requireContext(), "No calendars found", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            
-            val calendarNames = listOf("All Calendars") + calendars.values.toList()
-            val calendarIds = listOf(-1L) + calendars.keys.toList()
-            
-            val currentFilter = viewModel.currentFilter.value
-            val selectedIndex = if (currentFilter.calendarId == null) 0 else {
-                calendarIds.indexOfFirst { it == currentFilter.calendarId }
-            }
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Filter by Calendar")
-                .setSingleChoiceItems(calendarNames.toTypedArray(), selectedIndex) { dialog, which ->
-                    val calendarId = if (which == 0) null else calendarIds[which]
-                    viewModel.setCalendarFilter(calendarId)
-                    updateFilterButtonText()
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-    }
-    
-    private fun updateFilterButtonText() {
-        val filter = viewModel.currentFilter.value
-        
-        // Update rule filter button
-        if (filter.ruleId != null) {
-            viewModel.rules.value?.find { it.id == filter.ruleId }?.let { rule ->
-                binding.btnFilterRule.text = rule.name
-            }
-        } else {
-            binding.btnFilterRule.text = "All Rules"
-        }
-        
-        // Update calendar filter button
-        if (filter.calendarId != null) {
-            lifecycleScope.launch {
-                val calendars = viewModel.getCalendarsWithNames()
-                calendars[filter.calendarId]?.let { calendarName ->
-                    binding.btnFilterCalendar.text = calendarName
-                } ?: run {
-                    binding.btnFilterCalendar.text = "Unknown Calendar"
-                }
-            }
-        } else {
-            binding.btnFilterCalendar.text = "All Calendars"
-        }
-    }
     
     private fun showEventDetails(eventWithAlarms: EventWithAlarms) {
         val event = eventWithAlarms.event
@@ -312,6 +207,7 @@ class EventPreviewFragment : Fragment() {
     
     private fun showAlarmMonitoringMenu() {
         val options = arrayOf(
+            "Schedule Alarms Now",
             "Check Alarm Status",
             "Test Alarm Scheduling", 
             "Retry Failed Alarms",
@@ -319,13 +215,14 @@ class EventPreviewFragment : Fragment() {
         )
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Alarm Monitoring")
+            .setTitle("Alarm Management")
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> viewModel.checkAlarmSystemStatus()
-                    1 -> viewModel.testAlarmScheduling()
-                    2 -> viewModel.retryFailedAlarms()
-                    3 -> viewModel.clearSchedulingFailures()
+                    0 -> viewModel.scheduleAlarmsNow()
+                    1 -> viewModel.checkAlarmSystemStatus()
+                    2 -> viewModel.testAlarmScheduling()
+                    3 -> viewModel.retryFailedAlarms()
+                    4 -> viewModel.clearSchedulingFailures()
                 }
             }
             .show()

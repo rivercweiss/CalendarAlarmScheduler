@@ -14,8 +14,8 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPermissionOnboardingBinding
     private lateinit var adapter: OnboardingPagerAdapter
     
-    // Permission launcher for calendar permission
-    private val calendarPermissionLauncher = registerForActivityResult(
+    // Permission launcher for single permissions (calendar, notification)
+    private val singlePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -130,6 +130,9 @@ class PermissionOnboardingActivity : AppCompatActivity() {
             OnboardingStep.CALENDAR_PERMISSION -> {
                 requestCalendarPermission()
             }
+            OnboardingStep.NOTIFICATION_PERMISSION -> {
+                requestNotificationPermission()
+            }
             OnboardingStep.EXACT_ALARM_PERMISSION -> {
                 openExactAlarmSettings()
             }
@@ -145,9 +148,18 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     private fun requestCalendarPermission() {
         if (PermissionUtils.shouldShowCalendarPermissionRationale(this)) {
             // Show explanation first, then request
-            PermissionUtils.requestCalendarPermission(calendarPermissionLauncher)
+            PermissionUtils.requestCalendarPermission(singlePermissionLauncher)
         } else {
-            PermissionUtils.requestCalendarPermission(calendarPermissionLauncher)
+            PermissionUtils.requestCalendarPermission(singlePermissionLauncher)
+        }
+    }
+    
+    private fun requestNotificationPermission() {
+        if (PermissionUtils.shouldShowNotificationPermissionRationale(this)) {
+            // Show explanation first, then request
+            PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
+        } else {
+            PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
         }
     }
     

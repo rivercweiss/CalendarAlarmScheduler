@@ -39,7 +39,8 @@ class SettingsFragment : Fragment() {
         SettingsViewModelFactory(
             settingsRepository = (requireActivity().application as CalendarAlarmApplication).settingsRepository,
             workerManager = WorkerManager(requireContext()),
-            alarmScheduler = (requireActivity().application as CalendarAlarmApplication).alarmScheduler
+            alarmScheduler = (requireActivity().application as CalendarAlarmApplication).alarmScheduler,
+            context = requireContext()
         )
     }
     
@@ -48,17 +49,17 @@ class SettingsFragment : Fragment() {
     private var lastBatteryOptimizationResult: PermissionUtils.BatteryOptimizationResult? = null
     private lateinit var settingsRepository: SettingsRepository
     
-    // Permission launcher for calendar permission
-    private val calendarPermissionLauncher = registerForActivityResult(
+    // Permission launcher for single permissions (calendar, notification)
+    private val singlePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            Logger.i("SettingsFragment", "Calendar permission granted")
+            Logger.i("SettingsFragment", "Permission granted")
             updatePermissionStatus()
-            Toast.makeText(requireContext(), "Calendar permission granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_SHORT).show()
         } else {
-            Logger.w("SettingsFragment", "Calendar permission denied")
-            Toast.makeText(requireContext(), "Calendar permission is required for the app to function", Toast.LENGTH_LONG).show()
+            Logger.w("SettingsFragment", "Permission denied")
+            Toast.makeText(requireContext(), "This permission is required for the app to function properly", Toast.LENGTH_LONG).show()
         }
     }
     
@@ -195,15 +196,6 @@ class SettingsFragment : Fragment() {
             }
         }
         
-        // Observe duplicate handling mode changes
-        lifecycleScope.launch {
-            Logger.d("SettingsFragment", "Starting duplicate handling mode description collection")
-            viewModel.duplicateHandlingModeDescription.collect { description ->
-                val currentText = binding.textDuplicateHandlingDescription.text.toString()
-                Logger.i("SettingsFragment", "Duplicate handling mode UI update: '$currentText' -> '$description'")
-                binding.textDuplicateHandlingDescription.text = description
-            }
-        }
         
         // Observe work status
         lifecycleScope.launch {
@@ -226,8 +218,16 @@ class SettingsFragment : Fragment() {
             requestCalendarPermission()
         }
         
+        binding.btnNotificationPermission.setOnClickListener {
+            requestNotificationPermission()
+        }
+        
         binding.btnExactAlarmPermission.setOnClickListener {
             openExactAlarmSettings()
+        }
+        
+        binding.btnFullscreenIntentPermission.setOnClickListener {
+            openFullScreenIntentSettings()
         }
         
         binding.btnBatteryOptimization.setOnClickListener {
@@ -243,9 +243,6 @@ class SettingsFragment : Fragment() {
             showAllDayTimePicker()
         }
         
-        binding.btnDuplicateHandlingMode.setOnClickListener {
-            showDuplicateHandlingModeDialog()
-        }
         
         // Action buttons
         binding.btnResetSettings.setOnClickListener {
@@ -273,6 +270,16 @@ class SettingsFragment : Fragment() {
             deniedText = "Required to read calendar events"
         )
         
+        // Notification permission
+        updatePermissionRow(
+            iconView = binding.iconNotificationPermission,
+            textView = binding.textNotificationPermission,
+            buttonView = binding.btnNotificationPermission,
+            hasPermission = status.hasNotificationPermission,
+            grantedText = "Notifications can be displayed",
+            deniedText = "Required for alarm notifications on Android 13+"
+        )
+        
         // Exact alarm permission
         updatePermissionRow(
             iconView = binding.iconExactAlarmPermission,
@@ -281,6 +288,16 @@ class SettingsFragment : Fragment() {
             hasPermission = status.hasExactAlarmPermission,
             grantedText = "Exact alarms can be scheduled",
             deniedText = "Required for precise alarm timing on Android 12+"
+        )
+        
+        // Full-screen intent permission
+        updatePermissionRow(
+            iconView = binding.iconFullscreenIntentPermission,
+            textView = binding.textFullscreenIntentPermission,
+            buttonView = binding.btnFullscreenIntentPermission,
+            hasPermission = status.hasFullScreenIntentPermission,
+            grantedText = "Full-screen alarms can be displayed",
+            deniedText = "Required to show alarms when app is closed (Android 14+)"
         )
         
         // Battery optimization
@@ -363,7 +380,18 @@ class SettingsFragment : Fragment() {
     
     private fun requestCalendarPermission() {
         Logger.d("SettingsFragment", "Requesting calendar permission")
-        calendarPermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR)
+        singlePermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR)
+    }
+    
+    private fun requestNotificationPermission() {
+        Logger.d("SettingsFragment", "Requesting notification permission")
+        PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
+    }
+    
+    private fun openNotificationSettings() {
+        val intent = PermissionUtils.getNotificationSettingsIntent(requireContext())
+        Logger.d("SettingsFragment", "Opening notification settings")
+        systemSettingsLauncher.launch(intent)
     }
     
     private fun openExactAlarmSettings() {
@@ -373,6 +401,16 @@ class SettingsFragment : Fragment() {
             systemSettingsLauncher.launch(intent)
         } else {
             Toast.makeText(requireContext(), "Exact alarm settings not available on this device", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun openFullScreenIntentSettings() {
+        val intent = PermissionUtils.getFullScreenIntentSettingsIntent(requireContext())
+        if (intent != null) {
+            Logger.d("SettingsFragment", "Opening full-screen intent settings")
+            systemSettingsLauncher.launch(intent)
+        } else {
+            Toast.makeText(requireContext(), "Full-screen intent settings not available on this device", Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -700,39 +738,6 @@ class SettingsFragment : Fragment() {
         ).show()
     }
     
-    private fun showDuplicateHandlingModeDialog() {
-        val modes = com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.values()
-        val modeNames = modes.map { "${it.displayName}\n${it.description}" }.toTypedArray()
-        
-        val currentMode = viewModel.getCurrentDuplicateHandlingMode()
-        val selectedIndex = modes.indexOf(currentMode)
-        
-        AlertDialog.Builder(requireContext())
-            .setTitle("Multiple Rule Handling")
-            .setSingleChoiceItems(modeNames, selectedIndex) { dialog, which ->
-                val selectedMode = modes[which]
-                Logger.i("SettingsFragment", "User selected duplicate handling mode: ${selectedMode.displayName}")
-                
-                viewModel.setDuplicateHandlingMode(selectedMode)
-                
-                // Show feedback
-                lifecycleScope.launch {
-                    kotlinx.coroutines.delay(100)
-                    val newDescription = binding.textDuplicateHandlingDescription.text.toString()
-                    Logger.d("SettingsFragment", "Duplicate handling mode UI updated to: '$newDescription'")
-                    
-                    if (newDescription != selectedMode.displayName) {
-                        Logger.w("SettingsFragment", "Duplicate handling mode UI not updated after 100ms, forcing defensive refresh")
-                        binding.textDuplicateHandlingDescription.text = selectedMode.displayName
-                    }
-                }
-                
-                dialog.dismiss()
-                Toast.makeText(requireContext(), "Multiple rule handling updated", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
     
     private fun showResetSettingsConfirmation() {
         AlertDialog.Builder(requireContext())

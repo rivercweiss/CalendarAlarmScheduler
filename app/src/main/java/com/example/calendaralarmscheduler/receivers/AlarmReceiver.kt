@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.ui.alarm.AlarmActivity
+import com.example.calendaralarmscheduler.utils.AlarmNotificationManager
 import com.example.calendaralarmscheduler.utils.Logger
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -18,39 +19,66 @@ class AlarmReceiver : BroadcastReceiver() {
     }
     
     override fun onReceive(context: Context, intent: Intent) {
-        Logger.d("AlarmReceiver_onReceive", "Alarm broadcast received")
+        Logger.i("AlarmReceiver_onReceive", "=== ALARM BROADCAST RECEIVED ===")
+        Logger.i("AlarmReceiver_onReceive", "Broadcast time: ${java.util.Date()}")
+        Logger.i("AlarmReceiver_onReceive", "Intent action: ${intent.action}")
+        Logger.i("AlarmReceiver_onReceive", "Intent component: ${intent.component}")
+        Logger.i("AlarmReceiver_onReceive", "Intent package: ${intent.`package`}")
+        Logger.i("AlarmReceiver_onReceive", "Intent extras: ${intent.extras}")
         
         try {
+            // Log all extras for debugging
+            intent.extras?.let { extras ->
+                for (key in extras.keySet()) {
+                    val value = extras.get(key)
+                    Logger.d("AlarmReceiver_onReceive", "Extra: $key = $value (${value?.javaClass?.simpleName})")
+                }
+            }
+            
             val alarmId = intent.getStringExtra(EXTRA_ALARM_ID)
             val eventTitle = intent.getStringExtra(EXTRA_EVENT_TITLE) ?: "Unknown Event"
             val eventStartTime = intent.getLongExtra(EXTRA_EVENT_START_TIME, 0L)
             val ruleId = intent.getStringExtra(EXTRA_RULE_ID) ?: "Unknown Rule"
+            val isTestAlarm = intent.getBooleanExtra("IS_TEST_ALARM", false)
+            
+            Logger.i("AlarmReceiver_onReceive", "Alarm ID: '$alarmId'")
+            Logger.i("AlarmReceiver_onReceive", "Event Title: '$eventTitle'")
+            Logger.i("AlarmReceiver_onReceive", "Event Start Time: ${if (eventStartTime > 0) java.util.Date(eventStartTime) else "Not set"} (UTC: $eventStartTime)")
+            Logger.i("AlarmReceiver_onReceive", "Rule ID: '$ruleId'")
+            Logger.i("AlarmReceiver_onReceive", "Is Test Alarm: $isTestAlarm")
             
             if (alarmId == null) {
-                Logger.e("AlarmReceiver_onReceive", "Alarm ID is null, cannot process alarm")
+                Logger.e("AlarmReceiver_onReceive", "❌ Alarm ID is null, cannot process alarm")
                 return
             }
             
-            Logger.i("AlarmReceiver_onReceive", "Processing alarm: ID=$alarmId, Event='$eventTitle', RuleID='$ruleId'")
-            
-            // Create intent to launch AlarmActivity
-            val alarmIntent = Intent(context, AlarmActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
-                       Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                       Intent.FLAG_ACTIVITY_SINGLE_TOP
-                putExtra(EXTRA_ALARM_ID, alarmId)
-                putExtra(EXTRA_EVENT_TITLE, eventTitle)
-                putExtra(EXTRA_EVENT_START_TIME, eventStartTime)
-                putExtra(EXTRA_RULE_ID, ruleId)
+            if (isTestAlarm) {
+                Logger.i("AlarmReceiver_onReceive", "🧪 Processing TEST ALARM")
             }
             
-            // Launch alarm activity
-            ContextCompat.startActivity(context, alarmIntent, null)
+            Logger.i("AlarmReceiver_onReceive", "Creating full-screen alarm notification to bypass BAL restrictions...")
             
-            Logger.i("AlarmReceiver_onReceive", "Successfully launched AlarmActivity for alarm $alarmId")
+            // Use AlarmNotificationManager to show full-screen intent notification
+            // This bypasses Android's Background Activity Launch restrictions
+            val alarmNotificationManager = AlarmNotificationManager(context)
+            
+            Logger.i("AlarmReceiver_onReceive", "Showing full-screen alarm notification...")
+            alarmNotificationManager.showAlarmNotification(
+                alarmId = alarmId,
+                eventTitle = eventTitle,
+                eventStartTime = eventStartTime,
+                ruleId = ruleId,
+                isTestAlarm = isTestAlarm
+            )
+            
+            Logger.i("AlarmReceiver_onReceive", "✅ Full-screen alarm notification triggered for alarm $alarmId")
+            Logger.i("AlarmReceiver_onReceive", "📱 Notification will launch AlarmActivity and bypass BAL restrictions")
             
         } catch (e: Exception) {
-            Logger.e("AlarmReceiver_onReceive", "Error processing alarm broadcast", e)
+            Logger.e("AlarmReceiver_onReceive", "❌ Error processing alarm broadcast", e)
+            Logger.e("AlarmReceiver_onReceive", "Stack trace: ${e.stackTraceToString()}")
+        } finally {
+            Logger.i("AlarmReceiver_onReceive", "=== ALARM RECEIVER PROCESSING COMPLETE ===")
         }
     }
 }

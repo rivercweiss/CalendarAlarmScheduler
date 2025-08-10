@@ -248,7 +248,9 @@ class MainActivity : AppCompatActivity() {
             crashHandler.logNonFatalException("MainActivity", "Permission status check failed", e)
             PermissionUtils.PermissionStatus(
                 hasCalendarPermission = false,
+                hasNotificationPermission = false,
                 hasExactAlarmPermission = false,
+                hasFullScreenIntentPermission = false,
                 isBatteryOptimizationWhitelisted = false
             )
         }

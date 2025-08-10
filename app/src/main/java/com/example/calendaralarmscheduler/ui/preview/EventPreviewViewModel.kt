@@ -16,6 +16,7 @@ import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.data.database.AppDatabase
 import com.example.calendaralarmscheduler.data.database.entities.Rule
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
+import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
@@ -36,11 +38,7 @@ data class EventWithAlarms(
 )
 
 data class EventFilter(
-    val ruleId: String? = null,
-    val calendarId: Long? = null,
-    val startDate: LocalDate? = null,
-    val endDate: LocalDate? = null,
-    val showPastEvents: Boolean = false
+    val showOnlyMatchingRules: Boolean = false
 )
 
 data class AlarmSystemStatus(
@@ -68,6 +66,7 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
     private val alarmScheduler: AlarmScheduler
     private val alarmManager: AlarmManager
     private val ruleMatcher = RuleMatcher()
+    private val alarmSchedulingService: AlarmSchedulingService
     
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -93,6 +92,7 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
         alarmRepository = AlarmRepository(database.alarmDao())
         alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmScheduler = AlarmScheduler(application, alarmManager)
+        alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
         
         _isLoading.value = false
         
@@ -123,7 +123,13 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
             try {
                 val rules = ruleRepository.getAllRulesSync()
                 val alarms = alarmRepository.getActiveAlarmsSync()
-                refreshEventsWithAlarms(rules, alarms)
+                
+                // First schedule any missing alarms before refreshing the UI
+                scheduleAlarmsForMatchingEvents(rules)
+                
+                // Then refresh the UI with updated alarm data
+                val updatedAlarms = alarmRepository.getActiveAlarmsSync()
+                refreshEventsWithAlarms(rules, updatedAlarms)
             } catch (e: Exception) {
                 _errorMessage.value = "Error loading events: ${e.message}"
                 android.util.Log.e("EventPreviewViewModel", "Error refreshing events", e)
@@ -178,29 +184,16 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
         return events.filter { eventWithAlarms ->
             val event = eventWithAlarms.event
             
-            // Filter by rule
-            if (filter.ruleId != null) {
-                val hasMatchingRule = eventWithAlarms.matchingRules.any { it.id == filter.ruleId }
-                if (!hasMatchingRule) return@filter false
-            }
-            
-            // Filter by calendar
-            if (filter.calendarId != null && event.calendarId != filter.calendarId) {
+            // Always filter out past events
+            if (event.isInPast()) {
                 return@filter false
             }
             
-            // Filter by date range
-            val eventDate = event.getLocalStartTime().toLocalDate()
-            if (filter.startDate != null && eventDate.isBefore(filter.startDate)) {
-                return@filter false
-            }
-            if (filter.endDate != null && eventDate.isAfter(filter.endDate)) {
-                return@filter false
-            }
-            
-            // Filter past events
-            if (!filter.showPastEvents && event.isInPast()) {
-                return@filter false
+            // Filter by matching rules if toggle is on
+            if (filter.showOnlyMatchingRules) {
+                if (eventWithAlarms.matchingRules.isEmpty()) {
+                    return@filter false
+                }
             }
             
             true
@@ -216,25 +209,9 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
         }
     }
     
-    fun clearFilter() {
-        updateFilter(EventFilter())
-    }
-    
-    fun setRuleFilter(ruleId: String?) {
-        updateFilter(_currentFilter.value.copy(ruleId = ruleId))
-    }
-    
-    fun setCalendarFilter(calendarId: Long?) {
-        updateFilter(_currentFilter.value.copy(calendarId = calendarId))
-    }
-    
-    fun setDateRangeFilter(startDate: LocalDate?, endDate: LocalDate?) {
-        updateFilter(_currentFilter.value.copy(startDate = startDate, endDate = endDate))
-    }
-    
-    fun toggleShowPastEvents() {
+    fun toggleMatchingRulesFilter() {
         val current = _currentFilter.value
-        updateFilter(current.copy(showPastEvents = !current.showPastEvents))
+        updateFilter(current.copy(showOnlyMatchingRules = !current.showOnlyMatchingRules))
     }
     
     fun clearError() {
@@ -246,6 +223,115 @@ class EventPreviewViewModel(application: Application) : AndroidViewModel(applica
             calendarRepository.getCalendarsWithNames()
         } catch (e: Exception) {
             emptyMap()
+        }
+    }
+    
+    /**
+     * Schedules alarms for events that match rules but don't have alarms yet.
+     * This is called during UI refresh to ensure real-time alarm creation.
+     */
+    private suspend fun scheduleAlarmsForMatchingEvents(rules: List<Rule>) {
+        try {
+            android.util.Log.i("EventPreviewViewModel", "Starting immediate alarm scheduling for matching events")
+            
+            // Get calendar events in the lookahead window
+            val events = calendarRepository.getEventsInLookAheadWindow()
+            if (events.isEmpty()) {
+                android.util.Log.d("EventPreviewViewModel", "No events found in lookahead window")
+                return
+            }
+            
+            // Find matching rules using the same logic as CalendarRefreshWorker
+            val enabledRules = rules.filter { it.enabled && it.isValid() }
+            if (enabledRules.isEmpty()) {
+                android.util.Log.d("EventPreviewViewModel", "No enabled rules found")
+                return
+            }
+            
+            val matchResults = ruleMatcher.findMatchingRules(events, enabledRules)
+            android.util.Log.d("EventPreviewViewModel", "Found ${matchResults.size} rule matches")
+            
+            if (matchResults.isEmpty()) {
+                android.util.Log.d("EventPreviewViewModel", "No matching events found for enabled rules")
+                return
+            }
+            
+            // Get existing alarms to filter out duplicates and dismissed alarms
+            val existingAlarmsDb = alarmRepository.getAllAlarms().first()
+            val existingAlarms = existingAlarmsDb.map { dbAlarm ->
+                com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
+                    id = dbAlarm.id,
+                    eventId = dbAlarm.eventId,
+                    ruleId = dbAlarm.ruleId,
+                    eventTitle = dbAlarm.eventTitle,
+                    eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
+                    alarmTimeUtc = dbAlarm.alarmTimeUtc,
+                    scheduledAt = dbAlarm.scheduledAt,
+                    userDismissed = dbAlarm.userDismissed,
+                    pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
+                    lastEventModified = dbAlarm.lastEventModified
+                )
+            }
+            
+            // Filter out user-dismissed alarms (unless event was modified)
+            val filteredMatches = ruleMatcher.filterOutDismissedAlarms(matchResults, existingAlarms)
+            android.util.Log.d("EventPreviewViewModel", "After filtering dismissed alarms: ${filteredMatches.size} matches")
+            
+            if (filteredMatches.isEmpty()) {
+                android.util.Log.d("EventPreviewViewModel", "No matches remaining after filtering")
+                return
+            }
+            
+            // Use the shared scheduling service to process matches
+            val result = alarmSchedulingService.processMatchesAndScheduleAlarms(
+                filteredMatches,
+                logPrefix = "EventPreviewViewModel"
+            )
+            
+            // Show user feedback about scheduling results
+            if (result.success) {
+                if (result.scheduledCount > 0 || result.updatedCount > 0) {
+                    val message = buildString {
+                        if (result.scheduledCount > 0) {
+                            append("${result.scheduledCount} alarm(s) scheduled")
+                        }
+                        if (result.updatedCount > 0) {
+                            if (result.scheduledCount > 0) append(", ")
+                            append("${result.updatedCount} alarm(s) updated")
+                        }
+                    }
+                    _errorMessage.value = "✅ $message"
+                } else if (result.skippedCount > 0) {
+                    android.util.Log.d("EventPreviewViewModel", "All ${result.skippedCount} matching alarms already exist")
+                }
+            } else {
+                _errorMessage.value = "⚠️ ${result.message}"
+            }
+            
+        } catch (e: Exception) {
+            android.util.Log.e("EventPreviewViewModel", "Error scheduling alarms for matching events", e)
+            _errorMessage.value = "Error scheduling alarms: ${e.message}"
+        }
+    }
+    
+    /**
+     * Manually trigger alarm scheduling - exposed for UI use
+     */
+    fun scheduleAlarmsNow() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val rules = ruleRepository.getAllRulesSync()
+                scheduleAlarmsForMatchingEvents(rules)
+                
+                // Refresh the UI to show newly scheduled alarms
+                refreshEvents()
+            } catch (e: Exception) {
+                _errorMessage.value = "Error scheduling alarms: ${e.message}"
+                android.util.Log.e("EventPreviewViewModel", "Error in scheduleAlarmsNow", e)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
     

@@ -12,6 +12,7 @@ class OnboardingPagerAdapter(
     private val steps = listOf(
         OnboardingStep.WELCOME,
         OnboardingStep.CALENDAR_PERMISSION,
+        OnboardingStep.NOTIFICATION_PERMISSION,
         OnboardingStep.EXACT_ALARM_PERMISSION,
         OnboardingStep.BATTERY_OPTIMIZATION,
         OnboardingStep.COMPLETION
@@ -44,6 +45,13 @@ enum class OnboardingStep(
         title = "Calendar Access",
         description = "The app needs to read your calendar events to know when to schedule alarms.\n\nThis permission is essential for the app to function.",
         actionButtonText = "Grant Calendar Permission",
+        hasAction = true
+    ),
+    
+    NOTIFICATION_PERMISSION(
+        title = "Notification Access",
+        description = "Android 13+ requires permission to show notifications, including alarm notifications.\n\nThis permission is essential for alarms to work properly and notify you when events are approaching.",
+        actionButtonText = "Grant Notification Permission",
         hasAction = true
     ),
     

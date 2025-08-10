@@ -74,6 +74,10 @@ class CalendarPickerDialog : DialogFragment() {
             onCalendarsSelectedListener?.invoke(selectedCalendars)
             dismiss()
         }
+        
+        binding.buttonSelectAll.setOnClickListener {
+            viewModel.toggleSelectAll()
+        }
     }
     
     private fun observeViewModel() {
@@ -115,6 +119,17 @@ class CalendarPickerDialog : DialogFragment() {
             }
             binding.buttonSelect.isEnabled = count > 0
             Logger.d("CalendarPickerDialog", "Button text updated: '${binding.buttonSelect.text}', enabled: ${binding.buttonSelect.isEnabled}")
+        }
+        
+        viewModel.availableCalendars.observe(viewLifecycleOwner) { calendars ->
+            // Update select all button text based on selection state
+            val allSelected = calendars.isNotEmpty() && calendars.all { it.isSelected }
+            binding.buttonSelectAll.text = if (allSelected) {
+                "Deselect All"
+            } else {
+                "Select All"
+            }
+            Logger.d("CalendarPickerDialog", "Select all button updated: '${binding.buttonSelectAll.text}'")
         }
         
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->

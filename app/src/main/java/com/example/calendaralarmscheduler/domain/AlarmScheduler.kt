@@ -374,20 +374,23 @@ class AlarmScheduler(
                 return@withContext false
             }
             
-            val intent = Intent(context, com.example.calendaralarmscheduler.receivers.AlarmReceiver::class.java).apply {
-                action = ALARM_RECEIVER_ACTION
-                putExtra(EXTRA_ALARM_ID, "$eventId-$ruleId")
-                putExtra(EXTRA_EVENT_TITLE, eventTitle)
-                putExtra(EXTRA_RULE_ID, ruleId)
-                putExtra(EXTRA_EVENT_START_TIME, alarmTimeUtc)
-            }
-            
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            // Use the standardized intent creation method
+            val alarmId = "$eventId-$ruleId"
+            val tempAlarm = ScheduledAlarm(
+                id = alarmId,
+                eventId = eventId,
+                ruleId = ruleId,
+                eventTitle = eventTitle,
+                eventStartTimeUtc = alarmTimeUtc,
+                alarmTimeUtc = alarmTimeUtc,
+                scheduledAt = System.currentTimeMillis(),
+                userDismissed = false,
+                pendingIntentRequestCode = requestCode,
+                lastEventModified = System.currentTimeMillis()
             )
+            
+            val intent = createAlarmIntent(tempAlarm)
+            val pendingIntent = createPendingIntent(tempAlarm, intent)
             
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms() -> {
@@ -418,41 +421,78 @@ class AlarmScheduler(
         testAlarmTime: Long
     ): Boolean = withContext(Dispatchers.IO) {
         try {
-            val testRequestCode = testEventTitle.hashCode()
+            Log.i(TAG, "=== SCHEDULING TEST ALARM ===")
+            Log.i(TAG, "Test event title: '$testEventTitle'")
+            Log.i(TAG, "Test alarm time: ${java.util.Date(testAlarmTime)} (UTC: $testAlarmTime)")
+            Log.i(TAG, "Current time: ${java.util.Date(System.currentTimeMillis())} (UTC: ${System.currentTimeMillis()})")
+            Log.i(TAG, "Time until alarm: ${(testAlarmTime - System.currentTimeMillis()) / 1000} seconds")
             
-            val intent = Intent(context, com.example.calendaralarmscheduler.receivers.AlarmReceiver::class.java).apply {
-                action = ALARM_RECEIVER_ACTION
-                putExtra(EXTRA_ALARM_ID, "test-${System.currentTimeMillis()}")
-                putExtra(EXTRA_EVENT_TITLE, testEventTitle)
-                putExtra(EXTRA_RULE_ID, "test-rule")
-                putExtra(EXTRA_EVENT_START_TIME, testAlarmTime)
-                putExtra("IS_TEST_ALARM", true)
+            // Check if time is in the past
+            if (testAlarmTime <= System.currentTimeMillis()) {
+                Log.e(TAG, "❌ Test alarm time is in the past!")
+                return@withContext false
             }
             
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                testRequestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            // Check permissions first
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                Log.e(TAG, "❌ Cannot schedule test alarm without exact alarm permission")
+                return@withContext false
+            }
+            
+            val testRequestCode = (testAlarmTime % Int.MAX_VALUE).toInt()
+            val testAlarmId = "test-${System.currentTimeMillis()}"
+            
+            Log.d(TAG, "Test alarm ID: $testAlarmId")
+            Log.d(TAG, "Test request code: $testRequestCode")
+            
+            // Create standardized test alarm object
+            val testAlarm = ScheduledAlarm(
+                id = testAlarmId,
+                eventId = "test_event",
+                ruleId = "test_rule",
+                eventTitle = testEventTitle,
+                eventStartTimeUtc = testAlarmTime + 60_000, // Event "starts" 1 minute after alarm
+                alarmTimeUtc = testAlarmTime,
+                scheduledAt = System.currentTimeMillis(),
+                userDismissed = false,
+                pendingIntentRequestCode = testRequestCode,
+                lastEventModified = System.currentTimeMillis()
             )
             
-            when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms() -> {
-                    Log.w(TAG, "Cannot schedule test alarm without exact alarm permission")
-                    return@withContext false
-                }
-                else -> {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        testAlarmTime,
-                        pendingIntent
-                    )
-                    Log.d(TAG, "Scheduled test alarm '$testEventTitle' for ${java.util.Date(testAlarmTime)}")
-                    return@withContext true
-                }
+            // Add test alarm marker to intent
+            val intent = createAlarmIntent(testAlarm).apply {
+                putExtra("IS_TEST_ALARM", true)
+                Log.d(TAG, "Test alarm intent action: $action")
+                Log.d(TAG, "Test alarm intent component: $component")
+                Log.d(TAG, "Test alarm intent package: $`package`")
             }
+            
+            val pendingIntent = createPendingIntent(testAlarm, intent)
+            Log.d(TAG, "Test alarm PendingIntent created: $pendingIntent")
+            
+            // Schedule the alarm
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                testAlarmTime,
+                pendingIntent
+            )
+            
+            Log.i(TAG, "✅ Test alarm scheduled successfully!")
+            Log.i(TAG, "Alarm will trigger at: ${java.util.Date(testAlarmTime)}")
+            
+            // Verify the alarm was scheduled
+            val isScheduled = isAlarmScheduled(testAlarm)
+            Log.d(TAG, "Alarm verification - is scheduled in system: $isScheduled")
+            
+            if (!isScheduled) {
+                Log.w(TAG, "⚠️ Warning: Alarm verification failed - alarm may not be properly scheduled")
+            }
+            
+            Log.i(TAG, "=== TEST ALARM SCHEDULING COMPLETE ===")
+            return@withContext true
+            
         } catch (e: Exception) {
-            Log.e(TAG, "Error scheduling test alarm", e)
+            Log.e(TAG, "❌ Error scheduling test alarm", e)
             return@withContext false
         }
     }

@@ -69,13 +69,64 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
                             tools:text="Required to read calendar events" />
 
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/btn_calendar_permission"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Grant"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <!-- Notification Permission -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:id="@+id/icon_notification_permission"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Notification permission status"
+                        tools:src="@drawable/ic_check_circle" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Notification Access"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <TextView
+                            android:id="@+id/text_notification_permission"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
+                            tools:text="Required for alarm notifications on Android 13+" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_notification_permission"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -118,13 +169,64 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
                             tools:text="Required for precise alarm timing on Android 12+" />
 
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/btn_exact_alarm_permission"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Settings"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <!-- Full-Screen Intent Permission -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:id="@+id/icon_fullscreen_intent_permission"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Full-screen intent permission status"
+                        tools:src="@drawable/ic_check_circle" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Full-Screen Alarm Display"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <TextView
+                            android:id="@+id/text_fullscreen_intent_permission"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
+                            tools:text="Required to show alarms when app is closed (Android 14+)" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_fullscreen_intent_permission"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -166,7 +268,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
                             tools:text="Recommended for reliable background operation" />
 
                     </LinearLayout>
@@ -232,7 +335,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
                             tools:text="30 minutes (Default - recommended)" />
 
                     </LinearLayout>
@@ -267,7 +371,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurface"
+                        android:alpha="0.6"
                         tools:text="Background refresh is running normally" />
 
                 </LinearLayout>
@@ -323,7 +428,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:alpha="0.6"
                             tools:text="8:00 PM (applied before lead time calculation)" />
 
                     </LinearLayout>
@@ -341,86 +447,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="For all-day events, alarms will fire at exactly this time. No lead time is applied to all-day events."
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Duplicate Handling Settings -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Multiple Rule Handling"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="When multiple rules match one event"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
-
-                        <TextView
-                            android:id="@+id/text_duplicate_handling_description"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            tools:text="Allow Multiple Alarms" />
-
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btn_duplicate_handling_mode"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Change" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Controls what happens when multiple rules match the same calendar event."
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:alpha="0.6"
                     android:layout_marginTop="4dp" />
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
 
         <!-- System Information -->
         <com.google.android.material.card.MaterialCardView
@@ -458,7 +493,8 @@
                         android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_timezone"
                         android:contentDescription="Timezone"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                        android:alpha="0.6"
+                        app:tint="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/text_timezone_info"
@@ -466,7 +502,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurface"
+                        android:alpha="0.6"
                         tools:text="Eastern Standard Time (UTC-5)" />
 
                 </LinearLayout>
@@ -485,7 +522,8 @@
                         android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_database"
                         android:contentDescription="Database"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                        android:alpha="0.6"
+                        app:tint="?attr/colorOnSurface" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -493,7 +531,8 @@
                         android:layout_weight="1"
                         android:text="All times stored in UTC, displayed in local timezone"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="?attr/colorOnSurface"
+                        android:alpha="0.6" />
 
                 </LinearLayout>
 
@@ -510,7 +549,8 @@
                         android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_sync"
                         android:contentDescription="Last sync"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                        android:alpha="0.6"
+                        app:tint="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/text_last_sync"
@@ -518,7 +558,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurface"
+                        android:alpha="0.6"
                         tools:text="Last sync: 5 minutes ago" />
 
                 </LinearLayout>

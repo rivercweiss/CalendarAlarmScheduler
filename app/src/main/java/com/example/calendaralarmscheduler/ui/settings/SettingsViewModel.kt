@@ -1,5 +1,6 @@
 package com.example.calendaralarmscheduler.ui.settings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
+import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +23,8 @@ import java.util.UUID
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val workerManager: WorkerManager,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
+    private val context: Context
 ) : ViewModel() {
     
     private val _refreshIntervalDescription = MutableStateFlow("")
@@ -36,8 +39,6 @@ class SettingsViewModel(
     private val _lastSyncDescription = MutableStateFlow("")
     val lastSyncDescription: StateFlow<String> = _lastSyncDescription.asStateFlow()
     
-    private val _duplicateHandlingModeDescription = MutableStateFlow("")
-    val duplicateHandlingModeDescription: StateFlow<String> = _duplicateHandlingModeDescription.asStateFlow()
     
     init {
         Logger.d("SettingsViewModel", "SettingsViewModel initialized")
@@ -69,16 +70,6 @@ class SettingsViewModel(
             }
         }
         
-        viewModelScope.launch {
-            // Observe duplicate handling mode changes
-            Logger.d("SettingsViewModel", "Starting duplicate handling mode StateFlow collection")
-            settingsRepository.duplicateHandlingMode.collect { mode ->
-                val oldDescription = _duplicateHandlingModeDescription.value
-                val newDescription = mode.displayName
-                _duplicateHandlingModeDescription.value = newDescription
-                Logger.i("SettingsViewModel", "Duplicate handling mode description updated: '$oldDescription' -> '$newDescription'")
-            }
-        }
     }
     
     fun getCurrentRefreshInterval(): Int {
@@ -114,14 +105,6 @@ class SettingsViewModel(
         settingsRepository.setAllDayDefaultTime(hour, minute)
     }
     
-    fun getCurrentDuplicateHandlingMode(): com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode {
-        return settingsRepository.duplicateHandlingMode.value
-    }
-    
-    fun setDuplicateHandlingMode(mode: com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode) {
-        Logger.i("SettingsViewModel", "Setting duplicate handling mode to: ${mode.displayName}")
-        settingsRepository.setDuplicateHandlingMode(mode)
-    }
     
     fun resetSettings() {
         Logger.i("SettingsViewModel", "Resetting all settings to defaults")
@@ -142,38 +125,70 @@ class SettingsViewModel(
     fun scheduleTestAlarm(callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
-                Logger.i("SettingsViewModel", "Scheduling test alarm")
+                Logger.i("SettingsViewModel", "=== STARTING TEST ALARM SCHEDULING ===")
+                
+                // Comprehensive permission validation
+                Logger.i("SettingsViewModel", "Validating all permissions...")
+                val permissionStatus = PermissionUtils.getAllPermissionStatus(context)
+                
+                Logger.d("SettingsViewModel", "Calendar permission: ${permissionStatus.hasCalendarPermission}")
+                Logger.d("SettingsViewModel", "Notification permission: ${permissionStatus.hasNotificationPermission}")
+                Logger.d("SettingsViewModel", "Exact alarm permission: ${permissionStatus.hasExactAlarmPermission}")
+                Logger.d("SettingsViewModel", "Battery optimization whitelisted: ${permissionStatus.isBatteryOptimizationWhitelisted}")
+                
+                if (!permissionStatus.hasCalendarPermission) {
+                    Logger.e("SettingsViewModel", "❌ Calendar permission not granted")
+                    callback(false)
+                    return@launch
+                }
+                
+                if (!permissionStatus.hasNotificationPermission) {
+                    Logger.e("SettingsViewModel", "❌ Notification permission not granted")
+                    callback(false)
+                    return@launch
+                }
+                
+                if (!permissionStatus.hasExactAlarmPermission) {
+                    Logger.e("SettingsViewModel", "❌ Exact alarm permission not granted")
+                    callback(false)
+                    return@launch
+                }
+                
+                // Additional AlarmManager capability check
+                val canSchedule = alarmScheduler.canScheduleExactAlarms()
+                Logger.d("SettingsViewModel", "AlarmManager can schedule exact alarms: $canSchedule")
+                
+                if (!canSchedule) {
+                    Logger.e("SettingsViewModel", "❌ AlarmManager reports cannot schedule exact alarms")
+                    callback(false)
+                    return@launch
+                }
+                
+                Logger.i("SettingsViewModel", "✅ All permission checks passed")
                 
                 // Create a test alarm 10 seconds from now
                 val currentTime = System.currentTimeMillis()
                 val testAlarmTime = currentTime + 10_000 // 10 seconds
                 
-                val testAlarm = ScheduledAlarm(
-                    id = "test_alarm_${UUID.randomUUID()}",
-                    eventId = "test_event",
-                    ruleId = "test_rule",
-                    eventTitle = "Calendar Alarm Test",
-                    eventStartTimeUtc = testAlarmTime + 60_000, // Event "starts" 1 minute after alarm
-                    alarmTimeUtc = testAlarmTime,
-                    scheduledAt = currentTime,
-                    userDismissed = false,
-                    pendingIntentRequestCode = (testAlarmTime % Int.MAX_VALUE).toInt(),
-                    lastEventModified = currentTime
-                )
+                Logger.i("SettingsViewModel", "Creating test alarm for: ${Date(testAlarmTime)}")
                 
-                val result = alarmScheduler.scheduleAlarm(testAlarm)
+                // Use the enhanced test alarm scheduling method
+                val success = alarmScheduler.scheduleTestAlarm("Calendar Alarm Test", testAlarmTime)
                 
-                if (result.success) {
-                    Logger.i("SettingsViewModel", "Test alarm scheduled successfully for: ${Date(testAlarmTime)}")
+                if (success) {
+                    Logger.i("SettingsViewModel", "✅ Test alarm scheduled successfully!")
                 } else {
-                    Logger.e("SettingsViewModel", "Failed to schedule test alarm: ${result.message}")
+                    Logger.e("SettingsViewModel", "❌ Failed to schedule test alarm")
                 }
                 
-                callback(result.success)
+                callback(success)
                 
             } catch (e: Exception) {
-                Logger.e("SettingsViewModel", "Exception while scheduling test alarm", e)
+                Logger.e("SettingsViewModel", "❌ Exception while scheduling test alarm", e)
+                Logger.e("SettingsViewModel", "Stack trace: ${e.stackTraceToString()}")
                 callback(false)
+            } finally {
+                Logger.i("SettingsViewModel", "=== TEST ALARM SCHEDULING COMPLETE ===")
             }
         }
     }
@@ -262,13 +277,14 @@ class SettingsViewModel(
 class SettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val workerManager: WorkerManager,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
+    private val context: Context
 ) : ViewModelProvider.Factory {
     
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            return SettingsViewModel(settingsRepository, workerManager, alarmScheduler) as T
+            return SettingsViewModel(settingsRepository, workerManager, alarmScheduler, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

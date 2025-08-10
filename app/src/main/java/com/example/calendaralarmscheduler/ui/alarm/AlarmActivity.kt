@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.receivers.AlarmReceiver
+import com.example.calendaralarmscheduler.utils.AlarmNotificationManager
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
 import kotlinx.coroutines.launch
@@ -53,8 +54,15 @@ class AlarmActivity : ComponentActivity() {
         val eventTitle = intent.getStringExtra(AlarmReceiver.EXTRA_EVENT_TITLE) ?: "Unknown Event"
         val eventStartTime = intent.getLongExtra(AlarmReceiver.EXTRA_EVENT_START_TIME, 0L)
         val ruleId = intent.getStringExtra(AlarmReceiver.EXTRA_RULE_ID) ?: "unknown"
+        val launchedFromNotification = intent.getBooleanExtra("LAUNCHED_FROM_NOTIFICATION", false)
         
         Logger.i("AlarmActivity_onCreate", "Displaying alarm for event: $eventTitle")
+        
+        if (launchedFromNotification) {
+            Logger.i("AlarmActivity_onCreate", "🔔 Alarm launched from full-screen intent notification")
+            // Dismiss the notification since we're now showing the full activity
+            dismissAlarmNotification(alarmId)
+        }
         
         // Set layout and initialize UI components
         setContentView(R.layout.activity_alarm)
@@ -293,6 +301,19 @@ class AlarmActivity : ComponentActivity() {
     private fun finishAlarm() {
         stopAlarmNotification()
         finish()
+    }
+    
+    /**
+     * Dismisses the alarm notification when the activity is launched
+     */
+    private fun dismissAlarmNotification(alarmId: String) {
+        try {
+            val alarmNotificationManager = AlarmNotificationManager(this)
+            alarmNotificationManager.dismissAlarmNotification(alarmId)
+            Logger.d("AlarmActivity_dismissNotification", "Dismissed notification for alarm: $alarmId")
+        } catch (e: Exception) {
+            Logger.w("AlarmActivity_dismissNotification", "Error dismissing notification", e)
+        }
     }
     
     override fun onDestroy() {

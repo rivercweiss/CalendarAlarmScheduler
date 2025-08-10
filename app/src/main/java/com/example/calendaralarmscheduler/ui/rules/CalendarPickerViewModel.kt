@@ -131,4 +131,50 @@ class CalendarPickerViewModel(application: Application) : AndroidViewModel(appli
         val selected = currentList.filter { it.isSelected }.map { it.calendar }
         _selectedCalendars.value = selected
     }
+    
+    fun selectAll() {
+        Logger.i("CalendarPickerViewModel", "Selecting all calendars")
+        val currentList = _availableCalendars.value ?: emptyList()
+        
+        // Select all calendars
+        val updatedList = currentList.map { item ->
+            selectedCalendarIds.add(item.calendar.id)
+            item.copy(isSelected = true)
+        }
+        
+        _availableCalendars.value = updatedList
+        updateSelectedCalendars()
+        Logger.d("CalendarPickerViewModel", "All calendars selected - count: ${selectedCalendarIds.size}")
+    }
+    
+    fun selectNone() {
+        Logger.i("CalendarPickerViewModel", "Deselecting all calendars")
+        val currentList = _availableCalendars.value ?: emptyList()
+        
+        // Deselect all calendars
+        val updatedList = currentList.map { item ->
+            selectedCalendarIds.remove(item.calendar.id)
+            item.copy(isSelected = false)
+        }
+        
+        _availableCalendars.value = updatedList
+        updateSelectedCalendars()
+        Logger.d("CalendarPickerViewModel", "All calendars deselected - count: ${selectedCalendarIds.size}")
+    }
+    
+    fun toggleSelectAll() {
+        val currentList = _availableCalendars.value ?: emptyList()
+        val allSelected = currentList.isNotEmpty() && currentList.all { it.isSelected }
+        
+        if (allSelected) {
+            selectNone()
+        } else {
+            selectAll()
+        }
+    }
+    
+    fun areAllCalendarsSelected(): Boolean {
+        val currentList = _availableCalendars.value ?: emptyList()
+        return currentList.isNotEmpty() && currentList.all { it.isSelected }
+    }
 }
