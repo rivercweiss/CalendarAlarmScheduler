@@ -1,10 +1,94 @@
 package com.example.calendaralarmscheduler
 
+import android.app.AlarmManager
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import com.example.calendaralarmscheduler.data.AlarmRepository
+import com.example.calendaralarmscheduler.data.CalendarRepository
+import com.example.calendaralarmscheduler.data.RuleRepository
+import com.example.calendaralarmscheduler.data.SettingsRepository
+import com.example.calendaralarmscheduler.data.database.AppDatabase
+import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import com.example.calendaralarmscheduler.utils.Logger
+import com.example.calendaralarmscheduler.utils.TimezoneUtils
+import com.example.calendaralarmscheduler.workers.WorkerManager
 
 class CalendarAlarmApplication : Application() {
+    
+    // Database
+    val database by lazy { AppDatabase.getInstance(this) }
+    
+    // Repositories
+    val ruleRepository by lazy { RuleRepository(database.ruleDao()) }
+    val alarmRepository by lazy { AlarmRepository(database.alarmDao()) }
+    val calendarRepository by lazy { CalendarRepository(this) }
+    val settingsRepository by lazy { 
+        SettingsRepository(
+            context = this,
+            onRefreshIntervalChanged = ::onRefreshIntervalChanged
+        ) 
+    }
+    
+    // Domain services
+    val alarmScheduler by lazy { 
+        AlarmScheduler(
+            context = this,
+            alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        )
+    }
+    
+    // Worker management
+    val workerManager by lazy { WorkerManager(this) }
+    
+    // Timezone change listener
+    private var timezoneChangeReceiver: BroadcastReceiver? = null
+    
+    /**
+     * Handle settings changes that require worker rescheduling
+     */
+    fun onRefreshIntervalChanged(newIntervalMinutes: Int) {
+        try {
+            Logger.i("Application", "Refresh interval changed to $newIntervalMinutes minutes - rescheduling worker")
+            workerManager.reschedulePeriodicRefresh(newIntervalMinutes)
+        } catch (e: Exception) {
+            Logger.e("Application", "Failed to reschedule worker after settings change", e)
+        }
+    }
+    
+    /**
+     * Set up timezone change handling to reset last sync time and reschedule alarms
+     */
+    private fun setupTimezoneChangeHandling() {
+        try {
+            timezoneChangeReceiver = TimezoneUtils.registerTimezoneChangeListener(this) {
+                handleTimezoneChange()
+            }
+            Logger.i("Application", "Timezone change listener registered successfully")
+        } catch (e: Exception) {
+            Logger.e("Application", "Failed to register timezone change listener", e)
+        }
+    }
+    
+    /**
+     * Handle timezone changes by resetting last sync time and triggering alarm rescheduling
+     */
+    private fun handleTimezoneChange() {
+        try {
+            Logger.i("Application", "Handling timezone change")
+            
+            // Reset last sync time to force full calendar rescan
+            settingsRepository.handleTimezoneChange()
+            
+            // Trigger immediate calendar refresh to reschedule all alarms
+            workerManager.enqueueImmediateRefresh()
+            
+            Logger.i("Application", "Timezone change handled successfully - forced calendar refresh")
+        } catch (e: Exception) {
+            Logger.e("Application", "Failed to handle timezone change", e)
+        }
+    }
     
     override fun onCreate() {
         val startTime = System.currentTimeMillis()
@@ -22,6 +106,22 @@ class CalendarAlarmApplication : Application() {
             
             // Log system information
             Logger.dumpSystemInfo("Application")
+            
+            // Schedule background calendar refresh worker with user-configured interval
+            try {
+                val refreshInterval = settingsRepository.getRefreshIntervalMinutes()
+                workerManager.schedulePeriodicRefresh(refreshInterval)
+                Logger.i("Application", "Background calendar refresh worker scheduled successfully with ${refreshInterval}-minute interval")
+                
+                // Log current settings
+                settingsRepository.dumpSettings()
+            } catch (e: Exception) {
+                Logger.e("Application", "Failed to schedule background worker", e)
+                // Don't throw - app can still function without background refresh
+            }
+            
+            // Set up timezone change handling
+            setupTimezoneChangeHandling()
             
             val initTime = System.currentTimeMillis() - startTime
             Logger.logPerformance("Application", "Application.onCreate()", initTime)
@@ -43,6 +143,18 @@ class CalendarAlarmApplication : Application() {
     
     override fun onTerminate() {
         Logger.i("Application", "Application terminating")
+        
+        // Clean up timezone change receiver
+        timezoneChangeReceiver?.let { receiver ->
+            try {
+                TimezoneUtils.unregisterTimezoneChangeListener(this, receiver)
+                Logger.i("Application", "Timezone change listener unregistered")
+            } catch (e: Exception) {
+                Logger.w("Application", "Error unregistering timezone change listener", e)
+            }
+            timezoneChangeReceiver = null
+        }
+        
         super.onTerminate()
     }
     

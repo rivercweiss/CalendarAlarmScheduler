@@ -22,7 +22,7 @@ class RuleEditFragment : Fragment(), MenuProvider {
     private var _binding: FragmentRuleEditBinding? = null
     private val binding get() = _binding!!
     
-    // private val args: RuleEditFragmentArgs by navArgs()
+    private val args: RuleEditFragmentArgs by navArgs()
     private lateinit var viewModel: RuleEditViewModel
     
     override fun onCreateView(
@@ -47,9 +47,9 @@ class RuleEditFragment : Fragment(), MenuProvider {
         observeViewModel()
         
         // Load rule if editing existing one
-        // args.ruleId?.let { ruleId ->
-        //     viewModel.loadRule(ruleId)
-        // }
+        args.ruleId?.let { ruleId ->
+            viewModel.loadRule(ruleId)
+        }
     }
 
     private fun setupViews() {
@@ -67,6 +67,18 @@ class RuleEditFragment : Fragment(), MenuProvider {
             // Save button (also available in menu)
             buttonSave.setOnClickListener {
                 saveRule()
+            }
+            
+            // Initialize button texts with current ViewModel values
+            val leadTimeMinutes = viewModel.leadTimeMinutes.value ?: 30
+            buttonSelectLeadTime.text = formatLeadTime(leadTimeMinutes)
+            
+            val selectedCalendars = viewModel.selectedCalendars.value ?: emptyList()
+            val count = selectedCalendars.size
+            buttonSelectCalendars.text = if (count == 0) {
+                getString(R.string.select_calendars)
+            } else {
+                "$count calendar(s) selected"
             }
         }
     }

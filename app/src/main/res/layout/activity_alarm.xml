@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@android:color/holo_red_dark"
+    android:keepScreenOn="true">
+
+    <!-- Current Time Display -->
+    <TextView
+        android:id="@+id/currentTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12:34 AM"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Alarm Label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ALARM"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:alpha="0.9"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Event Details Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:padding="20dp"
+        android:layout_marginBottom="48dp"
+        android:elevation="8dp">
+
+        <!-- Event Title -->
+        <TextView
+            android:id="@+id/eventTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Event Time -->
+        <TextView
+            android:id="@+id/eventTimeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Time"
+            android:textSize="16sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Rule Info -->
+        <TextView
+            android:id="@+id/ruleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rule: Unknown"
+            android:textSize="14sp"
+            android:textColor="#999999"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="2">
+
+        <!-- Snooze Button -->
+        <Button
+            android:id="@+id/snoozeButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Snooze 5min"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@android:color/white"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="8dp"
+            android:elevation="2dp" />
+
+        <!-- Dismiss Button -->
+        <Button
+            android:id="@+id/dismissButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Dismiss"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@color/purple_500"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="8dp"
+            android:elevation="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

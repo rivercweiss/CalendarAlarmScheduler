@@ -11,6 +11,8 @@ class AlarmRepository(
     
     fun getActiveAlarms(): Flow<List<ScheduledAlarm>> = alarmDao.getActiveAlarms()
     
+    suspend fun getActiveAlarmsSync(): List<ScheduledAlarm> = alarmDao.getActiveAlarmsSync()
+    
     fun getAlarmsByEventId(eventId: String): Flow<List<ScheduledAlarm>> = 
         alarmDao.getAlarmsByEventId(eventId)
     
@@ -107,8 +109,21 @@ class AlarmRepository(
         setAlarmDismissed(alarmId, false)
     }
     
+    suspend fun reactivateAlarm(alarmId: String): Boolean {
+        return try {
+            setAlarmDismissed(alarmId, false)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
     suspend fun cleanupOldAlarms() {
         deleteExpiredAlarms()
+    }
+    
+    suspend fun markAlarmDismissed(alarmId: String) {
+        setAlarmDismissed(alarmId, true)
     }
     
     // Check if alarm should be rescheduled based on event changes
@@ -117,5 +132,25 @@ class AlarmRepository(
         return existingAlarm?.let { alarm ->
             !alarm.userDismissed && newLastModified > alarm.lastEventModified
         } ?: true
+    }
+    
+    suspend fun markMultipleAlarmsDismissed(alarmIds: List<String>) {
+        for (alarmId in alarmIds) {
+            setAlarmDismissed(alarmId, true)
+        }
+    }
+    
+    suspend fun checkSystemStateAndUpdateDismissals(
+        onAlarmDismissed: (alarmId: String, eventTitle: String) -> Unit = { _, _ -> }
+    ): List<String> {
+        // This method would typically be called with AlarmScheduler dependency
+        // For now, it returns an empty list as the logic is handled in the worker
+        return emptyList()
+    }
+    
+    suspend fun handleDismissedAlarms(dismissedAlarms: List<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>) {
+        for (alarm in dismissedAlarms) {
+            setAlarmDismissed(alarm.id, true)
+        }
     }
 }

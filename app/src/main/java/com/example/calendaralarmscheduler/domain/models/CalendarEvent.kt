@@ -57,11 +57,16 @@ data class CalendarEvent(
             return computeAlarmTimeUtc(leadTimeMinutes)
         }
         
-        val localDate = getLocalStartTime().toLocalDate()
-        val defaultTime = localDate.atTime(defaultTimeHour, defaultTimeMinute)
+        // For multi-day all-day events, always alarm on the first day only
+        val localStartDate = getLocalStartTime().toLocalDate()
+        val localEndDate = getLocalEndTime().toLocalDate()
+        
+        // Use the start date for the alarm time, regardless of how many days the event spans
+        val defaultTime = localStartDate.atTime(defaultTimeHour, defaultTimeMinute)
         val defaultTimeUtc = defaultTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         
-        return defaultTimeUtc - (leadTimeMinutes * 60 * 1000L)
+        // For all-day events, fire alarm exactly at the chosen time (no lead time applied)
+        return defaultTimeUtc
     }
     
     companion object {

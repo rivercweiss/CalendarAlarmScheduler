@@ -9,13 +9,16 @@ interface RuleDao {
     @Query("SELECT * FROM rules ORDER BY createdAt DESC")
     fun getAllRules(): Flow<List<Rule>>
     
+    @Query("SELECT * FROM rules ORDER BY createdAt DESC")
+    suspend fun getAllRulesSync(): List<Rule>
+    
     @Query("SELECT * FROM rules WHERE enabled = 1 ORDER BY createdAt DESC")
     fun getEnabledRules(): Flow<List<Rule>>
     
     @Query("SELECT * FROM rules WHERE id = :id")
     suspend fun getRuleById(id: String): Rule?
     
-    @Query("SELECT * FROM rules WHERE :calendarId IN (SELECT value FROM json_each(calendarIds))")
+    @Query("SELECT * FROM rules WHERE calendarIds LIKE '%' || :calendarId || '%'")
     fun getRulesByCalendarId(calendarId: Long): Flow<List<Rule>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)

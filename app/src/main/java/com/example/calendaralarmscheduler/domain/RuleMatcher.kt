@@ -156,6 +156,42 @@ class RuleMatcher {
         }
     }
     
+    fun resolveConflicts(
+        matches: List<MatchResult>,
+        duplicateHandlingMode: com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode
+    ): List<MatchResult> {
+        if (duplicateHandlingMode == com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.ALLOW_MULTIPLE) {
+            return matches
+        }
+        
+        // Group matches by event ID to find conflicts
+        val groupedByEvent = matches.groupBy { it.event.id }
+        
+        return groupedByEvent.flatMap { (_, eventMatches) ->
+            if (eventMatches.size <= 1) {
+                // No conflict for this event
+                eventMatches
+            } else {
+                // Resolve conflict based on mode
+                when (duplicateHandlingMode) {
+                    com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.EARLIEST_ONLY -> {
+                        listOf(eventMatches.minByOrNull { it.scheduledAlarm.alarmTimeUtc }!!)
+                    }
+                    com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.LATEST_ONLY -> {
+                        listOf(eventMatches.maxByOrNull { it.scheduledAlarm.alarmTimeUtc }!!)
+                    }
+                    com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.SHORTEST_LEAD_TIME -> {
+                        listOf(eventMatches.minByOrNull { it.rule.leadTimeMinutes }!!)
+                    }
+                    com.example.calendaralarmscheduler.domain.models.DuplicateHandlingMode.LONGEST_LEAD_TIME -> {
+                        listOf(eventMatches.maxByOrNull { it.rule.leadTimeMinutes }!!)
+                    }
+                    else -> eventMatches // Should never happen, but fallback to allow all
+                }
+            }
+        }
+    }
+    
     sealed class ValidationResult {
         object Valid : ValidationResult()
         data class Invalid(val message: String) : ValidationResult()

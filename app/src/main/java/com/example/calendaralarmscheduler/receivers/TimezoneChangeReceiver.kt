@@ -1,0 +1,154 @@
+package com.example.calendaralarmscheduler.receivers
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import com.example.calendaralarmscheduler.CalendarAlarmApplication
+import com.example.calendaralarmscheduler.utils.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.time.ZoneId
+
+class TimezoneChangeReceiver : BroadcastReceiver() {
+    
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
+    
+    override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            Intent.ACTION_TIMEZONE_CHANGED -> {
+                Logger.i("TimezoneChangeReceiver", "Timezone change detected")
+                handleTimezoneChange(context)
+            }
+            Intent.ACTION_TIME_CHANGED -> {
+                Logger.i("TimezoneChangeReceiver", "System time change detected")
+                handleTimeChange(context)
+            }
+        }
+    }
+    
+    private fun handleTimezoneChange(context: Context) {
+        val result = goAsync()
+        
+        scope.launch {
+            try {
+                val currentZone = ZoneId.systemDefault()
+                Logger.i("TimezoneChangeReceiver", "Handling timezone change to: ${currentZone.id}")
+                
+                val app = context.applicationContext as CalendarAlarmApplication
+                
+                // Reset last sync time to force full calendar rescan
+                app.settingsRepository.handleTimezoneChange()
+                
+                // Reschedule all active alarms with new timezone
+                rescheduleAllAlarms(context)
+                
+                // Trigger immediate calendar refresh to catch any new events
+                app.workerManager.enqueueImmediateRefresh()
+                
+                Logger.i("TimezoneChangeReceiver", "Timezone change handling completed for zone: ${currentZone.id}")
+                
+            } catch (e: Exception) {
+                Logger.e("TimezoneChangeReceiver", "Error handling timezone change", e)
+            } finally {
+                result.finish()
+            }
+        }
+    }
+    
+    private fun handleTimeChange(context: Context) {
+        val result = goAsync()
+        
+        scope.launch {
+            try {
+                Logger.i("TimezoneChangeReceiver", "Handling system time change")
+                
+                val app = context.applicationContext as CalendarAlarmApplication
+                
+                // Time changes can affect alarm scheduling, especially around DST transitions
+                // Reschedule all alarms to ensure they fire at the correct adjusted times
+                rescheduleAllAlarms(context)
+                
+                // Trigger calendar refresh to handle any date-boundary crossings
+                app.workerManager.enqueueImmediateRefresh()
+                
+                Logger.i("TimezoneChangeReceiver", "System time change handling completed")
+                
+            } catch (e: Exception) {
+                Logger.e("TimezoneChangeReceiver", "Error handling time change", e)
+            } finally {
+                result.finish()
+            }
+        }
+    }
+    
+    private suspend fun rescheduleAllAlarms(context: Context) {
+        try {
+            val app = context.applicationContext as CalendarAlarmApplication
+            val alarmRepository = app.alarmRepository
+            val alarmScheduler = app.alarmScheduler
+            
+            // Get all active alarms from database
+            val currentTime = System.currentTimeMillis()
+            val futureAlarms = mutableListOf<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>()
+            
+            // Get active alarms and convert to domain models
+            val activeAlarms = alarmRepository.getActiveAlarms()
+            
+            activeAlarms.collect { alarms ->
+                // Filter to only future, non-dismissed alarms
+                alarms.filter { dbAlarm ->
+                    dbAlarm.alarmTimeUtc > currentTime && !dbAlarm.userDismissed
+                }.forEach { dbAlarm ->
+                    // Convert database entity to domain model
+                    val domainAlarm = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
+                        id = dbAlarm.id,
+                        eventId = dbAlarm.eventId,
+                        ruleId = dbAlarm.ruleId,
+                        eventTitle = dbAlarm.eventTitle,
+                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
+                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
+                        scheduledAt = dbAlarm.scheduledAt,
+                        userDismissed = dbAlarm.userDismissed,
+                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
+                        lastEventModified = dbAlarm.lastEventModified
+                    )
+                    futureAlarms.add(domainAlarm)
+                }
+                
+                Logger.i("TimezoneChangeReceiver", "Found ${futureAlarms.size} alarms to reschedule after timezone/time change")
+                
+                if (futureAlarms.isNotEmpty()) {
+                    // Cancel all existing alarms first
+                    futureAlarms.forEach { alarm ->
+                        alarmScheduler.cancelAlarm(alarm)
+                    }
+                    
+                    // Reschedule all alarms with updated timezone
+                    val results = alarmScheduler.scheduleMultipleAlarms(futureAlarms)
+                    val successCount = results.count { it.success }
+                    val failureCount = results.count { !it.success }
+                    
+                    Logger.i("TimezoneChangeReceiver", 
+                        "Rescheduled $successCount alarms successfully, $failureCount failed after timezone change")
+                    
+                    // Log any failures
+                    results.filter { !it.success }.forEach { result ->
+                        Logger.w("TimezoneChangeReceiver", 
+                            "Failed to reschedule alarm after timezone change: ${result.message}")
+                    }
+                } else {
+                    Logger.d("TimezoneChangeReceiver", "No future alarms to reschedule")
+                }
+                
+                return@collect // Exit the collect block after processing
+            }
+            
+        } catch (e: Exception) {
+            Logger.e("TimezoneChangeReceiver", "Error rescheduling alarms after timezone change", e)
+            throw e
+        }
+    }
+}

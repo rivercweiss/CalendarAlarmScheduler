@@ -42,10 +42,9 @@ class RuleListFragment : Fragment() {
         ruleAdapter = RuleAdapter(
             onRuleClick = { rule ->
                 // Navigate to edit rule fragment
-                // val action = RuleListFragmentDirections
-                //     .actionRulesToEditRule(rule.id)
-                // findNavController().navigate(action)
-                // TODO: Implement navigation once Safe Args is configured
+                val action = RuleListFragmentDirections
+                    .actionRulesToEditRule(rule.id)
+                findNavController().navigate(action)
             },
             onRuleToggle = { rule, isEnabled ->
                 viewModel.updateRuleEnabled(rule, isEnabled)
@@ -61,10 +60,9 @@ class RuleListFragment : Fragment() {
     private fun setupFab() {
         binding.fabAddRule.setOnClickListener {
             // Navigate to add new rule
-            // val action = RuleListFragmentDirections
-            //     .actionRulesToEditRule(null)
-            // findNavController().navigate(action)
-            // TODO: Implement navigation once Safe Args is configured
+            val action = RuleListFragmentDirections
+                .actionRulesToEditRule(null)
+            findNavController().navigate(action)
         }
     }
 

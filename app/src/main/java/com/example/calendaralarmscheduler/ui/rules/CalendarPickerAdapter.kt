@@ -23,12 +23,36 @@ class CalendarPickerAdapter(
         holder.bind(getItem(position))
     }
     
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            // No payloads, do full bind
+            onBindViewHolder(holder, position)
+        } else {
+            // Handle partial updates based on payloads
+            val item = getItem(position)
+            for (payload in payloads) {
+                when (payload) {
+                    PAYLOAD_SELECTION_CHANGED -> {
+                        holder.updateSelectionOnly(item.isSelected)
+                    }
+                }
+            }
+        }
+    }
+    
     class ViewHolder(
         private val binding: ItemCalendarPickerBinding,
         private val onCalendarToggle: (CalendarRepository.CalendarInfo, Boolean) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         
+        private var isBinding = false
+        
+        private var currentItem: CalendarPickerItem? = null
+        
         fun bind(item: CalendarPickerItem) {
+            isBinding = true
+            currentItem = item
+            
             binding.apply {
                 textCalendarName.text = item.calendar.displayName
                 textAccountName.text = item.calendar.accountName
@@ -36,15 +60,44 @@ class CalendarPickerAdapter(
                 // Set calendar color indicator
                 viewColorIndicator.setBackgroundColor(item.calendar.color)
                 
+                // Clear listener before setting state to prevent triggering during bind
+                checkboxSelected.setOnCheckedChangeListener(null)
                 checkboxSelected.isChecked = item.isSelected
+                
+                // Set listener after state is properly initialized
                 checkboxSelected.setOnCheckedChangeListener { _, isChecked ->
-                    onCalendarToggle(item.calendar, isChecked)
+                    // Ignore listener calls during binding
+                    if (!isBinding) {
+                        onCalendarToggle(item.calendar, isChecked)
+                    }
                 }
                 
+                // Improve click handling - make entire row clickable with better UX
                 root.setOnClickListener {
-                    checkboxSelected.isChecked = !checkboxSelected.isChecked
+                    if (!isBinding) {
+                        checkboxSelected.isChecked = !checkboxSelected.isChecked
+                    }
                 }
             }
+            
+            isBinding = false
+        }
+        
+        fun updateSelectionOnly(isSelected: Boolean) {
+            isBinding = true
+            
+            // Update only the checkbox state without affecting other UI elements
+            binding.checkboxSelected.setOnCheckedChangeListener(null)
+            binding.checkboxSelected.isChecked = isSelected
+            binding.checkboxSelected.setOnCheckedChangeListener { _, isChecked ->
+                if (!isBinding) {
+                    currentItem?.let { item ->
+                        onCalendarToggle(item.calendar, isChecked)
+                    }
+                }
+            }
+            
+            isBinding = false
         }
     }
     
@@ -54,12 +107,25 @@ class CalendarPickerAdapter(
         }
         
         override fun areContentsTheSame(oldItem: CalendarPickerItem, newItem: CalendarPickerItem): Boolean {
-            return oldItem == newItem
+            // Check all relevant properties for content changes
+            return oldItem.calendar.id == newItem.calendar.id &&
+                   oldItem.calendar.displayName == newItem.calendar.displayName &&
+                   oldItem.calendar.accountName == newItem.calendar.accountName &&
+                   oldItem.calendar.color == newItem.calendar.color &&
+                   oldItem.isSelected == newItem.isSelected
+        }
+        
+        override fun getChangePayload(oldItem: CalendarPickerItem, newItem: CalendarPickerItem): Any? {
+            // Return a payload for selection changes to enable efficient partial updates
+            return if (oldItem.isSelected != newItem.isSelected) {
+                PAYLOAD_SELECTION_CHANGED
+            } else {
+                null
+            }
         }
     }
+    
+    companion object {
+        private const val PAYLOAD_SELECTION_CHANGED = "selection_changed"
+    }
 }
-
-data class CalendarPickerItem(
-    val calendar: CalendarRepository.CalendarInfo,
-    val isSelected: Boolean
-)

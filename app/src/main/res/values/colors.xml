@@ -7,4 +7,16 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Status colors for settings UI -->
+    <color name="success_green">#FF4CAF50</color>
+    <color name="error_red">#FFF44336</color>
+    <color name="warning_orange">#FFFF9800</color>
+    <color name="primary">#FF2196F3</color>
+    
+    <!-- Additional colors for preview UI -->
+    <color name="success">@color/success_green</color>
+    <color name="warning">@color/warning_orange</color>
+    <color name="text_primary">#FF212121</color>
+    <color name="text_secondary">#FF757575</color>
 </resources>

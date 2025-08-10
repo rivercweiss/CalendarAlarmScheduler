@@ -59,9 +59,10 @@ class CalendarRepository(private val context: Context) {
         calendarIds: List<Long>? = null,
         lastSyncTime: Long? = null
     ): List<CalendarEvent> = withContext(Dispatchers.IO) {
+        val currentTime = System.currentTimeMillis()
+        val endTime = currentTime + LOOKAHEAD_WINDOW_MS
+        
         try {
-            val currentTime = System.currentTimeMillis()
-            val endTime = currentTime + LOOKAHEAD_WINDOW_MS
             
             // Use Instances API to handle recurring events properly
             val events = mutableListOf<CalendarEvent>()
@@ -110,7 +111,29 @@ class CalendarRepository(private val context: Context) {
             emptyList()
         } catch (e: Exception) {
             Log.e(TAG, "Error querying calendar events", e)
-            emptyList()
+            
+            // Attempt retry for retriable exceptions
+            if (com.example.calendaralarmscheduler.utils.RetryManager.isRetriableException(e)) {
+                val retryResult = com.example.calendaralarmscheduler.utils.RetryManager.withRetry(
+                    operation = "query_calendar_events",
+                    maxRetries = 2,
+                    onRetry = { attempt, error ->
+                        Log.i(TAG, "Retrying calendar events query (attempt $attempt): ${error.message}")
+                    }
+                ) {
+                    queryEventsInternal(currentTime, endTime, calendarIds, lastSyncTime)
+                }
+                
+                if (retryResult.isSuccess) {
+                    Log.i(TAG, "Calendar events query succeeded after retry")
+                    retryResult.getOrNull() ?: emptyList()
+                } else {
+                    Log.e(TAG, "Calendar events query failed after retries", retryResult.exceptionOrNull())
+                    emptyList()
+                }
+            } else {
+                emptyList()
+            }
         }
     }
 
@@ -254,6 +277,47 @@ class CalendarRepository(private val context: Context) {
     }
 
     /**
+     * Get events in the lookahead window (alias for getUpcomingEvents for consistency)
+     */
+    suspend fun getEventsInLookAheadWindow(): List<CalendarEvent> = getUpcomingEvents()
+    
+    /**
+     * Get calendars as a map of ID to display name
+     */
+    suspend fun getCalendarsWithNames(): Map<Long, String> = withContext(Dispatchers.IO) {
+        try {
+            val calendars = mutableMapOf<Long, String>()
+            
+            val projection = arrayOf(
+                CalendarContract.Calendars._ID,
+                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME
+            )
+            
+            contentResolver.query(
+                CalendarContract.Calendars.CONTENT_URI,
+                projection,
+                "${CalendarContract.Calendars.VISIBLE} = 1",
+                null,
+                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Calendars._ID))
+                    val displayName = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME))
+                    calendars[id] = displayName ?: "Unknown Calendar"
+                }
+            }
+            
+            calendars
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Calendar permission not granted", e)
+            emptyMap()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error querying calendar names", e)
+            emptyMap()
+        }
+    }
+
+    /**
      * Check if we have calendar read permission
      */
     fun hasCalendarPermission(): Boolean {
@@ -271,6 +335,58 @@ class CalendarRepository(private val context: Context) {
         } catch (e: SecurityException) {
             false
         }
+    }
+    
+    /**
+     * Internal method for querying calendar events (used by retry logic)
+     */
+    private suspend fun queryEventsInternal(
+        startTimeUtc: Long,
+        endTimeUtc: Long,
+        calendarIds: List<Long>? = null,
+        lastModified: Long? = null
+    ): List<CalendarEvent> = withContext(Dispatchers.IO) {
+        val events = mutableListOf<CalendarEvent>()
+        
+        // Build selection criteria
+        val selectionArgs = mutableListOf<String>()
+        val selectionBuilder = StringBuilder()
+        
+        // Time window filter
+        selectionBuilder.append("(${CalendarContract.Instances.BEGIN} >= ? AND ${CalendarContract.Instances.BEGIN} <= ?)")
+        selectionArgs.add(startTimeUtc.toString())
+        selectionArgs.add(endTimeUtc.toString())
+        
+        // Calendar ID filter if specified
+        if (!calendarIds.isNullOrEmpty()) {
+            val calendarIdPlaceholders = calendarIds.joinToString(",") { "?" }
+            selectionBuilder.append(" AND ${CalendarContract.Instances.CALENDAR_ID} IN ($calendarIdPlaceholders)")
+            calendarIds.forEach { selectionArgs.add(it.toString()) }
+        }
+        
+        // Last modified filter if specified
+        if (lastModified != null) {
+            selectionBuilder.append(" AND ${CalendarContract.Instances.LAST_DATE} > ?")
+            selectionArgs.add(lastModified.toString())
+        }
+        
+        val instancesUri = CalendarContract.Instances.CONTENT_URI.buildUpon()
+            .appendPath(startTimeUtc.toString())
+            .appendPath(endTimeUtc.toString())
+            .build()
+        
+        contentResolver.query(
+            instancesUri,
+            INSTANCES_PROJECTION,
+            selectionBuilder.toString(),
+            selectionArgs.toTypedArray(),
+            "${CalendarContract.Instances.BEGIN} ASC"
+        )?.use { cursor ->
+            events.addAll(parseInstancesCursor(cursor))
+        }
+        
+        Log.d(TAG, "Retrieved ${events.size} events from internal query")
+        events
     }
 
     data class CalendarInfo(

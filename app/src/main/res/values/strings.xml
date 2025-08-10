@@ -28,6 +28,15 @@
     <string name="grant_permission">Grant Permission</string>
     <string name="open_settings">Open Settings</string>
     
+    <!-- Event Preview -->
+    <string name="matching_rules_count">Matches %d rule(s)</string>
+    <string name="no_alarms_scheduled">No alarms scheduled</string>
+    <string name="alarms_dismissed">%d alarm(s) dismissed</string>
+    <string name="active_alarms">%d active alarm(s)</string>
+    <string name="past_alarms">%d past alarm(s)</string>
+    <string name="no_active_alarms">No active alarms</string>
+    <string name="next_alarm">Next: %1$s (%2$s)</string>
+    
     <!-- Common -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

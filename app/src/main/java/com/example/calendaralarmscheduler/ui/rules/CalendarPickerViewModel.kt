@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.CalendarRepository
+import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.launch
 
 class CalendarPickerViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,21 +25,42 @@ class CalendarPickerViewModel(application: Application) : AndroidViewModel(appli
     private val selectedCalendarIds = mutableSetOf<Long>()
     
     init {
+        Logger.i("CalendarPickerViewModel", "Initializing CalendarPickerViewModel")
         _selectedCalendars.value = emptyList()
         loadCalendars()
     }
     
     private fun loadCalendars() {
+        Logger.i("CalendarPickerViewModel", "Starting to load available calendars")
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                Logger.d("CalendarPickerViewModel", "Calling calendarRepository.getAvailableCalendars()")
                 val calendars = calendarRepository.getAvailableCalendars()
+                Logger.i("CalendarPickerViewModel", "Successfully loaded ${calendars.size} calendars")
+                
+                if (calendars.isEmpty()) {
+                    Logger.w("CalendarPickerViewModel", "No calendars found - this may indicate:")
+                    Logger.w("CalendarPickerViewModel", "  1. No calendar accounts configured")
+                    Logger.w("CalendarPickerViewModel", "  2. Calendar permissions not granted")
+                    Logger.w("CalendarPickerViewModel", "  3. All calendars are hidden/disabled")
+                } else {
+                    Logger.d("CalendarPickerViewModel", "Calendar details:")
+                    calendars.forEachIndexed { index, calendar ->
+                        Logger.d("CalendarPickerViewModel", "  [$index] ${calendar.displayName} (${calendar.accountName})")
+                    }
+                }
+                
                 updateCalendarList(calendars)
+                Logger.d("CalendarPickerViewModel", "Calendar list updated successfully")
             } catch (e: Exception) {
-                android.util.Log.e("CalendarPickerViewModel", "Error loading calendars", e)
+                Logger.e("CalendarPickerViewModel", "Error loading calendars", e)
+                Logger.e("CalendarPickerViewModel", "Exception type: ${e::class.simpleName}")
+                Logger.e("CalendarPickerViewModel", "Exception message: ${e.message}")
                 _availableCalendars.value = emptyList()
             } finally {
                 _isLoading.value = false
+                Logger.d("CalendarPickerViewModel", "Calendar loading completed, isLoading set to false")
             }
         }
     }
@@ -57,10 +79,19 @@ class CalendarPickerViewModel(application: Application) : AndroidViewModel(appli
     }
     
     fun toggleCalendar(calendar: CalendarRepository.CalendarInfo, isSelected: Boolean) {
+        // Prevent redundant updates
+        val wasSelected = calendar.id in selectedCalendarIds
+        if (wasSelected == isSelected) {
+            Logger.d("CalendarPickerViewModel", "Toggle ignored - calendar ${calendar.displayName} already in state: $isSelected")
+            return
+        }
+        
         if (isSelected) {
             selectedCalendarIds.add(calendar.id)
+            Logger.d("CalendarPickerViewModel", "Added calendar to selection: ${calendar.displayName}")
         } else {
             selectedCalendarIds.remove(calendar.id)
+            Logger.d("CalendarPickerViewModel", "Removed calendar from selection: ${calendar.displayName}")
         }
         
         // Update the list to reflect the new selection state
@@ -72,19 +103,27 @@ class CalendarPickerViewModel(application: Application) : AndroidViewModel(appli
                 item
             }
         }
+        
+        Logger.d("CalendarPickerViewModel", "Updating calendar list with new selection state")
         _availableCalendars.value = updatedList
         
         updateSelectedCalendars()
+        Logger.d("CalendarPickerViewModel", "Toggle completed - selected count: ${selectedCalendarIds.size}")
     }
     
     private fun updateCalendarList(calendars: List<CalendarRepository.CalendarInfo>) {
+        Logger.d("CalendarPickerViewModel", "Updating calendar list with ${calendars.size} calendars")
         val items = calendars.map { calendar ->
+            val isSelected = calendar.id in selectedCalendarIds
+            Logger.v("CalendarPickerViewModel", "Mapping calendar: ${calendar.displayName} (selected: $isSelected)")
             CalendarPickerItem(
                 calendar = calendar,
-                isSelected = calendar.id in selectedCalendarIds
+                isSelected = isSelected
             )
         }
+        Logger.d("CalendarPickerViewModel", "Created ${items.size} CalendarPickerItems")
         _availableCalendars.value = items
+        Logger.d("CalendarPickerViewModel", "Updated _availableCalendars LiveData")
     }
     
     private fun updateSelectedCalendars() {

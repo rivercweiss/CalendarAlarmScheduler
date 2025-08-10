@@ -35,12 +35,13 @@ data class Rule(
     fun isValid(): Boolean {
         return name.isNotBlank() && 
                keywordPattern.isNotBlank() && 
-               leadTimeMinutes in 1..(7 * 24 * 60) &&
-               calendarIds.isNotEmpty()
+               leadTimeMinutes in 1..(7 * 24 * 60)
+        // Note: Empty calendarIds is valid and means "all calendars"
     }
     
     fun matchesEvent(event: com.example.calendaralarmscheduler.domain.models.CalendarEvent): Boolean {
-        if (!enabled || !calendarIds.contains(event.calendarId)) {
+        // Empty calendarIds means match all calendars
+        if (!enabled || (calendarIds.isNotEmpty() && !calendarIds.contains(event.calendarId))) {
             return false
         }
         

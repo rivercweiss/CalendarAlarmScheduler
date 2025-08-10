@@ -55,7 +55,11 @@
         <receiver
             android:name=".receivers.AlarmReceiver"
             android:exported="false"
-            android:enabled="true" />
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.calendaralarmscheduler.ALARM_TRIGGER" />
+            </intent-filter>
+        </receiver>
 
         <!-- Boot Receiver for alarm re-registration -->
         <receiver
@@ -68,6 +72,17 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
                 <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Timezone Change Receiver for alarm rescheduling -->
+        <receiver
+            android:name=".receivers.TimezoneChangeReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_CHANGED" />
             </intent-filter>
         </receiver>
 

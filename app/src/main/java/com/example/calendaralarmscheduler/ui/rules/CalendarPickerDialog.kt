@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.databinding.DialogCalendarPickerBinding
 import com.example.calendaralarmscheduler.data.CalendarRepository
+import com.example.calendaralarmscheduler.utils.Logger
 
 class CalendarPickerDialog : DialogFragment() {
     
@@ -33,7 +34,9 @@ class CalendarPickerDialog : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        Logger.i("CalendarPickerDialog", "onViewCreated - Setting up calendar picker dialog")
         viewModel = ViewModelProvider(this)[CalendarPickerViewModel::class.java]
+        Logger.d("CalendarPickerDialog", "ViewModel created successfully")
         
         setupRecyclerView()
         setupButtons()
@@ -41,18 +44,24 @@ class CalendarPickerDialog : DialogFragment() {
         
         // Load initial selection
         val selectedIds = arguments?.getLongArray(ARG_SELECTED_CALENDAR_IDS)?.toList() ?: emptyList()
+        Logger.d("CalendarPickerDialog", "Setting initial selection: ${selectedIds.size} calendars")
         viewModel.setInitialSelection(selectedIds)
     }
     
     private fun setupRecyclerView() {
+        Logger.d("CalendarPickerDialog", "Setting up RecyclerView")
         adapter = CalendarPickerAdapter { calendar, isSelected ->
+            Logger.d("CalendarPickerDialog", "Calendar toggled: ${calendar.displayName} -> $isSelected")
             viewModel.toggleCalendar(calendar, isSelected)
         }
         
         binding.recyclerViewCalendars.apply {
+            Logger.d("CalendarPickerDialog", "Configuring RecyclerView with LinearLayoutManager")
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@CalendarPickerDialog.adapter
+            Logger.d("CalendarPickerDialog", "RecyclerView adapter attached successfully")
         }
+        Logger.i("CalendarPickerDialog", "RecyclerView setup completed")
     }
     
     private fun setupButtons() {
@@ -68,28 +77,50 @@ class CalendarPickerDialog : DialogFragment() {
     }
     
     private fun observeViewModel() {
+        Logger.d("CalendarPickerDialog", "Setting up ViewModel observers")
+        
         viewModel.availableCalendars.observe(viewLifecycleOwner) { calendars ->
+            Logger.i("CalendarPickerDialog", "Received calendar list update: ${calendars.size} calendars")
+            
+            if (calendars.isEmpty()) {
+                Logger.w("CalendarPickerDialog", "Calendar list is empty - showing empty state")
+                Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to VISIBLE")
+            } else {
+                Logger.d("CalendarPickerDialog", "Submitting calendar list to adapter:")
+                calendars.forEachIndexed { index, item ->
+                    Logger.d("CalendarPickerDialog", "  [$index] ${item.calendar.displayName} (selected: ${item.isSelected})")
+                }
+                Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to GONE")
+            }
+            
+            Logger.d("CalendarPickerDialog", "Calling adapter.submitList() with ${calendars.size} items")
             adapter.submitList(calendars)
+            Logger.d("CalendarPickerDialog", "adapter.submitList() completed")
             
             binding.emptyStateText.visibility = if (calendars.isEmpty()) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
+            Logger.d("CalendarPickerDialog", "UI visibility states updated")
         }
         
         viewModel.selectedCalendars.observe(viewLifecycleOwner) { selectedCalendars ->
             val count = selectedCalendars.size
+            Logger.d("CalendarPickerDialog", "Selected calendars count changed: $count")
             binding.buttonSelect.text = if (count == 0) {
                 "Select"
             } else {
                 "Select ($count)"
             }
             binding.buttonSelect.isEnabled = count > 0
+            Logger.d("CalendarPickerDialog", "Button text updated: '${binding.buttonSelect.text}', enabled: ${binding.buttonSelect.isEnabled}")
         }
         
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            Logger.d("CalendarPickerDialog", "Loading state changed: $isLoading")
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            Logger.d("CalendarPickerDialog", "Progress bar visibility: ${if (isLoading) "VISIBLE" else "GONE"}")
         }
     }
     

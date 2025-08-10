@@ -76,6 +76,8 @@ class RuleRepository(
         }
     }
     
+    suspend fun getAllRulesSync(): List<Rule> = ruleDao.getAllRulesSync()
+    
     suspend fun createDefaultRules(): List<Rule> {
         try {
             Logger.i("RuleRepository", "Creating default rules")

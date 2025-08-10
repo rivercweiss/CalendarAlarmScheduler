@@ -20,21 +20,22 @@
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_calendars"
+        android:id="@+id/recyclerViewCalendars"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:maxHeight="400dp"
         app:layout_constraintBottom_toTopOf="@id/button_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_title"
+        app:layout_constraintVertical_bias="0.0"
         tools:itemCount="3"
         tools:listitem="@layout/item_calendar_picker" />
 
     <!-- Empty State -->
     <TextView
-        android:id="@+id/empty_state_text"
+        android:id="@+id/emptyStateText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="32dp"
@@ -50,7 +51,7 @@
 
     <!-- Progress Bar -->
     <ProgressBar
-        android:id="@+id/progress_bar"
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
@@ -71,7 +72,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/button_cancel"
+            android:id="@+id/buttonCancel"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,7 +80,7 @@
             android:text="@string/cancel" />
 
         <Button
-            android:id="@+id/button_select"
+            android:id="@+id/buttonSelect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select"

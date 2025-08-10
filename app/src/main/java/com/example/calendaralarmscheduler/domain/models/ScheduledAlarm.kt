@@ -124,7 +124,8 @@ data class ScheduledAlarm(
             defaultAllDayMinute: Int = 0
         ): ScheduledAlarm {
             val alarmTimeUtc = if (event.isAllDay) {
-                event.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, rule.leadTimeMinutes)
+                // For all-day events, fire alarm exactly at chosen time (no lead time)
+                event.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, 0)
             } else {
                 event.computeAlarmTimeUtc(rule.leadTimeMinutes)
             }
@@ -140,7 +141,8 @@ fun ScheduledAlarm.markDismissed(): ScheduledAlarm {
 
 fun ScheduledAlarm.updateForEventChange(newEvent: CalendarEvent, rule: Rule, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): ScheduledAlarm {
     val newAlarmTimeUtc = if (newEvent.isAllDay) {
-        newEvent.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, rule.leadTimeMinutes)
+        // For all-day events, fire alarm exactly at chosen time (no lead time)
+        newEvent.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, 0)
     } else {
         newEvent.computeAlarmTimeUtc(rule.leadTimeMinutes)
     }

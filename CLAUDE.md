@@ -10,11 +10,32 @@ The app runs **fully locally** with **no backend**, using Android APIs to read c
 
 ---
 
-## Tracking
+## Development Workflow
 
-The PLAN.md file contains the implementation plan and current status. Please use this as needed, and when making changes always update the file to show what was done.
+When working on hard problems, always tackle them small step at a time, verifying along the way things still compile and run successfully.
 
-Do not skip the Quick Verification section for each step of the implementation.
+Debugging:
+- Always use Logs or other sources of hard data to determine the root cause of bugs and other issues
+
+Tests:
+- When developing tests, we only want to develop end to end tests
+- The test development workflow for new tests should be
+  - Implement a minimum test, checking if it can be added to an existing test file
+  - Validate the test compiles and runs
+  - If it doesn't, fix any errors
+  - Add more full functionality
+  - Validate the test compiles and runs
+- You should always keep existing tests intact and unchanged as much as possible
+- You should always make sure the test is checking full functionality, including UI input
+- Never allow test to pass without having checked full functionality.
+
+---
+
+## Supported Android Versions
+
+This app only runs on min SDK version of 26, with a target of 34, so please optimize for use on 34.
+
+---
 
 ## 2. System Architecture
 
@@ -42,7 +63,7 @@ Do not skip the Quick Verification section for each step of the implementation.
 5. **UI Layer**
    * **Rule Management Screen** – Add/edit/delete keyword-based rules with calendar filters.
    * **Calendar Event Preview** – Show matching events and scheduled alarms with timezone info.
-   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status.
+   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. All settings must display currently selected values in real-time.
    * **Permission Onboarding** – Step-by-step permission granting with explanations.
 
 6. **Background Worker**
@@ -51,107 +72,6 @@ Do not skip the Quick Verification section for each step of the implementation.
    * Handles timezone changes reactively.
 
 ---
-
-## 3. File Structure
-
-```
-app/
- ├─ data/
- │   ├─ database/
- │   │   ├─ AppDatabase.kt          # Room database
- │   │   ├─ RuleDao.kt             # Rules table access
- │   │   └─ AlarmDao.kt            # Alarms table access  
- │   ├─ CalendarRepository.kt       # Queries Google Calendar
- │   ├─ RuleRepository.kt           # Stores user rules in Room
- │   └─ AlarmRepository.kt          # Tracks scheduled alarms
- │
- ├─ domain/
- │   ├─ models/
- │   │   ├─ CalendarEvent.kt
- │   │   ├─ Rule.kt
- │   │   └─ ScheduledAlarm.kt
- │   ├─ RuleMatcher.kt              # Matches events to rules (regex auto-detect)
- │   └─ AlarmScheduler.kt           # Sets alarms via AlarmManager
- │
- ├─ ui/
- │   ├─ MainActivity.kt
- │   ├─ onboarding/
- │   │   └─ PermissionOnboardingActivity.kt
- │   ├─ rules/
- │   │   ├─ RuleListFragment.kt
- │   │   └─ RuleEditFragment.kt
- │   ├─ preview/
- │   │   └─ EventPreviewFragment.kt
- │   ├─ settings/
- │   │   └─ SettingsFragment.kt
- │   └─ alarm/
- │       └─ AlarmActivity.kt        # Full-screen unmissable alarm
- │
- ├─ workers/
- │   └─ CalendarRefreshWorker.kt    # Periodic background refresh
- │
- ├─ receivers/
- │   ├─ AlarmReceiver.kt            # Handles alarm broadcasts
- │   └─ BootReceiver.kt             # Re-registers alarms after reboot
- │
- ├─ utils/
- │   ├─ PermissionUtils.kt
- │   └─ TimezoneUtils.kt
- │
- └─ test/
-     └─ calendar_events/
-         └─ TestEvents.ics          # Test calendar events for development
-```
-
----
-
-## 4. Database Schema (Room)
-
-### Rules Table
-```kotlin
-@Entity(tableName = "rules")
-data class Rule(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val keywordPattern: String,
-    val isRegex: Boolean,                    // Auto-detected
-    val calendarIds: List<Long>,             // Per-rule calendar filter
-    val leadTimeMinutes: Int,                // 1 minute to 7 days
-    val enabled: Boolean = true,
-    val createdAt: Long = System.currentTimeMillis()
-)
-```
-
-### Alarms Table
-```kotlin
-@Entity(tableName = "alarms")
-data class ScheduledAlarm(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
-    val eventId: String,
-    val ruleId: String,
-    val eventTitle: String,
-    val eventStartTimeUtc: Long,
-    val alarmTimeUtc: Long,
-    val scheduledAt: Long,
-    val userDismissed: Boolean = false,      // Track manual dismissals
-    val pendingIntentRequestCode: Int,
-    val lastEventModified: Long              // From CalendarContract
-)
-```
-
----
-
-## 6. Permission Handling
-
-### Required Permissions
-```xml
-<uses-permission android:name="android.permission.READ_CALENDAR" />
-<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-<uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-<uses-permission android:name="android.permission.VIBRATE" />
-```
 
 ### Onboarding Flow
 1. **Welcome Screen** - Explain app purpose and alarm reliability requirement
@@ -171,7 +91,9 @@ data class ScheduledAlarm(
 
 ### All-Day Events
 * Global user setting for default alarm time (e.g., "9:00 PM day before" or "8:00 AM day of")
-* Apply lead time from this default time
+* **IMPORTANT**: For all-day events, alarms fire at EXACTLY the chosen time - NO lead time is applied
+* Lead time rules only apply to regular timed events, not all-day events
+* This ensures consistent alarm behavior for all-day events regardless of rule settings
 
 ### Event Change Detection
 * Use `CalendarContract.Events.LAST_MODIFIED` to detect changes
@@ -261,43 +183,8 @@ All app logs use prefix `CalendarAlarmScheduler_` with categories:
 4. **For intermittent issues**: Use `./collect_logs.sh live`, reproduce issue, Ctrl+C
 5. **Look for patterns**: Performance issues, permission denials, database errors
 
-#### Common Issue Patterns
-- **Layout inflation errors**: Look for `InflateException` and XML line numbers
-- **Permission issues**: Search logs for `Permission` and `DENIED`
-- **Database crashes**: Look for `Room`, `SQLite`, or `Database` tags
-- **Memory issues**: Search for `OutOfMemory` or `GC_` logs
-- **Performance problems**: Check `*_Performance_*` timing logs
-
 #### Manual ADB Commands (if needed)
 - **Check devices**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb devices`
 - **Recent crashes**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -t 1000 | grep -E "(CalendarAlarmScheduler|AndroidRuntime|FATAL|EXCEPTION|CRASH)"`
 - **App-specific logs**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -s "CalendarAlarmScheduler:*" -v time`
 - **Clear logcat**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -c`
-
----
-
-## Completion Criteria
-
-**Phase 1 Complete When:**
-- All permissions can be granted through onboarding
-- Users can create rules and see matching calendar events
-- Alarms fire reliably and show unmissable full-screen activity
-- Basic CRUD operations work for rules and alarms
-
-**Phase 2 Complete When:**
-- Background worker runs on schedule and updates alarms
-- Event changes are detected and alarms updated accordingly
-- User-dismissed alarms stay dismissed until events change
-- Timezone changes properly trigger alarm rescheduling
-
-**Phase 3 Complete When:**
-- All edge cases handled gracefully
-- Settings screen provides full control
-- Event preview shows accurate real-time data
-- Battery optimization guidance helps users maintain reliability
-
-**Project Complete When:**
-- All automated tests pass
-- Manual testing checklist completed
-- App works reliably across different Android versions
-- Documentation updated with any architecture changes discovered during implementation
