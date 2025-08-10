@@ -2,31 +2,31 @@ package com.example.calendaralarmscheduler.ui.rules
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.utils.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CalendarPickerViewModel(application: Application) : AndroidViewModel(application) {
     
     private val calendarRepository = CalendarRepository(application)
     
-    private val _availableCalendars = MutableLiveData<List<CalendarPickerItem>>()
-    val availableCalendars: LiveData<List<CalendarPickerItem>> = _availableCalendars
+    private val _availableCalendars = MutableStateFlow<List<CalendarPickerItem>>(emptyList())
+    val availableCalendars: StateFlow<List<CalendarPickerItem>> = _availableCalendars.asStateFlow()
     
-    private val _selectedCalendars = MutableLiveData<List<CalendarRepository.CalendarInfo>>()
-    val selectedCalendars: LiveData<List<CalendarRepository.CalendarInfo>> = _selectedCalendars
+    private val _selectedCalendars = MutableStateFlow<List<CalendarRepository.CalendarInfo>>(emptyList())
+    val selectedCalendars: StateFlow<List<CalendarRepository.CalendarInfo>> = _selectedCalendars.asStateFlow()
     
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
     private val selectedCalendarIds = mutableSetOf<Long>()
     
     init {
         Logger.i("CalendarPickerViewModel", "Initializing CalendarPickerViewModel")
-        _selectedCalendars.value = emptyList()
         loadCalendars()
     }
     

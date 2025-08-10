@@ -22,11 +22,16 @@ import com.example.calendaralarmscheduler.receivers.AlarmReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
@@ -72,11 +77,11 @@ class EventPreviewViewModel @Inject constructor(
     
     private val ruleMatcher = RuleMatcher()
     
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
-    private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> = _errorMessage
+    private val _errorMessage = MutableSharedFlow<String>()
+    val errorMessage: SharedFlow<String> = _errorMessage.asSharedFlow()
     
     private val _currentFilter = MutableStateFlow(EventFilter())
     val currentFilter: StateFlow<EventFilter> = _currentFilter.asStateFlow()
@@ -105,17 +110,23 @@ class EventPreviewViewModel @Inject constructor(
         }
     }
     
-    val rules = ruleRepository.getAllRules().asLiveData()
+    val rules: StateFlow<List<Rule>> = ruleRepository.getAllRules()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     
     fun refreshEvents() {
         if (!PermissionUtils.hasCalendarPermission(context)) {
-            _errorMessage.value = "Calendar permission is required to view events"
+            viewModelScope.launch {
+                _errorMessage.emit("Calendar permission is required to view events")
+            }
             return
         }
         
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
             
             try {
                 val rules = ruleRepository.getAllRulesSync()
@@ -128,7 +139,7 @@ class EventPreviewViewModel @Inject constructor(
                 val updatedAlarms = alarmRepository.getActiveAlarmsSync()
                 refreshEventsWithAlarms(rules, updatedAlarms)
             } catch (e: Exception) {
-                _errorMessage.value = "Error loading events: ${e.message}"
+                _errorMessage.emit("Error loading events: ${e.message}")
                 android.util.Log.e("EventPreviewViewModel", "Error refreshing events", e)
             } finally {
                 _isLoading.value = false
@@ -170,7 +181,7 @@ class EventPreviewViewModel @Inject constructor(
             
             _eventsWithAlarms.value = applyFilter(eventsWithAlarms)
         } catch (e: Exception) {
-            _errorMessage.value = "Error processing events: ${e.message}"
+            _errorMessage.emit("Error processing events: ${e.message}")
             android.util.Log.e("EventPreviewViewModel", "Error in refreshEventsWithAlarms", e)
         }
     }
@@ -212,7 +223,7 @@ class EventPreviewViewModel @Inject constructor(
     }
     
     fun clearError() {
-        _errorMessage.value = null
+        // No longer needed with SharedFlow - events are automatically consumed
     }
     
     suspend fun getCalendarsWithNames(): Map<Long, String> {
@@ -297,17 +308,17 @@ class EventPreviewViewModel @Inject constructor(
                             append("${result.updatedCount} alarm(s) updated")
                         }
                     }
-                    _errorMessage.value = "✅ $message"
+                    _errorMessage.emit("✅ $message")
                 } else if (result.skippedCount > 0) {
                     android.util.Log.d("EventPreviewViewModel", "All ${result.skippedCount} matching alarms already exist")
                 }
             } else {
-                _errorMessage.value = "⚠️ ${result.message}"
+                _errorMessage.emit("⚠️ ${result.message}")
             }
             
         } catch (e: Exception) {
             android.util.Log.e("EventPreviewViewModel", "Error scheduling alarms for matching events", e)
-            _errorMessage.value = "Error scheduling alarms: ${e.message}"
+            _errorMessage.emit("Error scheduling alarms: ${e.message}")
         }
     }
     
@@ -324,7 +335,7 @@ class EventPreviewViewModel @Inject constructor(
                 // Refresh the UI to show newly scheduled alarms
                 refreshEvents()
             } catch (e: Exception) {
-                _errorMessage.value = "Error scheduling alarms: ${e.message}"
+                _errorMessage.emit("Error scheduling alarms: ${e.message}")
                 android.util.Log.e("EventPreviewViewModel", "Error in scheduleAlarmsNow", e)
             } finally {
                 _isLoading.value = false
@@ -395,7 +406,7 @@ class EventPreviewViewModel @Inject constructor(
                 updateAlarmSystemStatus(alarms)
                 detectMissingAlarms(alarms)
             } catch (e: Exception) {
-                _errorMessage.value = "Error checking alarm system status: ${e.message}"
+                _errorMessage.emit("Error checking alarm system status: ${e.message}")
                 android.util.Log.e("EventPreviewViewModel", "Error checking alarm system status", e)
             }
         }
@@ -438,7 +449,7 @@ class EventPreviewViewModel @Inject constructor(
                 )
                 
                 if (success) {
-                    _errorMessage.value = "Test alarm scheduled for 5 minutes from now"
+                    _errorMessage.emit("Test alarm scheduled for 5 minutes from now")
                 } else {
                     _schedulingFailures.value = _schedulingFailures.value + listOf(
                         AlarmSchedulingFailure(
@@ -449,10 +460,10 @@ class EventPreviewViewModel @Inject constructor(
                             retryCount = 0
                         )
                     )
-                    _errorMessage.value = "Failed to schedule test alarm"
+                    _errorMessage.emit("Failed to schedule test alarm")
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Error testing alarm scheduling: ${e.message}"
+                _errorMessage.emit("Error testing alarm scheduling: ${e.message}")
                 android.util.Log.e("EventPreviewViewModel", "Error testing alarm scheduling", e)
             }
         }
@@ -493,7 +504,7 @@ class EventPreviewViewModel @Inject constructor(
             _schedulingFailures.value = retriedFailures
             
             if (retriedFailures.size < failures.size) {
-                _errorMessage.value = "Retried ${failures.size - retriedFailures.size} failed alarms"
+                _errorMessage.emit("Retried ${failures.size - retriedFailures.size} failed alarms")
             }
         }
     }

@@ -1,8 +1,6 @@
 package com.example.calendaralarmscheduler.ui.rules
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.CalendarRepository
@@ -13,6 +11,12 @@ import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -25,26 +29,28 @@ class RuleEditViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     
-    private val _rule = MutableLiveData<Rule?>()
-    val rule: LiveData<Rule?> = _rule
+    // STATE data - persistent UI state
+    private val _rule = MutableStateFlow<Rule?>(null)
+    val rule: StateFlow<Rule?> = _rule.asStateFlow()
     
-    private val _selectedCalendars = MutableLiveData<List<CalendarRepository.CalendarInfo>>()
-    val selectedCalendars: LiveData<List<CalendarRepository.CalendarInfo>> = _selectedCalendars
+    private val _selectedCalendars = MutableStateFlow<List<CalendarRepository.CalendarInfo>>(emptyList())
+    val selectedCalendars: StateFlow<List<CalendarRepository.CalendarInfo>> = _selectedCalendars.asStateFlow()
     
-    private val _leadTimeMinutes = MutableLiveData<Int>()
-    val leadTimeMinutes: LiveData<Int> = _leadTimeMinutes
+    private val _leadTimeMinutes = MutableStateFlow(30) // Default 30 minutes
+    val leadTimeMinutes: StateFlow<Int> = _leadTimeMinutes.asStateFlow()
     
-    private val _availableCalendars = MutableLiveData<List<CalendarRepository.CalendarInfo>>()
-    val availableCalendars: LiveData<List<CalendarRepository.CalendarInfo>> = _availableCalendars
+    private val _availableCalendars = MutableStateFlow<List<CalendarRepository.CalendarInfo>>(emptyList())
+    val availableCalendars: StateFlow<List<CalendarRepository.CalendarInfo>> = _availableCalendars.asStateFlow()
     
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
-    private val _saveResult = MutableLiveData<SaveResult>()
-    val saveResult: LiveData<SaveResult> = _saveResult
+    // EVENT data - one-time events
+    private val _saveResult = MutableSharedFlow<SaveResult>()
+    val saveResult: SharedFlow<SaveResult> = _saveResult.asSharedFlow()
     
-    private val _statusMessage = MutableLiveData<String?>()
-    val statusMessage: LiveData<String?> = _statusMessage
+    private val _statusMessage = MutableSharedFlow<String>()
+    val statusMessage: SharedFlow<String> = _statusMessage.asSharedFlow()
     
     private var currentRuleId: String? = null
     private var pendingCalendarIds: List<Long>? = null // For storing calendar IDs while calendars are loading
@@ -52,11 +58,6 @@ class RuleEditViewModel @Inject constructor(
     init {
         // Set up RuleAlarmManager in the repository
         ruleRepository.setRuleAlarmManager(ruleAlarmManager)
-        
-        // Set default values
-        _selectedCalendars.value = emptyList()
-        _leadTimeMinutes.value = 30 // Default 30 minutes
-        _isLoading.value = false
         
         loadAvailableCalendars()
     }
@@ -129,7 +130,6 @@ class RuleEditViewModel @Inject constructor(
     fun saveRule(name: String, pattern: String, enabled: Boolean) {
         viewModelScope.launch {
             _isLoading.value = true
-            _statusMessage.value = null
             
             try {
                 // Check if all critical permissions are granted
@@ -140,15 +140,15 @@ class RuleEditViewModel @Inject constructor(
                     if (!permissionStatus.hasNotificationPermission) missingPermissions.add("Notification permission")
                     if (!permissionStatus.hasExactAlarmPermission) missingPermissions.add("Exact alarm permission")
                     
-                    _saveResult.value = SaveResult.Error("Missing required permissions: ${missingPermissions.joinToString(", ")}. Please grant all permissions before creating rules.")
+                    _saveResult.emit(SaveResult.Error("Missing required permissions: ${missingPermissions.joinToString(", ")}. Please grant all permissions before creating rules."))
                     return@launch
                 }
                 
-                val selectedCalendarIds = _selectedCalendars.value?.map { it.id } ?: emptyList()
-                val leadTime = _leadTimeMinutes.value ?: 30
+                val selectedCalendarIds = _selectedCalendars.value.map { it.id }
+                val leadTime = _leadTimeMinutes.value
                 
                 if (selectedCalendarIds.isEmpty()) {
-                    _saveResult.value = SaveResult.Error("Please select at least one calendar")
+                    _saveResult.emit(SaveResult.Error("Please select at least one calendar"))
                     return@launch
                 }
                 
@@ -168,7 +168,7 @@ class RuleEditViewModel @Inject constructor(
                             enabled = enabled
                         )
                     } else {
-                        _saveResult.value = SaveResult.Error("Rule not found")
+                        _saveResult.emit(SaveResult.Error("Rule not found"))
                         return@launch
                     }
                 } else {
@@ -191,12 +191,12 @@ class RuleEditViewModel @Inject constructor(
                     val result = ruleAlarmManager.updateRuleWithAlarmManagement(existingRule, rule)
                     
                     if (result.success) {
-                        _statusMessage.value = "✅ ${result.message}"
-                        _saveResult.value = SaveResult.Success
+                        _statusMessage.emit("✅ ${result.message}")
+                        _saveResult.emit(SaveResult.Success)
                         android.util.Log.i("RuleEditViewModel", "Rule '${rule.name}' updated: ${result.message}")
                     } else {
-                        _statusMessage.value = "⚠️ ${result.message}"
-                        _saveResult.value = SaveResult.Error(result.message)
+                        _statusMessage.emit("⚠️ ${result.message}")
+                        _saveResult.emit(SaveResult.Error(result.message))
                         android.util.Log.e("RuleEditViewModel", "Failed to update rule '${rule.name}': ${result.message}")
                     }
                 } else {
@@ -208,26 +208,26 @@ class RuleEditViewModel @Inject constructor(
                         val result = ruleAlarmManager.updateRuleEnabled(rule, true)
                         
                         if (result.success) {
-                            _statusMessage.value = "✅ ${result.message}"
-                            _saveResult.value = SaveResult.Success
+                            _statusMessage.emit("✅ ${result.message}")
+                            _saveResult.emit(SaveResult.Success)
                             android.util.Log.i("RuleEditViewModel", "Rule '${rule.name}' created with immediate alarm scheduling: ${result.message}")
                         } else {
-                            _statusMessage.value = "⚠️ Rule created but ${result.message}"
-                            _saveResult.value = SaveResult.Error("Rule created but ${result.message}")
+                            _statusMessage.emit("⚠️ Rule created but ${result.message}")
+                            _saveResult.emit(SaveResult.Error("Rule created but ${result.message}"))
                             android.util.Log.e("RuleEditViewModel", "Rule '${rule.name}' created but alarm scheduling failed: ${result.message}")
                         }
                     } else {
                         // Rule created but disabled - no alarm scheduling needed
-                        _statusMessage.value = "✅ Rule created successfully (disabled)"
-                        _saveResult.value = SaveResult.Success
+                        _statusMessage.emit("✅ Rule created successfully (disabled)")
+                        _saveResult.emit(SaveResult.Success)
                         android.util.Log.i("RuleEditViewModel", "Rule '${rule.name}' created in disabled state")
                     }
                 }
                 
             } catch (e: Exception) {
                 android.util.Log.e("RuleEditViewModel", "Error saving rule", e)
-                _statusMessage.value = "❌ Error saving rule: ${e.message}"
-                _saveResult.value = SaveResult.Error(e.message ?: "Unknown error")
+                _statusMessage.emit("❌ Error saving rule: ${e.message}")
+                _saveResult.emit(SaveResult.Error(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false
             }
@@ -243,32 +243,27 @@ class RuleEditViewModel @Inject constructor(
         
         viewModelScope.launch {
             _isLoading.value = true
-            _statusMessage.value = null
             
             try {
                 val result = ruleAlarmManager.deleteRuleWithAlarmCleanup(ruleToDelete)
                 
                 if (result.success) {
-                    _statusMessage.value = "✅ ${result.message}"
+                    _statusMessage.emit("✅ ${result.message}")
                     android.util.Log.i("RuleEditViewModel", "Rule '${ruleToDelete.name}' deleted: ${result.message}")
                     onSuccess()
                 } else {
-                    _statusMessage.value = "⚠️ ${result.message}"
-                    _saveResult.value = SaveResult.Error(result.message)
+                    _statusMessage.emit("⚠️ ${result.message}")
+                    _saveResult.emit(SaveResult.Error(result.message))
                     android.util.Log.e("RuleEditViewModel", "Failed to delete rule '${ruleToDelete.name}': ${result.message}")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("RuleEditViewModel", "Error deleting rule", e)
-                _statusMessage.value = "❌ Error deleting rule: ${e.message}"
-                _saveResult.value = SaveResult.Error(e.message ?: "Unknown error")
+                _statusMessage.emit("❌ Error deleting rule: ${e.message}")
+                _saveResult.emit(SaveResult.Error(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false
             }
         }
-    }
-    
-    fun clearStatusMessage() {
-        _statusMessage.value = null
     }
     
     sealed class SaveResult {

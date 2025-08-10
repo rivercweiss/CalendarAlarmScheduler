@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.databinding.FragmentRuleListBinding
 import com.example.calendaralarmscheduler.data.database.entities.Rule
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RuleListFragment : Fragment() {
@@ -68,29 +70,35 @@ class RuleListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.rules.observe(viewLifecycleOwner) { rules ->
-            ruleAdapter.submitList(rules)
-            
-            // Show empty state if no rules
-            binding.emptyStateGroup.visibility = if (rules.isEmpty()) {
-                View.VISIBLE
-            } else {
-                View.GONE
+        // Observe rules StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.rules.collect { rules ->
+                ruleAdapter.submitList(rules)
+                
+                // Show empty state if no rules
+                binding.emptyStateGroup.visibility = if (rules.isEmpty()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
         }
         
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) {
-                View.VISIBLE
-            } else {
-                View.GONE
+        // Observe loading state StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoading.collect { isLoading ->
+                binding.progressBar.visibility = if (isLoading) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
         }
         
-        viewModel.statusMessage.observe(viewLifecycleOwner) { message ->
-            message?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-                viewModel.clearStatusMessage()
+        // Observe status message events SharedFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.statusMessage.collect { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
     }

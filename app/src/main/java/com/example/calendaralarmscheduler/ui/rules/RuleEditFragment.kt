@@ -13,8 +13,10 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.launch
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.databinding.FragmentRuleEditBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -70,10 +72,10 @@ class RuleEditFragment : Fragment(), MenuProvider {
             }
             
             // Initialize button texts with current ViewModel values
-            val leadTimeMinutes = viewModel.leadTimeMinutes.value ?: 30
+            val leadTimeMinutes = viewModel.leadTimeMinutes.value
             buttonSelectLeadTime.text = formatLeadTime(leadTimeMinutes)
             
-            val selectedCalendars = viewModel.selectedCalendars.value ?: emptyList()
+            val selectedCalendars = viewModel.selectedCalendars.value
             val count = selectedCalendars.size
             buttonSelectCalendars.text = if (count == 0) {
                 getString(R.string.select_calendars)
@@ -84,56 +86,71 @@ class RuleEditFragment : Fragment(), MenuProvider {
     }
 
     private fun observeViewModel() {
-        viewModel.rule.observe(viewLifecycleOwner) { rule ->
-            if (rule != null) {
-                binding.apply {
-                    editTextRuleName.setText(rule.name)
-                    editTextKeywordPattern.setText(rule.keywordPattern)
-                    switchEnabled.isChecked = rule.enabled
+        // Observe rule StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.rule.collect { rule ->
+                if (rule != null) {
+                    binding.apply {
+                        editTextRuleName.setText(rule.name)
+                        editTextKeywordPattern.setText(rule.keywordPattern)
+                        switchEnabled.isChecked = rule.enabled
+                    }
                 }
             }
         }
         
-        viewModel.selectedCalendars.observe(viewLifecycleOwner) { calendars ->
-            val count = calendars.size
-            binding.buttonSelectCalendars.text = if (count == 0) {
-                getString(R.string.select_calendars)
-            } else {
-                "$count calendar(s) selected"
-            }
-        }
-        
-        viewModel.leadTimeMinutes.observe(viewLifecycleOwner) { minutes ->
-            binding.buttonSelectLeadTime.text = formatLeadTime(minutes)
-        }
-        
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.buttonSave.isEnabled = !isLoading
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
-        
-        viewModel.saveResult.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is RuleEditViewModel.SaveResult.Success -> {
-                    Toast.makeText(requireContext(), "Rule saved", Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
-                }
-                is RuleEditViewModel.SaveResult.Error -> {
-                    Toast.makeText(requireContext(), "Error: ${result.message}", Toast.LENGTH_LONG).show()
+        // Observe selected calendars StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.selectedCalendars.collect { calendars ->
+                val count = calendars.size
+                binding.buttonSelectCalendars.text = if (count == 0) {
+                    getString(R.string.select_calendars)
+                } else {
+                    "$count calendar(s) selected"
                 }
             }
         }
         
-        viewModel.statusMessage.observe(viewLifecycleOwner) { message ->
-            message?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-                viewModel.clearStatusMessage()
+        // Observe lead time StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.leadTimeMinutes.collect { minutes ->
+                binding.buttonSelectLeadTime.text = formatLeadTime(minutes)
+            }
+        }
+        
+        // Observe loading state StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoading.collect { isLoading ->
+                binding.buttonSave.isEnabled = !isLoading
+                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            }
+        }
+        
+        // Observe save result events SharedFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.saveResult.collect { result ->
+                when (result) {
+                    is RuleEditViewModel.SaveResult.Success -> {
+                        Toast.makeText(requireContext(), "Rule saved", Toast.LENGTH_SHORT).show()
+                        findNavController().navigateUp()
+                    }
+                    is RuleEditViewModel.SaveResult.Error -> {
+                        Toast.makeText(requireContext(), "Error: ${result.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+        
+        // Observe status message events SharedFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.statusMessage.collect { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun showCalendarPickerDialog() {
-        val dialog = CalendarPickerDialog.newInstance(viewModel.selectedCalendars.value ?: emptyList())
+        val dialog = CalendarPickerDialog.newInstance(viewModel.selectedCalendars.value)
         dialog.setOnCalendarsSelectedListener { selectedCalendars ->
             viewModel.setSelectedCalendars(selectedCalendars)
         }

@@ -7,10 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.databinding.DialogCalendarPickerBinding
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.utils.Logger
+import kotlinx.coroutines.launch
 
 class CalendarPickerDialog : DialogFragment() {
     
@@ -70,7 +72,7 @@ class CalendarPickerDialog : DialogFragment() {
         }
         
         binding.buttonSelect.setOnClickListener {
-            val selectedCalendars = viewModel.selectedCalendars.value ?: emptyList()
+            val selectedCalendars = viewModel.selectedCalendars.value
             onCalendarsSelectedListener?.invoke(selectedCalendars)
             dismiss()
         }
@@ -83,59 +85,66 @@ class CalendarPickerDialog : DialogFragment() {
     private fun observeViewModel() {
         Logger.d("CalendarPickerDialog", "Setting up ViewModel observers")
         
-        viewModel.availableCalendars.observe(viewLifecycleOwner) { calendars ->
-            Logger.i("CalendarPickerDialog", "Received calendar list update: ${calendars.size} calendars")
-            
-            if (calendars.isEmpty()) {
-                Logger.w("CalendarPickerDialog", "Calendar list is empty - showing empty state")
-                Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to VISIBLE")
-            } else {
-                Logger.d("CalendarPickerDialog", "Submitting calendar list to adapter:")
-                calendars.forEachIndexed { index, item ->
-                    Logger.d("CalendarPickerDialog", "  [$index] ${item.calendar.displayName} (selected: ${item.isSelected})")
+        // Observe available calendars StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.availableCalendars.collect { calendars ->
+                Logger.i("CalendarPickerDialog", "Received calendar list update: ${calendars.size} calendars")
+                
+                if (calendars.isEmpty()) {
+                    Logger.w("CalendarPickerDialog", "Calendar list is empty - showing empty state")
+                    Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to VISIBLE")
+                } else {
+                    Logger.d("CalendarPickerDialog", "Submitting calendar list to adapter:")
+                    calendars.forEachIndexed { index, item ->
+                        Logger.d("CalendarPickerDialog", "  [$index] ${item.calendar.displayName} (selected: ${item.isSelected})")
+                    }
+                    Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to GONE")
                 }
-                Logger.d("CalendarPickerDialog", "Setting emptyStateText visibility to GONE")
+                
+                Logger.d("CalendarPickerDialog", "Calling adapter.submitList() with ${calendars.size} items")
+                adapter.submitList(calendars)
+                Logger.d("CalendarPickerDialog", "adapter.submitList() completed")
+                
+                binding.emptyStateText.visibility = if (calendars.isEmpty()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+                Logger.d("CalendarPickerDialog", "UI visibility states updated")
+                
+                // Update select all button text based on selection state
+                val allSelected = calendars.isNotEmpty() && calendars.all { it.isSelected }
+                binding.buttonSelectAll.text = if (allSelected) {
+                    "Deselect All"
+                } else {
+                    "Select All"
+                }
+                Logger.d("CalendarPickerDialog", "Select all button updated: '${binding.buttonSelectAll.text}'")
             }
-            
-            Logger.d("CalendarPickerDialog", "Calling adapter.submitList() with ${calendars.size} items")
-            adapter.submitList(calendars)
-            Logger.d("CalendarPickerDialog", "adapter.submitList() completed")
-            
-            binding.emptyStateText.visibility = if (calendars.isEmpty()) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-            Logger.d("CalendarPickerDialog", "UI visibility states updated")
         }
         
-        viewModel.selectedCalendars.observe(viewLifecycleOwner) { selectedCalendars ->
-            val count = selectedCalendars.size
-            Logger.d("CalendarPickerDialog", "Selected calendars count changed: $count")
-            binding.buttonSelect.text = if (count == 0) {
-                "Select"
-            } else {
-                "Select ($count)"
+        // Observe selected calendars StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.selectedCalendars.collect { selectedCalendars ->
+                val count = selectedCalendars.size
+                Logger.d("CalendarPickerDialog", "Selected calendars count changed: $count")
+                binding.buttonSelect.text = if (count == 0) {
+                    "Select"
+                } else {
+                    "Select ($count)"
+                }
+                binding.buttonSelect.isEnabled = count > 0
+                Logger.d("CalendarPickerDialog", "Button text updated: '${binding.buttonSelect.text}', enabled: ${binding.buttonSelect.isEnabled}")
             }
-            binding.buttonSelect.isEnabled = count > 0
-            Logger.d("CalendarPickerDialog", "Button text updated: '${binding.buttonSelect.text}', enabled: ${binding.buttonSelect.isEnabled}")
         }
         
-        viewModel.availableCalendars.observe(viewLifecycleOwner) { calendars ->
-            // Update select all button text based on selection state
-            val allSelected = calendars.isNotEmpty() && calendars.all { it.isSelected }
-            binding.buttonSelectAll.text = if (allSelected) {
-                "Deselect All"
-            } else {
-                "Select All"
+        // Observe loading state StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoading.collect { isLoading ->
+                Logger.d("CalendarPickerDialog", "Loading state changed: $isLoading")
+                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                Logger.d("CalendarPickerDialog", "Progress bar visibility: ${if (isLoading) "VISIBLE" else "GONE"}")
             }
-            Logger.d("CalendarPickerDialog", "Select all button updated: '${binding.buttonSelectAll.text}'")
-        }
-        
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            Logger.d("CalendarPickerDialog", "Loading state changed: $isLoading")
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            Logger.d("CalendarPickerDialog", "Progress bar visibility: ${if (isLoading) "VISIBLE" else "GONE"}")
         }
     }
     

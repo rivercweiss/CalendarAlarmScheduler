@@ -13,7 +13,6 @@ import com.example.calendaralarmscheduler.databinding.FragmentEventPreviewBindin
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -77,21 +76,22 @@ class EventPreviewFragment : Fragment() {
     }
     
     private fun observeViewModel() {
-        // Observe loading state
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.layoutLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+        // Observe loading state StateFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoading.collect { isLoading ->
+                binding.layoutLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+            }
         }
         
-        // Observe error messages
-        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
-            errorMessage?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-                viewModel.clearError()
+        // Observe error message events SharedFlow
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorMessage.collect { errorMessage ->
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
             }
         }
         
         // Observe events with alarms
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsWithAlarms.collect { eventsWithAlarms ->
                 adapter.submitList(eventsWithAlarms)
                 updateEmptyState(eventsWithAlarms)
@@ -99,21 +99,21 @@ class EventPreviewFragment : Fragment() {
         }
         
         // Observe filter state
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.currentFilter.collect { filter ->
                 binding.switchFilterMatching.isChecked = filter.showOnlyMatchingRules
             }
         }
         
         // Observe alarm system status
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.alarmSystemStatus.collect { status ->
                 updateAlarmSystemStatus(status)
             }
         }
         
         // Observe scheduling failures
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.schedulingFailures.collect { failures ->
                 if (failures.isNotEmpty()) {
                     showSchedulingFailures(failures)
@@ -124,7 +124,7 @@ class EventPreviewFragment : Fragment() {
     
     private fun updateEmptyState(events: List<EventWithAlarms>) {
         val isEmpty = events.isEmpty()
-        val isLoading = viewModel.isLoading.value ?: false
+        val isLoading = viewModel.isLoading.value
         
         binding.layoutEmpty.visibility = if (isEmpty && !isLoading) View.VISIBLE else View.GONE
         binding.recyclerEvents.visibility = if (isEmpty && !isLoading) View.GONE else View.VISIBLE
