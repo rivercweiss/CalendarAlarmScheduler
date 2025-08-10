@@ -11,28 +11,87 @@
         android:id="@+id/text_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Select Lead Time"
+        android:layout_marginBottom="24dp"
+        android:text="Set Lead Time"
         android:textAppearance="?attr/textAppearanceHeadlineSmall"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_lead_times"
+    <!-- Input Section -->
+    <LinearLayout
+        android:id="@+id/input_layout"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:maxHeight="400dp"
-        app:layout_constraintBottom_toTopOf="@id/button_cancel"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_title"
-        tools:itemCount="8"
-        tools:listitem="@layout/item_lead_time" />
+        app:layout_constraintTop_toBottomOf="@id/text_title">
 
-    <!-- Cancel Button -->
+        <EditText
+            android:id="@+id/edit_text_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="12dp"
+            android:hint="Enter value"
+            android:inputType="number"
+            android:imeOptions="actionDone"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:selectAllOnFocus="true" />
+
+        <Spinner
+            android:id="@+id/spinner_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="100dp" />
+
+    </LinearLayout>
+
+    <!-- Preview Text -->
+    <TextView
+        android:id="@+id/text_preview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorPrimary"
+        tools:text="Total: 30 minutes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_layout" />
+
+    <!-- Helper Text -->
+    <TextView
+        android:id="@+id/text_helper"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Enter 1 minute to 2 days"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_preview" />
+
+    <!-- Error Text -->
+    <TextView
+        android:id="@+id/text_error"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorError"
+        android:visibility="gone"
+        tools:text="Please enter a valid value"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_helper" />
+
+    <!-- Buttons -->
     <Button
         android:id="@+id/button_cancel"
         style="@style/Widget.Material3.Button.TextButton"
@@ -40,6 +99,17 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/button_ok"
+        app:layout_constraintTop_toBottomOf="@id/text_error" />
+
+    <Button
+        android:id="@+id/button_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="OK"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_error" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
