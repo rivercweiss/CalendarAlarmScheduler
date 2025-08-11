@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import com.example.calendaralarmscheduler.ui.BaseFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.calendaralarmscheduler.R
@@ -32,7 +32,9 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SettingsFragment : Fragment() {
+class SettingsFragment : BaseFragment() {
+    override val fragmentName = "SettingsFragment"
+    
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     
@@ -72,6 +74,9 @@ class SettingsFragment : Fragment() {
             Logger.d("SettingsFragment", "Battery optimization attempts: ${settingsRepository.getBatteryOptimizationAttempts()}")
             Logger.d("SettingsFragment", "User previously skipped: ${settingsRepository.getUserSkippedBatteryOptimization()}")
         }
+        
+        // Clear background usage cache since user may have changed settings
+        BackgroundUsageDetector.clearCache()
         
         // Update permission status immediately
         updatePermissionStatus()
@@ -137,7 +142,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
+    override fun createView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -147,21 +152,14 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        
-        Logger.d("SettingsFragment", "onViewCreated")
-        
+    override fun setupView(view: View, savedInstanceState: Bundle?) {
         setupObservers()
         setupClickListeners()
         updatePermissionStatus()
         updateSystemInfo()
     }
     
-    override fun onResume() {
-        super.onResume()
-        Logger.d("SettingsFragment", "onResume - performing defensive refresh")
-        
+    override fun onFragmentResumed() {
         // Defensive refresh: ensure UI is up-to-date with actual settings
         viewModel.refreshAllSettings()
         
@@ -171,7 +169,7 @@ class SettingsFragment : Fragment() {
     
     private fun setupObservers() {
         // Observe refresh interval changes
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             Logger.d("SettingsFragment", "Starting refresh interval description collection")
             viewModel.refreshIntervalDescription.collect { description ->
                 val currentText = binding.textRefreshIntervalDescription.text.toString()
@@ -182,7 +180,7 @@ class SettingsFragment : Fragment() {
         }
         
         // Observe all-day time changes
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             Logger.d("SettingsFragment", "Starting all-day time description collection")
             viewModel.allDayTimeDescription.collect { description ->
                 val currentText = binding.textAllDayTimeDescription.text.toString()
@@ -194,14 +192,14 @@ class SettingsFragment : Fragment() {
         
         
         // Observe work status
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.workStatus.collect { status ->
                 updateWorkStatus(status)
             }
         }
         
         // Observe last sync time
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.lastSyncDescription.collect { description ->
                 binding.textLastSync.text = description
             }
@@ -686,7 +684,7 @@ class SettingsFragment : Fragment() {
                 Logger.d("SettingsFragment", "ViewModel.setRefreshInterval() called")
                 
                 // Defensive: ensure UI updates immediately even if StateFlow has issues
-                lifecycleScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     kotlinx.coroutines.delay(100) // Small delay to allow StateFlow to propagate
                     val expectedText = "Every $selectedInterval minute${if (selectedInterval != 1) "s" else ""}"
                     if (binding.textRefreshIntervalDescription.text.toString() != expectedText) {
@@ -717,7 +715,7 @@ class SettingsFragment : Fragment() {
                 Logger.d("SettingsFragment", "ViewModel.setAllDayDefaultTime() called")
                 
                 // Defensive: ensure UI updates immediately even if StateFlow has issues
-                lifecycleScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     kotlinx.coroutines.delay(100) // Small delay to allow StateFlow to propagate  
                     val currentText = binding.textAllDayTimeDescription.text.toString()
                     if (currentText == oldText) {
@@ -772,9 +770,12 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun cleanupView() {
+        // Clear binding reference to prevent memory leaks
         _binding = null
+        
+        // Clear background usage cache when view is destroyed to force fresh detection
+        BackgroundUsageDetector.clearCache()
     }
     
 }

@@ -14,8 +14,11 @@ The app runs **fully locally** with **no backend**, using Android APIs to read c
 
 When working on hard problems, always tackle them small step at a time, verifying along the way things still compile and run successfully.
 
+Don't worry about compatibility, rather keep the code clean and robust.
+
 Debugging:
 - Always use Logs or other sources of hard data to determine the root cause of bugs and other issues
+- The logs are too big to directly read, you need to tail or grep (or a combination) to find relevant data
 
 Tests:
 - When developing tests, we only want to develop end to end tests
