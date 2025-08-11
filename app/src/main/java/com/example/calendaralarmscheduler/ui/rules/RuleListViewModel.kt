@@ -49,7 +49,10 @@ class RuleListViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 5000,
+                replayExpirationMillis = 0 // Don't replay old values after timeout to save memory
+            ),
             initialValue = UiState.Loading
         )
     

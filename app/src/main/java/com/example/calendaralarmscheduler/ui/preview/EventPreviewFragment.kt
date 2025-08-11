@@ -251,8 +251,8 @@ class EventPreviewFragment : Fragment() {
     // Cooldown mechanism to prevent infinite loops in alarm recovery
     private var lastAlarmRecoveryAttempt = 0L
     private var consecutiveRecoveryAttempts = 0
-    private val RECOVERY_COOLDOWN_MS = 30000L // 30 seconds
-    private val MAX_CONSECUTIVE_ATTEMPTS = 3
+    private val RECOVERY_COOLDOWN_MS = 60000L // 60 seconds (increased from 30s)
+    private val MAX_CONSECUTIVE_ATTEMPTS = 2 // Reduced from 3 to 2
     
     private fun updateAlarmSystemStatus(status: AlarmSystemStatus) {
         // Automatically detect and repair missing alarms with safeguards against infinite loops
@@ -268,11 +268,12 @@ class EventPreviewFragment : Fragment() {
                 return
             }
             
-            // Cooldown: prevent rapid successive recovery attempts
-            if (currentTime - lastAlarmRecoveryAttempt < RECOVERY_COOLDOWN_MS) {
-                val remainingCooldown = (RECOVERY_COOLDOWN_MS - (currentTime - lastAlarmRecoveryAttempt)) / 1000
+            // Cooldown with exponential backoff: prevent rapid successive recovery attempts
+            val currentCooldown = RECOVERY_COOLDOWN_MS * (1 shl consecutiveRecoveryAttempts) // Exponential backoff
+            if (currentTime - lastAlarmRecoveryAttempt < currentCooldown) {
+                val remainingCooldown = (currentCooldown - (currentTime - lastAlarmRecoveryAttempt)) / 1000
                 Logger.d("EventPreviewFragment", 
-                    "Skipping alarm recovery - cooldown active for $remainingCooldown more seconds")
+                    "Skipping alarm recovery - exponential cooldown active for $remainingCooldown more seconds (attempt ${consecutiveRecoveryAttempts + 1})")
                 return
             }
             

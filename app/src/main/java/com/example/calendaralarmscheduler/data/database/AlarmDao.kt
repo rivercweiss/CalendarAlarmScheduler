@@ -12,11 +12,11 @@ interface AlarmDao {
     @Query("SELECT * FROM alarms ORDER BY alarmTimeUtc ASC")
     suspend fun getAllAlarmsSync(): List<ScheduledAlarm>
     
-    @Query("SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > :currentTimeUtc ORDER BY alarmTimeUtc ASC")
-    fun getActiveAlarms(currentTimeUtc: Long = System.currentTimeMillis()): Flow<List<ScheduledAlarm>>
+    @Query("SELECT * FROM alarms WHERE userDismissed = 0 ORDER BY alarmTimeUtc ASC")
+    fun getActiveAlarmsAll(): Flow<List<ScheduledAlarm>>
     
     @Query("SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > :currentTimeUtc ORDER BY alarmTimeUtc ASC")
-    suspend fun getActiveAlarmsSync(currentTimeUtc: Long = System.currentTimeMillis()): List<ScheduledAlarm>
+    suspend fun getActiveAlarmsSync(currentTimeUtc: Long): List<ScheduledAlarm>
     
     @Query("SELECT * FROM alarms WHERE eventId = :eventId")
     fun getAlarmsByEventId(eventId: String): Flow<List<ScheduledAlarm>>

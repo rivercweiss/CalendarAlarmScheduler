@@ -137,6 +137,18 @@ class CalendarAlarmApplication : Application() {
                 }
             }
             
+            // Clean up expired alarms on app start to prevent database bloat
+            applicationScope.launch {
+                try {
+                    val cleanupStartTime = System.currentTimeMillis()
+                    alarmRepository.cleanupOldAlarms()
+                    val cleanupTime = System.currentTimeMillis() - cleanupStartTime
+                    Logger.i("Application", "Expired alarms cleanup completed in ${cleanupTime}ms")
+                } catch (e: Exception) {
+                    Logger.w("Application", "Failed to cleanup expired alarms on startup", e)
+                }
+            }
+            
             val initTime = System.currentTimeMillis() - startTime
             Logger.logPerformance("Application", "Application.onCreate()", initTime)
             Logger.i("Application", "CalendarAlarmApplication initialization completed successfully in ${initTime}ms")
@@ -153,6 +165,29 @@ class CalendarAlarmApplication : Application() {
             }
             throw e
         }
+    }
+    
+    /**
+     * Log comprehensive system memory usage for monitoring
+     */
+    private fun logSystemMemoryUsage(context: String) {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+        val maxMemory = runtime.maxMemory()
+        val totalMemory = runtime.totalMemory()
+        val usagePercent = (usedMemory.toDouble() / maxMemory.toDouble()) * 100
+        
+        // Also get system memory info
+        val memoryInfo = android.app.ActivityManager.MemoryInfo()
+        val activityManager = getSystemService(android.content.Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        activityManager.getMemoryInfo(memoryInfo)
+        
+        Logger.i("Application_Memory", 
+            "$context - App Memory: ${usedMemory / 1024 / 1024}MB/${totalMemory / 1024 / 1024}MB " +
+            "(${usagePercent.toInt()}% of ${maxMemory / 1024 / 1024}MB max)")
+        Logger.i("Application_Memory", 
+            "$context - System Memory: ${(memoryInfo.totalMem - memoryInfo.availMem) / 1024 / 1024}MB/" +
+            "${memoryInfo.totalMem / 1024 / 1024}MB (${memoryInfo.availMem / 1024 / 1024}MB available)")
     }
     
     override fun onTerminate() {
@@ -173,7 +208,8 @@ class CalendarAlarmApplication : Application() {
     }
     
     override fun onLowMemory() {
-        Logger.w("Application", "Low memory warning received")
+        Logger.w("Application", "Low memory warning received from Android system")
+        logSystemMemoryUsage("onLowMemory callback")
         super.onLowMemory()
     }
     
@@ -190,6 +226,23 @@ class CalendarAlarmApplication : Application() {
         }
         
         Logger.w("Application", "Trim memory: $levelName (level $level)")
+        logSystemMemoryUsage("onTrimMemory $levelName")
+        
+        // Trigger cleanup in severe memory situations
+        if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            Logger.i("Application", "Requesting aggressive cleanup due to memory pressure")
+            applicationScope.launch {
+                try {
+                    alarmRepository.cleanupOldAlarms()
+                    System.gc()
+                    kotlinx.coroutines.delay(1000)
+                    logSystemMemoryUsage("Post-cleanup")
+                } catch (e: Exception) {
+                    Logger.w("Application", "Error during memory pressure cleanup", e)
+                }
+            }
+        }
+        
         super.onTrimMemory(level)
     }
 }

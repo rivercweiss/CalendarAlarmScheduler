@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -95,43 +96,140 @@ class EventPreviewViewModel @Inject constructor(
     val currentFilter: StateFlow<EventFilter> = _currentFilter.asStateFlow()
     
     private val _eventsUiState = MutableStateFlow<UiState<List<EventWithAlarms>>>(UiState.Loading)
-    val eventsUiState: StateFlow<UiState<List<EventWithAlarms>>> = _eventsUiState.asStateFlow()
+    val eventsUiState: StateFlow<UiState<List<EventWithAlarms>>> = _eventsUiState
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 5000,
+                replayExpirationMillis = 0
+            ),
+            initialValue = UiState.Loading
+        )
     
     private val _alarmSystemStatus = MutableStateFlow(AlarmSystemStatus(0, 0, 0, 0, emptyList()))
     val alarmSystemStatus: StateFlow<AlarmSystemStatus> = _alarmSystemStatus
         .debounce(1000) // Debounce for 1 second to prevent rapid status updates
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 5000,
+                replayExpirationMillis = 0 // Don't replay old values after timeout
+            ),
             initialValue = AlarmSystemStatus(0, 0, 0, 0, emptyList())
         )
     
     private val _schedulingFailures = MutableStateFlow<List<AlarmSchedulingFailure>>(emptyList())
-    val schedulingFailures: StateFlow<List<AlarmSchedulingFailure>> = _schedulingFailures.asStateFlow()
+    val schedulingFailures: StateFlow<List<AlarmSchedulingFailure>> = _schedulingFailures
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 5000,
+                replayExpirationMillis = 0
+            ),
+            initialValue = emptyList()
+        )
     
     // Store unfiltered events data to enable proper filter toggling
+    // Memory optimization: limit cache size and implement cleanup
     private var unfilteredEvents: List<EventWithAlarms> = emptyList()
+    private var lastCacheCleanup = 0L
+    
+    companion object {
+        // Memory management constants - optimized for emulator constraints (186MB available)
+        private const val MAX_CACHED_EVENTS = 100 // Limit cached events to prevent memory bloat  
+        private const val MEMORY_PRESSURE_THRESHOLD = 65 // Start cleanup at 65% memory usage
+        private const val CRITICAL_MEMORY_THRESHOLD = 75 // Critical threshold for low-memory fallback
+        private const val CACHE_CLEANUP_INTERVAL_MS = 30_000 // Clean cache every 30 seconds
+        private const val LOW_MEMORY_GC_DELAY_MS = 2_000 // Delay before requesting GC
+    }
     
     init {
-        // Single unified data loading observer - no more conflicting refresh paths
+        // Optimized data loading - avoid constantly changing Flow combinations
         viewModelScope.launch {
-            combine(
-                ruleRepository.getAllRules(),
-                alarmRepository.getActiveAlarms()
-            ) { rules, alarms ->
-                android.util.Log.d("EventPreviewViewModel", "Data changed - triggering unified refresh")
-                refreshEventsUnified(rules, alarms, includeAlarmScheduling = false)
+            // Track rules changes separately to avoid constant Flow re-combinations
+            ruleRepository.getAllRules()
+                .debounce(300)
+                .collect { rules ->
+                    android.util.Log.d("EventPreviewViewModel", "Rules changed - triggering refresh")
+                    // Get current alarms snapshot instead of reactive flow
+                    val currentAlarms = alarmRepository.getActiveAlarmsSync()
+                    refreshEventsUnified(rules, currentAlarms, includeAlarmScheduling = false)
+                }
+        }
+        
+        // Start proactive memory monitoring
+        startMemoryMonitoring()
+    }
+    
+    /**
+     * Memory monitoring and management utilities
+     */
+    private fun getCurrentMemoryUsagePercent(): Double {
+        val runtime = Runtime.getRuntime()
+        // Correct calculation: (allocated - free) / max possible heap
+        return ((runtime.totalMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
+    }
+    
+    private fun logMemoryUsage(operation: String) {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+        val maxMemory = runtime.maxMemory()
+        val totalMemory = runtime.totalMemory()
+        val usagePercent = (usedMemory.toDouble() / maxMemory.toDouble()) * 100
+        
+        android.util.Log.d("EventPreviewViewModel_Memory", 
+            "$operation - Memory: ${usedMemory / 1024 / 1024}MB/${totalMemory / 1024 / 1024}MB (${usagePercent.toInt()}% of ${maxMemory / 1024 / 1024}MB max)")
+    }
+    
+    private suspend fun performMemoryCleanupIfNeeded() {
+        val memoryUsage = getCurrentMemoryUsagePercent()
+        val currentTime = System.currentTimeMillis()
+        
+        if (memoryUsage > MEMORY_PRESSURE_THRESHOLD || 
+            (currentTime - lastCacheCleanup) > CACHE_CLEANUP_INTERVAL_MS) {
+            
+            android.util.Log.i("EventPreviewViewModel_Memory", 
+                "Performing memory cleanup - usage: ${memoryUsage.toInt()}%")
+            
+            // Limit cache size
+            if (unfilteredEvents.size > MAX_CACHED_EVENTS) {
+                // Keep only the most recent events
+                unfilteredEvents = unfilteredEvents
+                    .sortedByDescending { it.event.startTimeUtc }
+                    .take(MAX_CACHED_EVENTS)
+                android.util.Log.d("EventPreviewViewModel_Memory", 
+                    "Trimmed cache to ${unfilteredEvents.size} events")
             }
-            // Moderate debounce to prevent excessive processing while keeping responsiveness
-            .debounce(300)
-            .collect { }
+            
+            lastCacheCleanup = currentTime
+            
+            // Request garbage collection if memory usage is high
+            if (memoryUsage > MEMORY_PRESSURE_THRESHOLD) {
+                viewModelScope.launch {
+                    kotlinx.coroutines.delay(LOW_MEMORY_GC_DELAY_MS.toLong())
+                    System.gc()
+                    android.util.Log.d("EventPreviewViewModel_Memory", "Requested garbage collection")
+                }
+            }
+        }
+    }
+    
+    private fun startMemoryMonitoring() {
+        viewModelScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(30_000) // Check every 30 seconds
+                performMemoryCleanupIfNeeded()
+            }
         }
     }
     
     val rules: StateFlow<List<Rule>> = ruleRepository.getAllRules()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 5000,
+                replayExpirationMillis = 0 // Don't replay old values after timeout to save memory
+            ),
             initialValue = emptyList()
         )
     
@@ -144,17 +242,38 @@ class EventPreviewViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                // Check memory before performing fresh data fetch
-                val runtime = Runtime.getRuntime()
-                val memoryUsagePercent = ((runtime.maxMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
+                // Log memory usage before refresh
+                logMemoryUsage("Before refresh")
                 
-                if (memoryUsagePercent > 95) {
+                // Check memory before performing fresh data fetch
+                val memoryUsagePercent = getCurrentMemoryUsagePercent()
+                android.util.Log.i("EventPreviewViewModel_Memory", 
+                    "Memory check: ${memoryUsagePercent.toInt()}% (pressure>${MEMORY_PRESSURE_THRESHOLD}%, critical>${CRITICAL_MEMORY_THRESHOLD}%)")
+                
+                // Proactively clean up memory if under pressure
+                if (memoryUsagePercent > MEMORY_PRESSURE_THRESHOLD) {
+                    android.util.Log.i("EventPreviewViewModel_Memory", "Memory pressure detected - cleaning up")
+                    performMemoryCleanupIfNeeded()
+                }
+                
+                if (memoryUsagePercent > CRITICAL_MEMORY_THRESHOLD) {
                     // Critical memory situation - fall back to cached data if available
-                    android.util.Log.w("EventPreviewViewModel", "Critical memory usage (${memoryUsagePercent.toInt()}%) - using cached data")
+                    android.util.Log.w("EventPreviewViewModel_Memory", 
+                        "CRITICAL memory usage (${memoryUsagePercent.toInt()}%) - using cached data to avoid OOM")
+                    logMemoryUsage("Critical memory fallback")
                     if (unfilteredEvents.isNotEmpty()) {
                         val filteredEvents = applyFilter(unfilteredEvents)
                         _eventsUiState.value = UiState.Success(filteredEvents)
                         _errorMessage.emit("⚠️ Using cached data due to low memory")
+                        
+                        // Request GC to free up memory
+                        viewModelScope.launch {
+                            kotlinx.coroutines.delay(LOW_MEMORY_GC_DELAY_MS.toLong())
+                            android.util.Log.d("EventPreviewViewModel_Memory", "Requesting GC due to memory pressure")
+                            System.gc()
+                            kotlinx.coroutines.delay(1000) // Wait for GC
+                            logMemoryUsage("Post-GC")
+                        }
                     } else {
                         _eventsUiState.value = UiState.Error("Low memory - please close other apps and try again")
                     }
@@ -172,6 +291,9 @@ class EventPreviewViewModel @Inject constructor(
                 // Update alarm system status with fresh data
                 updateAlarmSystemStatus(currentAlarms)
                 
+                // Log memory usage after refresh
+                logMemoryUsage("After refresh")
+                
                 android.util.Log.d("EventPreviewViewModel", "Fresh calendar data refresh completed successfully")
                 _errorMessage.emit("✅ Calendar data refreshed")
                 
@@ -188,6 +310,9 @@ class EventPreviewViewModel @Inject constructor(
                     _eventsUiState.value = UiState.Error(errorMessage)
                     _errorMessage.emit("❌ $errorMessage")
                 }
+            } finally {
+                // Perform cleanup after refresh
+                performMemoryCleanupIfNeeded()
             }
         }
     }
@@ -218,17 +343,22 @@ class EventPreviewViewModel @Inject constructor(
         }
         lastRefreshRequest = now
         
-        // Memory check - only block if truly critical (99%+) and only for heavy operations
+        // Memory check - use new memory management functions
+        val memoryUsagePercent = getCurrentMemoryUsagePercent()
         if (includeAlarmScheduling) {
-            val runtime = Runtime.getRuntime()
-            val memoryUsagePercent = ((runtime.maxMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
-            if (memoryUsagePercent > 99) {
+            if (memoryUsagePercent > CRITICAL_MEMORY_THRESHOLD) {
                 android.util.Log.w("EventPreviewViewModel", "Skipping heavy refresh due to critical memory usage: ${memoryUsagePercent.toInt()}%")
                 _eventsUiState.value = UiState.Error("Low memory - please close other apps")
                 return
             }
         }
-        // Lightweight refreshes (no alarm scheduling) skip memory check entirely
+        
+        // Proactive cleanup for all operations if memory pressure detected
+        if (memoryUsagePercent > MEMORY_PRESSURE_THRESHOLD) {
+            viewModelScope.launch {
+                performMemoryCleanupIfNeeded()
+            }
+        }
         
         viewModelScope.launch {
             isRefreshing = true
@@ -302,11 +432,22 @@ class EventPreviewViewModel @Inject constructor(
             eventsWithAlarms.add(EventWithAlarms(event, eventAlarms, matchingRules))
         }
         
-        // Store unfiltered events for filter toggling
-        unfilteredEvents = eventsWithAlarms
+        // Store unfiltered events for filter toggling with memory management
+        unfilteredEvents = if (eventsWithAlarms.size > MAX_CACHED_EVENTS) {
+            // Keep only the most recent events if we have too many
+            eventsWithAlarms
+                .sortedByDescending { it.event.startTimeUtc }
+                .take(MAX_CACHED_EVENTS)
+                .also {
+                    android.util.Log.i("EventPreviewViewModel_Memory", 
+                        "Limited cached events: ${eventsWithAlarms.size} → ${it.size}")
+                }
+        } else {
+            eventsWithAlarms
+        }
         
         // Apply current filter and update UI
-        _eventsUiState.value = UiState.Success(applyFilter(eventsWithAlarms))
+        _eventsUiState.value = UiState.Success(applyFilter(unfilteredEvents))
     }
     
     /**

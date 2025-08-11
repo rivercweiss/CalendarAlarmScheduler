@@ -14,10 +14,63 @@ class CalendarRefreshWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
     
+    companion object {
+        private const val TAG = "CalendarRefreshWorker"
+        // Memory management constants
+        private const val MEMORY_PRESSURE_THRESHOLD = 85.0
+        private const val CRITICAL_MEMORY_THRESHOLD = 95.0
+        private const val MAX_EVENTS_BATCH_SIZE = 50 // Process events in batches to prevent memory bloat
+        private const val LARGE_COLLECTION_THRESHOLD = 100 // Consider streaming if more than this many events
+    }
+    
+    /**
+     * Memory monitoring utilities for background worker
+     */
+    private fun getCurrentMemoryUsagePercent(): Double {
+        val runtime = Runtime.getRuntime()
+        return ((runtime.maxMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
+    }
+    
+    private fun logMemoryUsage(operation: String) {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = runtime.maxMemory() - runtime.freeMemory()
+        val maxMemory = runtime.maxMemory()
+        val usagePercent = (usedMemory.toDouble() / maxMemory.toDouble()) * 100
+        
+        Logger.d("CalendarRefreshWorker_Memory", 
+            "$operation - Memory: ${usedMemory / 1024 / 1024}MB/${maxMemory / 1024 / 1024}MB (${usagePercent.toInt()}%)")
+    }
+    
+    private suspend fun performMemoryCleanupIfNeeded(): Boolean {
+        val memoryUsage = getCurrentMemoryUsagePercent()
+        if (memoryUsage > MEMORY_PRESSURE_THRESHOLD) {
+            Logger.w("CalendarRefreshWorker_Memory", "Memory pressure detected: ${memoryUsage.toInt()}%")
+            
+            // Force garbage collection
+            System.gc()
+            kotlinx.coroutines.delay(1000) // Give GC time to work
+            
+            val afterGcMemory = getCurrentMemoryUsagePercent()
+            Logger.d("CalendarRefreshWorker_Memory", "After GC: ${afterGcMemory.toInt()}%")
+            
+            if (afterGcMemory > CRITICAL_MEMORY_THRESHOLD) {
+                Logger.e("CalendarRefreshWorker_Memory", "Critical memory usage after GC: ${afterGcMemory.toInt()}%")
+                return false // Indicate memory is still critical
+            }
+        }
+        return true
+    }
     
     override suspend fun doWork(): Result {
         val startTime = System.currentTimeMillis()
         Logger.i("CalendarRefreshWorker_doWork", "Starting calendar refresh background work")
+        
+        // Initial memory check
+        logMemoryUsage("Worker start")
+        if (!performMemoryCleanupIfNeeded()) {
+            Logger.e("CalendarRefreshWorker_doWork", "Critical memory usage at start - aborting work")
+            return Result.retry() // Retry later when system may have more memory
+        }
         
         return try {
             val app = applicationContext as CalendarAlarmApplication
@@ -57,11 +110,25 @@ class CalendarRefreshWorker(
             
             Logger.d("CalendarRefreshWorker_doWork", "Retrieved ${events.size} events (modified since last sync)")
             
+            // Memory check after retrieving events
+            logMemoryUsage("After event retrieval")
+            if (!performMemoryCleanupIfNeeded()) {
+                Logger.e("CalendarRefreshWorker_doWork", "Critical memory usage after event retrieval")
+                return Result.retry()
+            }
+            
             if (events.isEmpty()) {
                 Logger.i("CalendarRefreshWorker_doWork", "No new or modified events found")
                 settingsRepository.updateLastSyncTime()
                 errorNotificationManager.clearErrorNotifications()
                 return Result.success()
+            }
+            
+            // Check if we need batch processing for large collections
+            if (events.size > LARGE_COLLECTION_THRESHOLD) {
+                Logger.i("CalendarRefreshWorker_doWork", "Large event collection detected (${events.size}). Using batch processing.")
+                return processEventsInBatches(events, enabledRules, alarmRepository, ruleMatcher, 
+                    alarmSchedulingService, settingsRepository, errorNotificationManager, startTime)
             }
             
             // Find matching events and rules
@@ -244,4 +311,119 @@ class CalendarRefreshWorker(
         val rescheduledCount: Int,
         val failedCount: Int
     )
+    
+    /**
+     * Process large event collections in memory-efficient batches
+     */
+    private suspend fun processEventsInBatches(
+        events: List<com.example.calendaralarmscheduler.domain.models.CalendarEvent>,
+        enabledRules: List<com.example.calendaralarmscheduler.data.database.entities.Rule>,
+        alarmRepository: com.example.calendaralarmscheduler.data.AlarmRepository,
+        ruleMatcher: RuleMatcher,
+        alarmSchedulingService: AlarmSchedulingService,
+        settingsRepository: com.example.calendaralarmscheduler.data.SettingsRepository,
+        errorNotificationManager: com.example.calendaralarmscheduler.utils.ErrorNotificationManager,
+        startTime: Long
+    ): Result {
+        Logger.i("CalendarRefreshWorker_BatchProcessing", "Processing ${events.size} events in batches of $MAX_EVENTS_BATCH_SIZE")
+        
+        var totalScheduledCount = 0
+        var totalUpdatedCount = 0
+        var totalSkippedCount = 0
+        var totalFailedCount = 0
+        val allFailedEvents = mutableListOf<String>()
+        
+        // Get existing alarms once for all batches
+        val existingAlarmsDb = alarmRepository.getAllAlarms().first()
+        val existingAlarms = existingAlarmsDb.map { dbAlarm ->
+            com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
+                id = dbAlarm.id,
+                eventId = dbAlarm.eventId,
+                ruleId = dbAlarm.ruleId,
+                eventTitle = dbAlarm.eventTitle,
+                eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
+                alarmTimeUtc = dbAlarm.alarmTimeUtc,
+                scheduledAt = dbAlarm.scheduledAt,
+                userDismissed = dbAlarm.userDismissed,
+                pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
+                lastEventModified = dbAlarm.lastEventModified
+            )
+        }
+        
+        // Process events in batches
+        val eventBatches = events.chunked(MAX_EVENTS_BATCH_SIZE)
+        Logger.i("CalendarRefreshWorker_BatchProcessing", "Split into ${eventBatches.size} batches")
+        
+        for ((batchIndex, eventBatch) in eventBatches.withIndex()) {
+            Logger.d("CalendarRefreshWorker_BatchProcessing", "Processing batch ${batchIndex + 1}/${eventBatches.size} (${eventBatch.size} events)")
+            
+            // Memory check before each batch
+            logMemoryUsage("Before batch ${batchIndex + 1}")
+            if (!performMemoryCleanupIfNeeded()) {
+                Logger.e("CalendarRefreshWorker_BatchProcessing", "Critical memory usage at batch ${batchIndex + 1} - stopping")
+                break
+            }
+            
+            try {
+                // Find matching rules for this batch
+                val batchMatchResults = ruleMatcher.findMatchingRules(eventBatch, enabledRules)
+                
+                // Filter out dismissed alarms for this batch
+                val filteredMatches = ruleMatcher.filterOutDismissedAlarms(batchMatchResults, existingAlarms)
+                
+                if (filteredMatches.isNotEmpty()) {
+                    // Process this batch
+                    val batchResult = alarmSchedulingService.processMatchesAndScheduleAlarms(
+                        filteredMatches,
+                        logPrefix = "CalendarRefreshWorker_Batch${batchIndex + 1}"
+                    )
+                    
+                    // Accumulate results
+                    totalScheduledCount += batchResult.scheduledCount
+                    totalUpdatedCount += batchResult.updatedCount
+                    totalSkippedCount += batchResult.skippedCount
+                    totalFailedCount += batchResult.failedCount
+                    allFailedEvents.addAll(batchResult.failedEvents)
+                }
+                
+                // Clear temporary batch data to free memory
+                // (Kotlin will GC these automatically, but being explicit helps)
+                
+            } catch (e: Exception) {
+                Logger.e("CalendarRefreshWorker_BatchProcessing", "Error processing batch ${batchIndex + 1}", e)
+                // Continue with next batch rather than failing completely
+            }
+            
+            // Memory cleanup between batches
+            if (batchIndex % 3 == 0) { // Every 3 batches
+                performMemoryCleanupIfNeeded()
+            }
+        }
+        
+        // Update last sync time
+        settingsRepository.updateLastSyncTime()
+        
+        // Handle error notifications
+        if (totalFailedCount > 0) {
+            Logger.w("CalendarRefreshWorker_BatchProcessing", "Failed to process $totalFailedCount alarms across all batches")
+            if (allFailedEvents.isNotEmpty()) {
+                errorNotificationManager.showAlarmSchedulingError(allFailedEvents.first())
+            }
+        } else {
+            errorNotificationManager.clearErrorNotifications()
+        }
+        
+        // Perform health check
+        val healthCheckResult = performAlarmHealthCheck(alarmRepository, 
+            com.example.calendaralarmscheduler.domain.AlarmScheduler(applicationContext, 
+                applicationContext.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager))
+        
+        val workTime = System.currentTimeMillis() - startTime
+        Logger.i("CalendarRefreshWorker_BatchProcessing", 
+            "Batch processing completed in ${workTime}ms. " +
+            "Total - Scheduled: $totalScheduledCount, Updated: $totalUpdatedCount, " +
+            "Skipped: $totalSkippedCount, Failed: $totalFailedCount")
+        
+        return Result.success()
+    }
 }
