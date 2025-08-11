@@ -58,13 +58,29 @@ class AlarmScheduler(
                 pendingIntent
             )
             
-            Log.d(TAG, "Scheduled alarm for ${alarm.eventTitle} at ${alarm.getLocalAlarmTime()}")
-            
-            return@withContext ScheduleResult(
-                success = true,
-                message = "Alarm scheduled successfully",
-                alarm = alarm
+            // Verify the alarm was actually scheduled by checking if PendingIntent still exists
+            val verificationIntent = createAlarmIntent(alarm)
+            val verificationPendingIntent = PendingIntent.getBroadcast(
+                context,
+                alarm.pendingIntentRequestCode,
+                verificationIntent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
             )
+            
+            if (verificationPendingIntent != null) {
+                Log.d(TAG, "✓ Verified alarm scheduled for ${alarm.eventTitle} at ${alarm.getLocalAlarmTime()}")
+                return@withContext ScheduleResult(
+                    success = true,
+                    message = "Alarm scheduled and verified successfully",
+                    alarm = alarm
+                )
+            } else {
+                Log.w(TAG, "⚠️ Alarm appeared to schedule but verification failed for ${alarm.eventTitle}")
+                return@withContext ScheduleResult(
+                    success = false,
+                    message = "Alarm scheduling verification failed - PendingIntent not found after scheduling"
+                )
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to schedule alarm for ${alarm.eventTitle}", e)
             
@@ -519,7 +535,20 @@ class AlarmScheduler(
                     pendingIntent
                 )
                 
-                Log.d(TAG, "Scheduled alarm for ${alarm.eventTitle} at ${alarm.getLocalAlarmTime()}")
+                // Verify the alarm was actually scheduled
+                val verificationIntent = createAlarmIntent(alarm)
+                val verificationPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    alarm.pendingIntentRequestCode,
+                    verificationIntent,
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                )
+                
+                if (verificationPendingIntent != null) {
+                    Log.d(TAG, "✓ Verified alarm scheduled for ${alarm.eventTitle} at ${alarm.getLocalAlarmTime()}")
+                } else {
+                    throw IllegalStateException("Alarm scheduling verification failed for ${alarm.eventTitle} - PendingIntent not found after scheduling")
+                }
             }
         }
     }

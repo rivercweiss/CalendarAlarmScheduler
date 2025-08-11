@@ -22,6 +22,7 @@ import com.example.calendaralarmscheduler.receivers.AlarmReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -97,7 +98,13 @@ class EventPreviewViewModel @Inject constructor(
     val eventsUiState: StateFlow<UiState<List<EventWithAlarms>>> = _eventsUiState.asStateFlow()
     
     private val _alarmSystemStatus = MutableStateFlow(AlarmSystemStatus(0, 0, 0, 0, emptyList()))
-    val alarmSystemStatus: StateFlow<AlarmSystemStatus> = _alarmSystemStatus.asStateFlow()
+    val alarmSystemStatus: StateFlow<AlarmSystemStatus> = _alarmSystemStatus
+        .debounce(1000) // Debounce for 1 second to prevent rapid status updates
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AlarmSystemStatus(0, 0, 0, 0, emptyList())
+        )
     
     private val _schedulingFailures = MutableStateFlow<List<AlarmSchedulingFailure>>(emptyList())
     val schedulingFailures: StateFlow<List<AlarmSchedulingFailure>> = _schedulingFailures.asStateFlow()
@@ -129,21 +136,59 @@ class EventPreviewViewModel @Inject constructor(
         )
     
     fun refreshEvents() {
-        // Use the SAME approach as filter toggle - just refresh UI with cached data
-        // No database calls, no memory checks, no heavy operations
-        android.util.Log.d("EventPreviewViewModel", "Refresh button pressed - refreshing UI display")
+        // Fetch FRESH calendar data from the system when user explicitly requests refresh
+        android.util.Log.d("EventPreviewViewModel", "Refresh button pressed - fetching fresh calendar data")
         
-        if (unfilteredEvents.isNotEmpty()) {
-            // Use cached data like the filter toggle does
-            val currentFilter = _currentFilter.value
-            val filteredEvents = applyFilter(unfilteredEvents)
-            _eventsUiState.value = UiState.Success(filteredEvents)
-            android.util.Log.d("EventPreviewViewModel", "Refresh completed using cached data")
-        } else {
-            // No cached data available - let user know data is loading
-            // The combine observer will automatically load fresh data
-            _eventsUiState.value = UiState.Loading
-            android.util.Log.d("EventPreviewViewModel", "No cached data available, showing loading state")
+        // Show loading state for fresh data fetch
+        _eventsUiState.value = UiState.Loading
+        
+        viewModelScope.launch {
+            try {
+                // Check memory before performing fresh data fetch
+                val runtime = Runtime.getRuntime()
+                val memoryUsagePercent = ((runtime.maxMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
+                
+                if (memoryUsagePercent > 95) {
+                    // Critical memory situation - fall back to cached data if available
+                    android.util.Log.w("EventPreviewViewModel", "Critical memory usage (${memoryUsagePercent.toInt()}%) - using cached data")
+                    if (unfilteredEvents.isNotEmpty()) {
+                        val filteredEvents = applyFilter(unfilteredEvents)
+                        _eventsUiState.value = UiState.Success(filteredEvents)
+                        _errorMessage.emit("⚠️ Using cached data due to low memory")
+                    } else {
+                        _eventsUiState.value = UiState.Error("Low memory - please close other apps and try again")
+                    }
+                    return@launch
+                }
+                
+                // Fetch fresh data from calendar provider
+                android.util.Log.d("EventPreviewViewModel", "Fetching fresh calendar data from provider")
+                val currentRules = ruleRepository.getAllRules().first()
+                val currentAlarms = alarmRepository.getActiveAlarms().first()
+                
+                // Build fresh events data (same as unified refresh but called directly)
+                buildEventsWithAlarms(currentRules, currentAlarms)
+                
+                // Update alarm system status with fresh data
+                updateAlarmSystemStatus(currentAlarms)
+                
+                android.util.Log.d("EventPreviewViewModel", "Fresh calendar data refresh completed successfully")
+                _errorMessage.emit("✅ Calendar data refreshed")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("EventPreviewViewModel", "Fresh calendar data refresh failed", e)
+                
+                // Fall back to cached data if available
+                if (unfilteredEvents.isNotEmpty()) {
+                    val filteredEvents = applyFilter(unfilteredEvents)
+                    _eventsUiState.value = UiState.Success(filteredEvents)
+                    _errorMessage.emit("⚠️ Refresh failed, showing cached data: ${e.message}")
+                } else {
+                    val errorMessage = "Failed to refresh calendar data: ${e.message}"
+                    _eventsUiState.value = UiState.Error(errorMessage)
+                    _errorMessage.emit("❌ $errorMessage")
+                }
+            }
         }
     }
     
@@ -494,8 +539,19 @@ class EventPreviewViewModel @Inject constructor(
                 PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
             )
             
-            pendingIntent != null
+            val isScheduled = pendingIntent != null
+            
+            // Enhanced logging for debugging missing alarms
+            if (!isScheduled) {
+                android.util.Log.d("EventPreviewViewModel", 
+                    "Alarm not found in system - Event: ${alarm.eventTitle}, " +
+                    "ID: ${alarm.id}, RequestCode: ${alarm.pendingIntentRequestCode}, " +
+                    "AlarmTime: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date(alarm.alarmTimeUtc))}")
+            }
+            
+            isScheduled
         } catch (e: Exception) {
+            android.util.Log.e("EventPreviewViewModel", "Error checking if alarm is scheduled in system: ${alarm.eventTitle}", e)
             false
         }
     }
@@ -606,6 +662,91 @@ class EventPreviewViewModel @Inject constructor(
             
             if (retriedFailures.size < failures.size) {
                 _errorMessage.emit("Retried ${failures.size - retriedFailures.size} failed alarms")
+            }
+        }
+    }
+    
+    /**
+     * Automatically reschedule all alarms that exist in database but are missing from system.
+     * This is called when the system detects missing alarms to provide automatic recovery.
+     */
+    fun rescheduleAllMissingAlarms() {
+        viewModelScope.launch {
+            try {
+                android.util.Log.i("EventPreviewViewModel", "Starting automatic missing alarm recovery")
+                val alarms = alarmRepository.getActiveAlarmsSync()
+                var rescheduledCount = 0
+                val failures = mutableListOf<AlarmSchedulingFailure>()
+                
+                for (alarm in alarms) {
+                    if (!alarm.userDismissed && alarm.alarmTimeUtc > System.currentTimeMillis()) {
+                        if (!isAlarmScheduledInSystem(alarm)) {
+                            try {
+                                // Convert database alarm to domain model
+                                val domainAlarm = ScheduledAlarm(
+                                    id = alarm.id,
+                                    eventId = alarm.eventId,
+                                    ruleId = alarm.ruleId,
+                                    eventTitle = alarm.eventTitle,
+                                    eventStartTimeUtc = alarm.eventStartTimeUtc,
+                                    alarmTimeUtc = alarm.alarmTimeUtc,
+                                    scheduledAt = alarm.scheduledAt,
+                                    userDismissed = alarm.userDismissed,
+                                    pendingIntentRequestCode = alarm.pendingIntentRequestCode,
+                                    lastEventModified = alarm.lastEventModified
+                                )
+                                
+                                val result = alarmScheduler.scheduleAlarm(domainAlarm)
+                                if (result.success) {
+                                    rescheduledCount++
+                                    android.util.Log.d("EventPreviewViewModel", "Successfully rescheduled missing alarm: ${alarm.eventTitle}")
+                                } else {
+                                    failures.add(
+                                        AlarmSchedulingFailure(
+                                            alarmId = alarm.id,
+                                            eventTitle = alarm.eventTitle,
+                                            failureReason = "Auto-reschedule failed: ${result.message}",
+                                            failureTime = System.currentTimeMillis(),
+                                            retryCount = 0
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                failures.add(
+                                    AlarmSchedulingFailure(
+                                        alarmId = alarm.id,
+                                        eventTitle = alarm.eventTitle,
+                                        failureReason = "Auto-reschedule exception: ${e.message}",
+                                        failureTime = System.currentTimeMillis(),
+                                        retryCount = 0
+                                    )
+                                )
+                                android.util.Log.e("EventPreviewViewModel", "Error auto-rescheduling alarm ${alarm.eventTitle}", e)
+                            }
+                        }
+                    }
+                }
+                
+                // Update scheduling failures if any occurred
+                if (failures.isNotEmpty()) {
+                    _schedulingFailures.value = _schedulingFailures.value + failures
+                }
+                
+                android.util.Log.i("EventPreviewViewModel", "Automatic alarm recovery completed: $rescheduledCount alarms rescheduled, ${failures.size} failures")
+                
+                // Allow time for the system to register newly scheduled alarms before checking status
+                if (rescheduledCount > 0) {
+                    android.util.Log.d("EventPreviewViewModel", "Waiting 3 seconds for system to register newly scheduled alarms...")
+                    delay(3000) // Give Android system time to register PendingIntents
+                }
+                
+                // Refresh alarm status after attempting to reschedule
+                val refreshedAlarms = alarmRepository.getActiveAlarmsSync()
+                updateAlarmSystemStatus(refreshedAlarms)
+                
+            } catch (e: Exception) {
+                android.util.Log.e("EventPreviewViewModel", "Error in automatic missing alarm recovery", e)
+                _errorMessage.emit("Error recovering missing alarms: ${e.message}")
             }
         }
     }

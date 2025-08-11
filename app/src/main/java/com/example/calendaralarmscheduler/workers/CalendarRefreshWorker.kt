@@ -145,6 +145,16 @@ class CalendarRefreshWorker(
                 errorNotificationManager.clearErrorNotifications()
             }
             
+            // Perform proactive alarm health monitoring - check for any missing alarms and auto-repair
+            Logger.d("CalendarRefreshWorker_doWork", "Starting proactive alarm health check...")
+            val healthCheckResult = performAlarmHealthCheck(alarmRepository, alarmScheduler)
+            if (healthCheckResult.rescheduledCount > 0) {
+                Logger.i("CalendarRefreshWorker_doWork", "Alarm health check: automatically rescheduled ${healthCheckResult.rescheduledCount} missing alarms")
+            }
+            if (healthCheckResult.failedCount > 0) {
+                Logger.w("CalendarRefreshWorker_doWork", "Alarm health check: failed to reschedule ${healthCheckResult.failedCount} alarms")
+            }
+            
             val workTime = System.currentTimeMillis() - startTime
             Logger.logPerformance("CalendarRefreshWorker", "doWork()", workTime)
             Logger.i("CalendarRefreshWorker_doWork", 
@@ -159,4 +169,79 @@ class CalendarRefreshWorker(
             Result.retry()
         }
     }
+    
+    /**
+     * Proactive alarm health monitoring and repair
+     */
+    private suspend fun performAlarmHealthCheck(
+        alarmRepository: com.example.calendaralarmscheduler.data.AlarmRepository,
+        alarmScheduler: com.example.calendaralarmscheduler.domain.AlarmScheduler
+    ): AlarmHealthCheckResult {
+        return try {
+            val activeAlarms = alarmRepository.getActiveAlarmsSync()
+            var rescheduledCount = 0
+            var failedCount = 0
+            
+            Logger.d("CalendarRefreshWorker_healthCheck", "Checking ${activeAlarms.size} active alarms")
+            
+            for (alarm in activeAlarms) {
+                if (!alarm.userDismissed && alarm.alarmTimeUtc > System.currentTimeMillis()) {
+                    // Check if alarm exists in system
+                    val intent = android.content.Intent(applicationContext, com.example.calendaralarmscheduler.receivers.AlarmReceiver::class.java)
+                    intent.putExtra("ALARM_ID", alarm.id)
+                    intent.putExtra("EVENT_TITLE", alarm.eventTitle)
+                    intent.putExtra("RULE_ID", alarm.ruleId)
+                    
+                    val pendingIntent = android.app.PendingIntent.getBroadcast(
+                        applicationContext,
+                        alarm.pendingIntentRequestCode,
+                        intent,
+                        android.app.PendingIntent.FLAG_NO_CREATE or android.app.PendingIntent.FLAG_IMMUTABLE
+                    )
+                    
+                    if (pendingIntent == null) {
+                        // Alarm is missing from system - attempt to reschedule
+                        Logger.w("CalendarRefreshWorker_healthCheck", "Missing alarm detected for ${alarm.eventTitle} - attempting automatic reschedule")
+                        
+                        try {
+                            val domainAlarm = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
+                                id = alarm.id,
+                                eventId = alarm.eventId,
+                                ruleId = alarm.ruleId,
+                                eventTitle = alarm.eventTitle,
+                                eventStartTimeUtc = alarm.eventStartTimeUtc,
+                                alarmTimeUtc = alarm.alarmTimeUtc,
+                                scheduledAt = alarm.scheduledAt,
+                                userDismissed = alarm.userDismissed,
+                                pendingIntentRequestCode = alarm.pendingIntentRequestCode,
+                                lastEventModified = alarm.lastEventModified
+                            )
+                            
+                            val result = alarmScheduler.scheduleAlarm(domainAlarm)
+                            if (result.success) {
+                                rescheduledCount++
+                                Logger.d("CalendarRefreshWorker_healthCheck", "Successfully rescheduled missing alarm: ${alarm.eventTitle}")
+                            } else {
+                                failedCount++
+                                Logger.e("CalendarRefreshWorker_healthCheck", "Failed to reschedule missing alarm ${alarm.eventTitle}: ${result.message}")
+                            }
+                        } catch (e: Exception) {
+                            failedCount++
+                            Logger.e("CalendarRefreshWorker_healthCheck", "Exception while rescheduling missing alarm ${alarm.eventTitle}", e)
+                        }
+                    }
+                }
+            }
+            
+            AlarmHealthCheckResult(rescheduledCount, failedCount)
+        } catch (e: Exception) {
+            Logger.e("CalendarRefreshWorker_healthCheck", "Error during alarm health check", e)
+            AlarmHealthCheckResult(0, 0)
+        }
+    }
+    
+    private data class AlarmHealthCheckResult(
+        val rescheduledCount: Int,
+        val failedCount: Int
+    )
 }

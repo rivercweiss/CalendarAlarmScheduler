@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.databinding.FragmentEventPreviewBinding
 import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.utils.Logger
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -60,7 +61,7 @@ class EventPreviewFragment : Fragment() {
     
     private fun setupClickListeners() {
         binding.fabRefresh.setOnClickListener {
-            // Use lightweight refresh for normal refresh button (same as filter toggle)
+            // Fetch fresh calendar data from system when user presses refresh
             viewModel.refreshEvents()
         }
         
@@ -247,16 +248,48 @@ class EventPreviewFragment : Fragment() {
             .show()
     }
     
+    // Cooldown mechanism to prevent infinite loops in alarm recovery
+    private var lastAlarmRecoveryAttempt = 0L
+    private var consecutiveRecoveryAttempts = 0
+    private val RECOVERY_COOLDOWN_MS = 30000L // 30 seconds
+    private val MAX_CONSECUTIVE_ATTEMPTS = 3
+    
     private fun updateAlarmSystemStatus(status: AlarmSystemStatus) {
-        // Could update a status indicator in the UI
-        // For now, we'll just log it and show a brief message if there are issues
+        // Automatically detect and repair missing alarms with safeguards against infinite loops
         if (status.systemAlarms < status.activeAlarms) {
             val missedCount = status.activeAlarms - status.systemAlarms
-            Toast.makeText(
-                requireContext(), 
-                "Warning: $missedCount alarm(s) may not be scheduled in system", 
-                Toast.LENGTH_LONG
-            ).show()
+            val currentTime = System.currentTimeMillis()
+            
+            // Circuit breaker: stop after too many consecutive attempts
+            if (consecutiveRecoveryAttempts >= MAX_CONSECUTIVE_ATTEMPTS) {
+                Logger.w("EventPreviewFragment", 
+                    "Skipping alarm recovery - reached maximum consecutive attempts ($consecutiveRecoveryAttempts). " +
+                    "Manual intervention may be required.")
+                return
+            }
+            
+            // Cooldown: prevent rapid successive recovery attempts
+            if (currentTime - lastAlarmRecoveryAttempt < RECOVERY_COOLDOWN_MS) {
+                val remainingCooldown = (RECOVERY_COOLDOWN_MS - (currentTime - lastAlarmRecoveryAttempt)) / 1000
+                Logger.d("EventPreviewFragment", 
+                    "Skipping alarm recovery - cooldown active for $remainingCooldown more seconds")
+                return
+            }
+            
+            Logger.w("EventPreviewFragment", 
+                "Detected $missedCount missing alarm(s) - attempting automatic recovery (attempt ${consecutiveRecoveryAttempts + 1}/$MAX_CONSECUTIVE_ATTEMPTS)")
+            
+            lastAlarmRecoveryAttempt = currentTime
+            consecutiveRecoveryAttempts++
+            
+            // Automatically attempt to reschedule missing alarms
+            viewModel.rescheduleAllMissingAlarms()
+        } else {
+            // Reset recovery attempts counter when system is healthy
+            if (consecutiveRecoveryAttempts > 0) {
+                Logger.d("EventPreviewFragment", "Alarm system healthy - resetting recovery attempt counter")
+                consecutiveRecoveryAttempts = 0
+            }
         }
     }
     
