@@ -1,328 +1,159 @@
-08-10 20:31:18.520 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.496][I] SettingsRepository initialized
-08-10 20:31:18.526 26009 26009 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.525][D] Settings are up to date (version 1)
-08-10 20:31:18.530 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.529][I] Initial StateFlow values - refresh: 30min, all-day: 20:0
-08-10 20:31:18.545 26009 26009 I CalendarAlarmScheduler_RuleRepository: [2025-08-10 20:31:18.543][I] RuleRepository initialized
-08-10 20:31:18.551 26009 26009 I CalendarAlarmScheduler_Logger: [2025-08-10 20:31:18.551][I] Logger initialized - Debug: true, API: 36
-08-10 20:31:18.554 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.554][I] Starting CalendarAlarmApplication initialization - Debug: true
-08-10 20:31:18.555 26009 26009 I CalendarAlarmScheduler_CrashHandler: [2025-08-10 20:31:18.555][I] Crash handler initialized
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.559][I] === System Info ===
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: API Level: 36
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: Brand: google
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: Model: sdk_gphone64_arm64
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: Manufacturer: Google
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: Available Memory: 186MB
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: Free Storage: 4303MB
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: === End System Info ===
-08-10 20:31:18.559 26009 26009 I CalendarAlarmScheduler_Application: 
-08-10 20:31:18.560 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.560][I] Refresh interval change callback set
-08-10 20:31:18.563 26009 26009 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.562][I] Scheduling periodic calendar refresh with interval: 30 minutes
-08-10 20:31:18.567 26009 26009 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.567][I] Periodic calendar refresh scheduled successfully with 30-minute interval
-08-10 20:31:18.570 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.569][W] No session cache available, using basic fallback detection
-08-10 20:31:18.571 26009 26009 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.570][I] ✅ Background usage allowed via FALLBACK - background work should run reliably
-08-10 20:31:18.574 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.574][W] No session cache available, using basic fallback detection
-08-10 20:31:18.575 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.575][D] Background usage check:
-08-10 20:31:18.576 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.575][D]   Allowed: true
-08-10 20:31:18.577 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.576][D]   Method: FALLBACK
-08-10 20:31:18.578 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.577][D]   API Level: 36
-08-10 20:31:18.579 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.578][W] No session cache available, using basic fallback detection
-08-10 20:31:18.580 26009 26009 W CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.580][W] Doze mode warning: App may experience delays in background work during Doze mode
-08-10 20:31:18.582 26009 26009 W CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.582][W] Recommendation: Request user to whitelist app from battery optimization
-08-10 20:31:18.583 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.583][W] No session cache available, using basic fallback detection
-08-10 20:31:18.584 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.584][D] Background usage check:
-08-10 20:31:18.585 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.584][D]   Allowed: true
-08-10 20:31:18.586 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.585][D]   Method: FALLBACK
-08-10 20:31:18.587 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.586][D]   API Level: 36
-08-10 20:31:18.588 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.587][W] No session cache available, using basic fallback detection
-08-10 20:31:18.589 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.589][W] No session cache available, using basic fallback detection
-08-10 20:31:18.590 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.590][D] Background usage check:
-08-10 20:31:18.591 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.591][D]   Allowed: true
-08-10 20:31:18.593 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.592][D]   Method: FALLBACK
-08-10 20:31:18.594 26009 26009 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:31:18.593][D]   API Level: 36
-08-10 20:31:18.595 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.594][W] No session cache available, using basic fallback detection
-08-10 20:31:18.596 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.595][I] === Doze Mode Compatibility Status ===
-08-10 20:31:18.597 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.596][I] Device API Level: 36
-08-10 20:31:18.599 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.598][I] Supports Doze Mode: true
-08-10 20:31:18.600 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.599][I] Currently in Doze Mode: false
-08-10 20:31:18.601 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.600][I] App Whitelisted: false
-08-10 20:31:18.602 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.601][I] Battery Optimization Ignored: true
-08-10 20:31:18.603 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.602][I] Background Usage Method: FALLBACK
-08-10 20:31:18.604 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.603][I] Background Usage Allowed: true
-08-10 20:31:18.605 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.604][I] Compatibility Test Result: App may experience delays in background work during Doze mode
-08-10 20:31:18.606 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.605][I] Severity: MEDIUM
-08-10 20:31:18.607 26009 26009 W CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.607][W] Issues found:
-08-10 20:31:18.608 26009 26009 W CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.607][W]   - App is not whitelisted from battery optimization
-08-10 20:31:18.610 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.609][I] Recommendations:
-08-10 20:31:18.611 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.610][I]   - Request user to whitelist app from battery optimization
-08-10 20:31:18.612 26009 26009 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:31:18.611][I] =====================================
-08-10 20:31:18.613 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.612][I] Background calendar refresh worker scheduled successfully with 30-minute interval
-08-10 20:31:18.616 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.615][I] Current settings:
-08-10 20:31:18.617 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.616][I]   refreshIntervalMinutes: 30
-08-10 20:31:18.618 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.618][I]   allDayDefaultHour: 20
-08-10 20:31:18.619 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.619][I]   allDayDefaultMinute: 0
-08-10 20:31:18.620 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.620][I]   allDayDefaultTimeFormatted: 8:00 PM
-08-10 20:31:18.622 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.621][I]   onboardingCompleted: false
-08-10 20:31:18.623 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.622][I]   firstLaunch: true
-08-10 20:31:18.624 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.623][I]   refreshIntervalDescription: 30 minutes (Default - recommended)
-08-10 20:31:18.625 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.624][I]   lastSyncTime: 0
-08-10 20:31:18.626 26009 26009 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:31:18.626][I]   hasEverSynced: false
-08-10 20:31:18.628 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.627][I] Timezone change listener registered successfully
-08-10 20:31:18.630 26009 26009 I CalendarAlarmScheduler_Performance_Application: [2025-08-10 20:31:18.630][I] Application.onCreate() took 167ms
-08-10 20:31:18.631 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.631][I] CalendarAlarmApplication initialization completed successfully in 167ms
-08-10 20:31:18.645 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.645][I] === Initializing Background Usage Session Cache (Background Thread) ===
-08-10 20:31:18.652 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.651][I] Device: Google sdk_gphone64_arm64
-08-10 20:31:18.657 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.657][I] Android API: 36
-08-10 20:31:18.674 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.674][I] Package: com.example.calendaralarmscheduler
-08-10 20:31:18.690 26009 26009 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:31:18.689][D] onCreate - Starting MainActivity initialization
-08-10 20:31:18.696 26009 26036 D CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.696][D] Database opened - version: 2
-08-10 20:31:18.708 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.699][D] Checking background usage for API level 36
-08-10 20:31:18.710 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.703][D] super.onCreate() completed successfully
-08-10 20:31:18.711 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.711][D] Inflating ActivityMainBinding
-08-10 20:31:18.717 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.717][D] Legacy battery optimization - ignored: false
-08-10 20:31:18.733 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.719][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:18.743 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.739][D] App standby bucket: 10, allowed: true
-08-10 20:31:18.758 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.758][V] Query: DELETE FROM alarms WHERE alarmTimeUtc < ? with args: [1754796678644]
-08-10 20:31:18.762 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.762][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:18.786 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.786][V] Query: END TRANSACTION with args: []
-08-10 20:31:18.791 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.774][D] Background restricted: false
-08-10 20:31:18.815 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.815][D] AppOps background check - mode: 3, allowed: false
-08-10 20:31:18.825 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.816][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:18.830 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.829][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:18.842 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.820][D] Analyzing 5 detection results:
-08-10 20:31:18.844 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.843][D]   LEGACY_BATTERY_OPTIMIZATION: false
-08-10 20:31:18.848 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.848][D]   APP_STANDBY_BUCKET: true
-08-10 20:31:18.851 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.845][D] ActivityMainBinding inflated successfully
-08-10 20:31:18.852 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.852][D] Setting content view
-08-10 20:31:18.854 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.848][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:18.856 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.856][V] Query: END TRANSACTION with args: []
-08-10 20:31:18.859 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.858][D]   BACKGROUND_RESTRICTION: true
-08-10 20:31:18.868 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.868][D]   APP_OPS_BACKGROUND_CHECK: false
-08-10 20:31:18.885 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.884][D] Content view set successfully
-08-10 20:31:18.886 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.885][D] Context dump: Activity: MainActivity, isFinishing: false
-08-10 20:31:18.887 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.886][D] Setting up navigation
-08-10 20:31:18.888 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.887][D] Finding NavHostFragment
-08-10 20:31:18.889 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.888][D] NavHostFragment found, getting NavController
-08-10 20:31:18.890 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.890][D] NavController obtained: androidx.navigation.NavHostController@813be95
-08-10 20:31:18.891 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.890][D] Setting up bottom navigation with NavController
-08-10 20:31:18.893 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.892][D] Bottom navigation setup completed
-08-10 20:31:18.894 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.894][D] Navigation setup completed
-08-10 20:31:18.895 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.892][D]   OEM_SPECIFIC: true
-08-10 20:31:18.896 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.895][I] Selected detection method: APP_STANDBY_BUCKET, allowed: true
-08-10 20:31:18.897 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.896][D] Checking permissions and proceeding
-08-10 20:31:18.898 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.898][D] Checking critical permissions status
-08-10 20:31:18.901 26009 26009 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.901][W] No session cache available, using basic fallback detection
-08-10 20:31:18.902 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.902][D] Background usage permission check:
-08-10 20:31:18.904 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.904][D]   Result: true
-08-10 20:31:18.905 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.904][D]   Method: FALLBACK
-08-10 20:31:18.906 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.903][I] Final Result:
-08-10 20:31:18.907 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.907][I]   Background Usage Allowed: true
-08-10 20:31:18.908 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.907][I] Critical permissions status: true
-08-10 20:31:18.909 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.908][I] Onboarding completed status: true
-08-10 20:31:18.910 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.909][I] Proceeding normally - permissions: true, onboarding done: true
-08-10 20:31:18.911 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.910][I] onPermissionGranted called - app can function normally
-08-10 20:31:18.912 26009 26009 I CalendarAlarmScheduler_Performance_MainActivity: [2025-08-10 20:31:18.911][I] onCreate() took 222ms
-08-10 20:31:18.913 26009 26009 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:31:18.912][D] onCreate - Completed successfully in 222ms
-08-10 20:31:18.916 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.916][I]   Detection Method: APP_STANDBY_BUCKET
-08-10 20:31:18.933 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.929][I]   Details: {standbyBucket=10, bucketName=WORKING_SET, method=UsageStatsManager.getAppStandbyBucket}
-08-10 20:31:18.934 26009 26034 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.934][I] ===========================================
-08-10 20:31:18.943 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.941][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:18.944 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.944][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(0, 0) with args: []
-08-10 20:31:18.945 26009 26009 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:31:18.942][D] onResume - Checking permissions on resume
-08-10 20:31:18.946 26009 26034 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.945][D] Background usage session cache initialized
-08-10 20:31:18.951 26009 26009 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:31:18.951][D] Returning cached background usage result from session
-08-10 20:31:18.953 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.952][D] Background usage permission check:
-08-10 20:31:18.954 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.953][D]   Result: true
-08-10 20:31:18.955 26009 26009 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:31:18.954][D]   Method: APP_STANDBY_BUCKET
-08-10 20:31:18.956 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.955][I] onResume permission check: true
-08-10 20:31:18.956 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.956][I] onResume onboarding completed: true
-08-10 20:31:18.958 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.958][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_UPDATE` AFTER UPDATE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
-08-10 20:31:18.959 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.958][I] onResume isOnboardingLaunched flag: false
-08-10 20:31:18.960 26009 26009 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.959][D] Resetting onboarding launched flag - onboarding completed or permissions granted
-08-10 20:31:18.961 26009 26009 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:31:18.960][I] Permissions OK or onboarding completed on resume - not launching onboarding
-08-10 20:31:18.968 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.968][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_DELETE` AFTER DELETE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
-08-10 20:31:18.977 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.976][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_INSERT` AFTER INSERT ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
-08-10 20:31:18.978 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.977][I] Expired alarms cleanup completed in 333ms
-08-10 20:31:18.979 26009 26009 I CalendarAlarmScheduler_Application: [2025-08-10 20:31:18.979][I] Background usage detection cache initialized successfully
-08-10 20:31:18.982 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.981][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:18.985 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.985][V] Query: END TRANSACTION with args: []
-08-10 20:31:19.001 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:18.989][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:22.230 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_updateRuleEnabled: [2025-08-10 20:31:22.230][I] Updating rule 'Test Rule' enabled status: false
-08-10 20:31:22.231 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:22.231][D] Cancelling all alarms for rule: Test Rule
-08-10 20:31:22.232 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.232][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.245 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.245][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(1, 0) with args: []
-08-10 20:31:22.247 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.247][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_UPDATE` AFTER UPDATE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:22.250 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.250][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_DELETE` AFTER DELETE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:22.250 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.250][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_INSERT` AFTER INSERT ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:22.250 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.250][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.250 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.250][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.251 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.251][V] Query: SELECT * FROM alarms WHERE ruleId = ? with args: [d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:22.253 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.253][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.254 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.253][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_UPDATE` with args: []
-08-10 20:31:22.254 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.254][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_DELETE` with args: []
-08-10 20:31:22.254 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.254][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_INSERT` with args: []
-08-10 20:31:22.254 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.254][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.254 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.254][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.255 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:22.255][D] Found 1 existing alarms for rule Test Rule
-08-10 20:31:22.263 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:22.263][D] Successfully cancelled 1 out of 1 system alarms
-08-10 20:31:22.264 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.264][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.265 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.264][V] Query: DELETE FROM alarms WHERE ruleId = ? with args: [d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:22.265 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.265][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.265 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.265][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.265 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.265][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.266 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.266][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:22.266 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.266][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.266 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.266][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.266 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:22.266][D] Deleted 1 alarm database entries for rule d3674e15-daaa-4942-9814-19c893db55db
-08-10 20:31:22.268 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.268][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.269 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.269][V] Query: UPDATE OR ABORT `rules` SET `id` = ?,`name` = ?,`keywordPattern` = ?,`isRegex` = ?,`calendarIds` = ?,`leadTimeMinutes` = ?,`enabled` = ?,`createdAt` = ? WHERE `id` = ? with args: [d3674e15-daaa-4942-9814-19c893db55db, Test Rule, test, 0, [2,3], 30, 0, 1754881750984, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:22.269 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.269][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.270 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.270][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.270 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:22.270][I] Successfully disabled rule 'Test Rule' and cancelled 1 alarms
-08-10 20:31:22.272 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.272][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:22.276 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.275][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:22.276 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.276][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:22.276 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.276][V] Query: END TRANSACTION with args: []
-08-10 20:31:22.283 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:22.280][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:27.050 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_updateRuleEnabled: [2025-08-10 20:31:27.049][I] Updating rule 'Test Rule' enabled status: true
-08-10 20:31:27.051 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:27.051][D] Rescheduling alarms for enabled rule: Test Rule
-08-10 20:31:27.056 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.055][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.072 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.072][V] Query: UPDATE OR ABORT `rules` SET `id` = ?,`name` = ?,`keywordPattern` = ?,`isRegex` = ?,`calendarIds` = ?,`leadTimeMinutes` = ?,`enabled` = ?,`createdAt` = ? WHERE `id` = ? with args: [d3674e15-daaa-4942-9814-19c893db55db, Test Rule, test, 0, [2,3], 30, 1, 1754881750984, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:27.075 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.075][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.082 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.082][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.082 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.082][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.083 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.083][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:27.083 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.083][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.083 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.083][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.085 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:27.085][D] Updated rule 'Test Rule' to enabled status
-08-10 20:31:27.105 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.105][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:27.172 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:27.172][D] Found 1 matching events for rule 'Test Rule'
-08-10 20:31:27.184 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.184][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.185 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.184][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(1, 0) with args: []
-08-10 20:31:27.185 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.185][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_UPDATE` AFTER UPDATE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:27.185 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.185][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_DELETE` AFTER DELETE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:27.188 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.188][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_INSERT` AFTER INSERT ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:27.189 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.189][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.189 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.189][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.196 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.196][V] Query: SELECT * FROM alarms ORDER BY alarmTimeUtc ASC with args: []
-08-10 20:31:27.199 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.199][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.201 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.201][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_UPDATE` with args: []
-08-10 20:31:27.201 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.201][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_DELETE` with args: []
-08-10 20:31:27.201 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.201][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_INSERT` with args: []
-08-10 20:31:27.201 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.201][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.201 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.201][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.202 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:27.202][D] After filtering dismissed alarms: 1 matches to process
-08-10 20:31:27.202 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:27.202][D] Processing 1 matches for alarm scheduling
-08-10 20:31:27.204 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.204][V] Query: SELECT * FROM alarms WHERE eventId = ? AND ruleId = ? with args: [144, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:27.236 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.236][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.237 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.237][V] Query: INSERT OR REPLACE INTO `alarms` (`id`,`eventId`,`ruleId`,`eventTitle`,`eventStartTimeUtc`,`alarmTimeUtc`,`scheduledAt`,`userDismissed`,`pendingIntentRequestCode`,`lastEventModified`) VALUES (?,?,?,?,?,?,?,?,?,?) with args: [c8bf3d14-edcb-4866-a8c3-a0d8145794cb, 144, d3674e15-daaa-4942-9814-19c893db55db, Test event, 1754942400000, 1754940600000, 1754883087236, 0, -982518594, 1754946000000]
-08-10 20:31:27.237 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.237][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.237 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.237][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.237 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.237][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.238 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.238][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:27.238 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.238][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.246 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.238][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.246 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:27.246][D] Scheduled new alarm for event: Test event
-08-10 20:31:27.249 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.249][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.249 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.249][V] Query: DELETE FROM alarms WHERE alarmTimeUtc < ? with args: [1754796687247]
-08-10 20:31:27.253 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.253][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.253 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.253][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.253 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.253][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:27.253 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.253][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:27.254 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.254][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:27.254 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:27.254][V] Query: END TRANSACTION with args: []
-08-10 20:31:27.254 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:27.254][I] Alarm scheduling completed. Scheduled: 1, Updated: 0, Skipped: 0, Failed: 0 (Total: 1)
-08-10 20:31:27.254 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:27.254][I] Successfully enabled rule 'Test Rule' and scheduled 1 alarm(s)
-08-10 20:31:28.834 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:28.834][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:29.349 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:29.349][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754883089348]
-08-10 20:31:30.357 26009 26009 W CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:31:30.356][W] Detected 1 missing alarm(s) - attempting automatic recovery (attempt 1/2)
-08-10 20:31:30.360 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:30.359][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754883090359]
-08-10 20:31:33.369 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:33.369][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754883093369]
-08-10 20:31:34.494 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_updateRuleEnabled: [2025-08-10 20:31:34.494][I] Updating rule 'Test Rule' enabled status: false
-08-10 20:31:34.496 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:34.496][D] Cancelling all alarms for rule: Test Rule
-08-10 20:31:34.500 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.500][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.501 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.501][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(1, 0) with args: []
-08-10 20:31:34.502 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.502][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_UPDATE` AFTER UPDATE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:34.502 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.502][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_DELETE` AFTER DELETE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:34.503 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.503][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_INSERT` AFTER INSERT ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:34.503 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.503][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.504 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.504][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.504 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.504][V] Query: SELECT * FROM alarms WHERE ruleId = ? with args: [d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:34.506 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.506][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.514 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.514][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_UPDATE` with args: []
-08-10 20:31:34.515 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.514][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_DELETE` with args: []
-08-10 20:31:34.515 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.515][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_INSERT` with args: []
-08-10 20:31:34.515 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.515][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.515 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.515][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.516 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:34.516][D] Found 1 existing alarms for rule Test Rule
-08-10 20:31:34.517 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:34.517][D] Successfully cancelled 1 out of 1 system alarms
-08-10 20:31:34.518 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.518][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.519 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.519][V] Query: DELETE FROM alarms WHERE ruleId = ? with args: [d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:34.519 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.519][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.519 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.519][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.519 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.519][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.520 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.520][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:34.520 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.520][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.520 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.520][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.520 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:34.520][D] Deleted 1 alarm database entries for rule d3674e15-daaa-4942-9814-19c893db55db
-08-10 20:31:34.521 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.521][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.521 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.521][V] Query: UPDATE OR ABORT `rules` SET `id` = ?,`name` = ?,`keywordPattern` = ?,`isRegex` = ?,`calendarIds` = ?,`leadTimeMinutes` = ?,`enabled` = ?,`createdAt` = ? WHERE `id` = ? with args: [d3674e15-daaa-4942-9814-19c893db55db, Test Rule, test, 0, [2,3], 30, 0, 1754881750984, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:34.522 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.522][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.522 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.522][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.522 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.522][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:34.524 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.524][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:34.524 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_cancelAlarmsForRule: [2025-08-10 20:31:34.523][I] Successfully disabled rule 'Test Rule' and cancelled 1 alarms
-08-10 20:31:34.533 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.533][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:34.534 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.534][V] Query: END TRANSACTION with args: []
-08-10 20:31:34.535 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.535][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:34.537 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:34.537][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:35.040 26009 26036 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:35.040][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754883095039]
-08-10 20:31:37.797 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_updateRuleEnabled: [2025-08-10 20:31:37.797][I] Updating rule 'Test Rule' enabled status: true
-08-10 20:31:37.799 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:37.798][D] Rescheduling alarms for enabled rule: Test Rule
-08-10 20:31:37.812 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.805][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.813 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.813][V] Query: UPDATE OR ABORT `rules` SET `id` = ?,`name` = ?,`keywordPattern` = ?,`isRegex` = ?,`calendarIds` = ?,`leadTimeMinutes` = ?,`enabled` = ?,`createdAt` = ? WHERE `id` = ? with args: [d3674e15-daaa-4942-9814-19c893db55db, Test Rule, test, 0, [2,3], 30, 1, 1754881750984, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:37.814 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.814][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.814 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.814][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.814 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.814][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.815 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.815][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:37.815 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:37.815][D] Updated rule 'Test Rule' to enabled status
-08-10 20:31:37.818 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.817][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.818 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.818][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.819 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.819][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:37.821 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.820][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
-08-10 20:31:37.827 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:37.827][D] Found 1 matching events for rule 'Test Rule'
-08-10 20:31:37.830 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.830][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.830 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.830][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(1, 0) with args: []
-08-10 20:31:37.832 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.832][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_UPDATE` AFTER UPDATE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:37.833 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.833][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_DELETE` AFTER DELETE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:37.833 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.833][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_INSERT` AFTER INSERT ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
-08-10 20:31:37.833 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.833][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.834 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.833][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.834 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.834][V] Query: SELECT * FROM alarms ORDER BY alarmTimeUtc ASC with args: []
-08-10 20:31:37.835 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.835][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.835 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.835][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_UPDATE` with args: []
-08-10 20:31:37.835 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.835][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_DELETE` with args: []
-08-10 20:31:37.835 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.835][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_alarms_INSERT` with args: []
-08-10 20:31:37.836 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.836][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.836 26009 26060 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.836][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.836 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:37.836][D] After filtering dismissed alarms: 1 matches to process
-08-10 20:31:37.836 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:37.836][D] Processing 1 matches for alarm scheduling
-08-10 20:31:37.837 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.837][V] Query: SELECT * FROM alarms WHERE eventId = ? AND ruleId = ? with args: [144, d3674e15-daaa-4942-9814-19c893db55db]
-08-10 20:31:37.839 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.839][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.847 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.847][V] Query: INSERT OR REPLACE INTO `alarms` (`id`,`eventId`,`ruleId`,`eventTitle`,`eventStartTimeUtc`,`alarmTimeUtc`,`scheduledAt`,`userDismissed`,`pendingIntentRequestCode`,`lastEventModified`) VALUES (?,?,?,?,?,?,?,?,?,?) with args: [c1166999-c4af-4b58-a377-4591f10b708f, 144, d3674e15-daaa-4942-9814-19c893db55db, Test event, 1754942400000, 1754940600000, 1754883097839, 0, -1846910967, 1754946000000]
-08-10 20:31:37.853 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.853][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.853 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.853][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.853 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.853][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.854 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.854][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:37.854 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.854][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.854 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.854][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.858 26009 26009 D CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:37.858][D] Scheduled new alarm for event: Test event
-08-10 20:31:37.861 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.860][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.862 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.862][V] Query: DELETE FROM alarms WHERE alarmTimeUtc < ? with args: [1754796697858]
-08-10 20:31:37.862 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.862][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.862 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.862][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.862 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.862][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 20:31:37.863 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.863][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
-08-10 20:31:37.863 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.863][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 20:31:37.864 26009 26040 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:37.864][V] Query: END TRANSACTION with args: []
-08-10 20:31:37.876 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule_processMatches: [2025-08-10 20:31:37.876][I] Alarm scheduling completed. Scheduled: 1, Updated: 0, Skipped: 0, Failed: 0 (Total: 1)
-08-10 20:31:37.876 26009 26009 I CalendarAlarmScheduler_RuleAlarmManager_rescheduleAlarmsForRule: [2025-08-10 20:31:37.876][I] Successfully enabled rule 'Test Rule' and scheduled 1 alarm(s)
-08-10 20:31:38.332 26009 26041 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:31:38.332][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754883098332]
+08-10 20:48:07.233 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.220][I] SettingsRepository initialized
+08-10 20:48:07.234 26898 26898 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.234][D] Settings are up to date (version 1)
+08-10 20:48:07.234 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.234][I] Initial StateFlow values - refresh: 30min, all-day: 20:0
+08-10 20:48:07.247 26898 26898 I CalendarAlarmScheduler_RuleRepository: [2025-08-10 20:48:07.246][I] RuleRepository initialized
+08-10 20:48:07.263 26898 26898 I CalendarAlarmScheduler_Logger: [2025-08-10 20:48:07.262][I] Logger initialized - Debug: true, API: 36
+08-10 20:48:07.270 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.268][I] Starting CalendarAlarmApplication initialization - Debug: true
+08-10 20:48:07.273 26898 26898 I CalendarAlarmScheduler_CrashHandler: [2025-08-10 20:48:07.273][I] Crash handler initialized
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.277][I] === System Info ===
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: API Level: 36
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: Brand: google
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: Model: sdk_gphone64_arm64
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: Manufacturer: Google
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: Available Memory: 186MB
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: Free Storage: 4302MB
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: === End System Info ===
+08-10 20:48:07.278 26898 26898 I CalendarAlarmScheduler_Application: 
+08-10 20:48:07.279 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.279][I] Refresh interval change callback set
+08-10 20:48:07.280 26898 26898 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.280][I] Scheduling periodic calendar refresh with interval: 30 minutes
+08-10 20:48:07.298 26898 26898 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.297][I] Periodic calendar refresh scheduled successfully with 30-minute interval
+08-10 20:48:07.302 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.301][W] No session cache available, using basic fallback detection
+08-10 20:48:07.303 26898 26898 I CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.303][I] ✅ Background usage allowed via FALLBACK - background work should run reliably
+08-10 20:48:07.310 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.309][W] No session cache available, using basic fallback detection
+08-10 20:48:07.311 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.311][D] Background usage check:
+08-10 20:48:07.312 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.312][D]   Allowed: true
+08-10 20:48:07.313 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.312][D]   Method: FALLBACK
+08-10 20:48:07.316 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.315][D]   API Level: 36
+08-10 20:48:07.319 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.318][W] No session cache available, using basic fallback detection
+08-10 20:48:07.320 26898 26898 W CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.320][W] Doze mode warning: App may experience delays in background work during Doze mode
+08-10 20:48:07.321 26898 26898 W CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.320][W] Recommendation: Request user to whitelist app from battery optimization
+08-10 20:48:07.326 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.325][W] No session cache available, using basic fallback detection
+08-10 20:48:07.328 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.328][D] Background usage check:
+08-10 20:48:07.332 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.331][D]   Allowed: true
+08-10 20:48:07.334 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.333][D]   Method: FALLBACK
+08-10 20:48:07.340 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.339][D]   API Level: 36
+08-10 20:48:07.343 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.342][W] No session cache available, using basic fallback detection
+08-10 20:48:07.350 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.350][W] No session cache available, using basic fallback detection
+08-10 20:48:07.351 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.351][D] Background usage check:
+08-10 20:48:07.352 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.352][D]   Allowed: true
+08-10 20:48:07.353 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.352][D]   Method: FALLBACK
+08-10 20:48:07.355 26898 26898 D CalendarAlarmScheduler_WorkerManager: [2025-08-10 20:48:07.354][D]   API Level: 36
+08-10 20:48:07.357 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.356][W] No session cache available, using basic fallback detection
+08-10 20:48:07.359 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.359][I] === Doze Mode Compatibility Status ===
+08-10 20:48:07.360 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.360][I] Device API Level: 36
+08-10 20:48:07.362 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.362][I] Supports Doze Mode: true
+08-10 20:48:07.363 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.363][I] Currently in Doze Mode: false
+08-10 20:48:07.364 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.364][I] App Whitelisted: false
+08-10 20:48:07.366 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.366][I] Battery Optimization Ignored: true
+08-10 20:48:07.368 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.368][I] Background Usage Method: FALLBACK
+08-10 20:48:07.369 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.369][I] Background Usage Allowed: true
+08-10 20:48:07.370 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.370][I] Compatibility Test Result: App may experience delays in background work during Doze mode
+08-10 20:48:07.371 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.371][I] Severity: MEDIUM
+08-10 20:48:07.372 26898 26898 W CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.372][W] Issues found:
+08-10 20:48:07.373 26898 26898 W CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.373][W]   - App is not whitelisted from battery optimization
+08-10 20:48:07.374 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.374][I] Recommendations:
+08-10 20:48:07.375 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.374][I]   - Request user to whitelist app from battery optimization
+08-10 20:48:07.375 26898 26898 I CalendarAlarmScheduler_DozeCompatibility: [2025-08-10 20:48:07.375][I] =====================================
+08-10 20:48:07.377 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.376][I] Background calendar refresh worker scheduled successfully with 30-minute interval
+08-10 20:48:07.382 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.382][I] Current settings:
+08-10 20:48:07.383 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.382][I]   refreshIntervalMinutes: 30
+08-10 20:48:07.384 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.383][I]   allDayDefaultHour: 20
+08-10 20:48:07.384 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.384][I]   allDayDefaultMinute: 0
+08-10 20:48:07.385 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.385][I]   allDayDefaultTimeFormatted: 8:00 PM
+08-10 20:48:07.386 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.386][I]   onboardingCompleted: false
+08-10 20:48:07.387 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.387][I]   firstLaunch: true
+08-10 20:48:07.388 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.388][I]   refreshIntervalDescription: 30 minutes (Default - recommended)
+08-10 20:48:07.389 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.389][I]   lastSyncTime: 0
+08-10 20:48:07.390 26898 26898 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 20:48:07.390][I]   hasEverSynced: false
+08-10 20:48:07.393 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.392][I] Timezone change listener registered successfully
+08-10 20:48:07.395 26898 26898 I CalendarAlarmScheduler_Performance_Application: [2025-08-10 20:48:07.395][I] Application.onCreate() took 205ms
+08-10 20:48:07.396 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.396][I] CalendarAlarmApplication initialization completed successfully in 205ms
+08-10 20:48:07.418 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.417][I] === Initializing Background Usage Session Cache (Background Thread) ===
+08-10 20:48:07.447 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.441][I] Device: Google sdk_gphone64_arm64
+08-10 20:48:07.462 26898 26898 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:48:07.462][D] onCreate - Starting MainActivity initialization
+08-10 20:48:07.470 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.470][I] Android API: 36
+08-10 20:48:07.471 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.471][I] Package: com.example.calendaralarmscheduler
+08-10 20:48:07.485 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.479][D] super.onCreate() completed successfully
+08-10 20:48:07.487 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.486][D] Inflating ActivityMainBinding
+08-10 20:48:07.496 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.485][D] Checking background usage for API level 36
+08-10 20:48:07.502 26898 26923 D CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.482][D] Database opened - version: 2
+08-10 20:48:07.519 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.518][D] Legacy battery optimization - ignored: false
+08-10 20:48:07.521 26898 26923 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.521][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 20:48:07.528 26898 26923 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.528][V] Query: DELETE FROM alarms WHERE alarmTimeUtc < ? with args: [1754797687416]
+08-10 20:48:07.544 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.537][D] App standby bucket: 10, allowed: true
+08-10 20:48:07.557 26898 26923 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.540][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 20:48:07.563 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.563][D] Background restricted: false
+08-10 20:48:07.586 26898 26923 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.571][V] Query: END TRANSACTION with args: []
+08-10 20:48:07.590 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.590][D] AppOps background check - mode: 3, allowed: false
+08-10 20:48:07.604 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.604][D] Analyzing 5 detection results:
+08-10 20:48:07.622 26898 26928 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.618][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 20:48:07.624 26898 26928 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.623][V] Query: SELECT * FROM room_table_modification_log WHERE invalidated = 1; with args: []
+08-10 20:48:07.627 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.619][D] ActivityMainBinding inflated successfully
+08-10 20:48:07.628 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.627][D] Setting content view
+08-10 20:48:07.630 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.621][D]   LEGACY_BATTERY_OPTIMIZATION: false
+08-10 20:48:07.631 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.631][D]   APP_STANDBY_BUCKET: true
+08-10 20:48:07.643 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.643][D]   BACKGROUND_RESTRICTION: true
+08-10 20:48:07.650 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.650][D]   APP_OPS_BACKGROUND_CHECK: false
+08-10 20:48:07.651 26898 26928 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.647][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 20:48:07.654 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.653][D] Content view set successfully
+08-10 20:48:07.656 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.655][D] Context dump: Activity: MainActivity, isFinishing: false
+08-10 20:48:07.656 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.656][D] Setting up navigation
+08-10 20:48:07.658 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.658][D] Finding NavHostFragment
+08-10 20:48:07.660 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.660][D] NavHostFragment found, getting NavController
+08-10 20:48:07.662 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.661][D] NavController obtained: androidx.navigation.NavHostController@7a3039e
+08-10 20:48:07.664 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.663][D] Setting up bottom navigation with NavController
+08-10 20:48:07.666 26898 26928 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.665][V] Query: END TRANSACTION with args: []
+08-10 20:48:07.669 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.666][D] Bottom navigation setup completed
+08-10 20:48:07.670 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.670][D] Navigation setup completed
+08-10 20:48:07.671 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.671][D] Checking permissions and proceeding
+08-10 20:48:07.672 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.672][D] Checking critical permissions status
+08-10 20:48:07.673 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.651][D]   OEM_SPECIFIC: true
+08-10 20:48:07.675 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.674][I] Selected detection method: APP_STANDBY_BUCKET, allowed: true
+08-10 20:48:07.678 26898 26898 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.678][W] No session cache available, using basic fallback detection
+08-10 20:48:07.679 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.679][D] Background usage permission check:
+08-10 20:48:07.680 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.680][D]   Result: true
+08-10 20:48:07.681 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.681][D]   Method: FALLBACK
+08-10 20:48:07.683 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.683][I] Final Result:
+08-10 20:48:07.685 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.685][I]   Background Usage Allowed: true
+08-10 20:48:07.685 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.683][I] Critical permissions status: true
+08-10 20:48:07.686 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.685][I] Onboarding completed status: true
+08-10 20:48:07.687 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.686][I] Proceeding normally - permissions: true, onboarding done: true
+08-10 20:48:07.688 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.687][I] onPermissionGranted called - app can function normally
+08-10 20:48:07.689 26898 26898 I CalendarAlarmScheduler_Performance_MainActivity: [2025-08-10 20:48:07.688][I] onCreate() took 226ms
+08-10 20:48:07.690 26898 26898 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:48:07.690][D] onCreate - Completed successfully in 226ms
+08-10 20:48:07.696 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.696][I]   Detection Method: APP_STANDBY_BUCKET
+08-10 20:48:07.708 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.707][I]   Details: {standbyBucket=10, bucketName=WORKING_SET, method=UsageStatsManager.getAppStandbyBucket}
+08-10 20:48:07.718 26898 26922 I CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.718][I] ===========================================
+08-10 20:48:07.729 26898 26922 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.729][D] Background usage session cache initialized
+08-10 20:48:07.730 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.724][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 20:48:07.731 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.730][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(0, 0) with args: []
+08-10 20:48:07.732 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.731][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_UPDATE` AFTER UPDATE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 20:48:07.732 26898 26898 D CalendarAlarmScheduler_Lifecycle_MainActivity: [2025-08-10 20:48:07.725][D] onResume - Checking permissions on resume
+08-10 20:48:07.738 26898 26898 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 20:48:07.737][D] Returning cached background usage result from session
+08-10 20:48:07.739 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.738][D] Background usage permission check:
+08-10 20:48:07.740 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.739][D]   Result: true
+08-10 20:48:07.740 26898 26898 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 20:48:07.740][D]   Method: APP_STANDBY_BUCKET
+08-10 20:48:07.741 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.741][I] onResume permission check: true
+08-10 20:48:07.742 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.742][I] onResume onboarding completed: true
+08-10 20:48:07.743 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.743][I] onResume isOnboardingLaunched flag: false
+08-10 20:48:07.744 26898 26898 D CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.744][D] Resetting onboarding launched flag - onboarding completed or permissions granted
+08-10 20:48:07.745 26898 26898 I CalendarAlarmScheduler_MainActivity: [2025-08-10 20:48:07.744][I] Permissions OK or onboarding completed on resume - not launching onboarding
+08-10 20:48:07.748 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.747][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_DELETE` AFTER DELETE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 20:48:07.753 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.751][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_INSERT` AFTER INSERT ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 20:48:07.760 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.754][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 20:48:07.761 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.760][V] Query: END TRANSACTION with args: []
+08-10 20:48:07.769 26898 26929 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:07.765][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
+08-10 20:48:07.788 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.784][I] Expired alarms cleanup completed in 368ms
+08-10 20:48:07.792 26898 26898 I CalendarAlarmScheduler_Application: [2025-08-10 20:48:07.791][I] Background usage detection cache initialized successfully
+08-10 20:48:12.663 26898 26946 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:12.662][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
+08-10 20:48:13.225 26898 26923 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 20:48:13.224][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754884093222]
+08-10 20:48:13.384 26898 26898 D CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:48:13.384][D] UiState.Success - submitting 5 events to adapter
+08-10 20:48:13.384 26898 26898 D CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:48:13.384][D] Adapter update complete - scrolling to top
+08-10 20:48:23.810 26898 26898 D CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:48:23.810][D] Filter toggle clicked: showOnlyMatching=true
+08-10 20:48:23.811 26898 26898 D CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:48:23.811][D] UiState.Success - submitting 1 events to adapter
+08-10 20:48:23.834 26898 26898 D CalendarAlarmScheduler_EventPreviewFragment: [2025-08-10 20:48:23.834][D] Adapter update complete - scrolling to top
+08-10 20:48:31.782 26970 26970 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-10 20:48:31.796 26970 26970 I AndroidRuntime: Using default boot image
+08-10 20:48:31.797 26970 26970 I AndroidRuntime: Leaving lock profiling enabled
+08-10 20:48:32.035 26970 26970 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-10 20:48:33.171 26970 26970 D AndroidRuntime: Shutting down VM

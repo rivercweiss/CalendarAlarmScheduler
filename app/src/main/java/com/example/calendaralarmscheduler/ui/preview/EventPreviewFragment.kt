@@ -66,6 +66,7 @@ class EventPreviewFragment : Fragment() {
         }
         
         binding.switchFilterMatching.setOnCheckedChangeListener { _, isChecked ->
+            Logger.d("EventPreviewFragment", "Filter toggle clicked: showOnlyMatching=$isChecked")
             viewModel.toggleMatchingRulesFilter()
             // No need to call refreshEvents() - toggleMatchingRulesFilter() already updates the UI
         }
@@ -89,7 +90,13 @@ class EventPreviewFragment : Fragment() {
                     }
                     is UiState.Success -> {
                         binding.layoutLoading.visibility = View.GONE
-                        adapter.submitList(uiState.data)
+                        Logger.d("EventPreviewFragment", "UiState.Success - submitting ${uiState.data.size} events to adapter")
+                        // Submit list with callback to ensure scroll happens AFTER adapter update
+                        adapter.submitList(uiState.data) {
+                            Logger.d("EventPreviewFragment", "Adapter update complete - scrolling to top")
+                            // Scroll to top after adapter has finished updating with new data
+                            binding.recyclerEvents.scrollToPosition(0)
+                        }
                         updateEmptyState(uiState.data)
                     }
                     is UiState.Error -> {

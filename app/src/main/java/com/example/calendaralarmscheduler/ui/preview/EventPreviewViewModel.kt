@@ -500,6 +500,7 @@ class EventPreviewViewModel @Inject constructor(
     }
     
     fun updateFilter(newFilter: EventFilter) {
+        android.util.Log.d("EventPreviewViewModel", "updateFilter: showOnlyMatching=${newFilter.showOnlyMatchingRules}, unfilteredEvents.size=${unfilteredEvents.size}")
         _currentFilter.value = newFilter
         
         // Apply filter to ORIGINAL unfiltered data to ensure proper toggle behavior
@@ -507,10 +508,12 @@ class EventPreviewViewModel @Inject constructor(
         if (unfilteredEvents.isNotEmpty()) {
             // Use the original unfiltered events and apply the new filter
             val filteredEvents = applyFilter(unfilteredEvents)
+            android.util.Log.d("EventPreviewViewModel", "updateFilter: filtered ${unfilteredEvents.size} -> ${filteredEvents.size} events")
             _eventsUiState.value = UiState.Success(filteredEvents)
         } else {
             // No unfiltered data available yet - check if we can use current data or need to refresh
             val currentUiState = _eventsUiState.value
+            android.util.Log.d("EventPreviewViewModel", "updateFilter: no unfiltered data, currentState=${currentUiState.javaClass.simpleName}")
             if (currentUiState is UiState.Loading) {
                 // If still loading, do nothing - filter will be applied when data arrives
             } else {
@@ -523,6 +526,7 @@ class EventPreviewViewModel @Inject constructor(
     
     fun toggleMatchingRulesFilter() {
         val current = _currentFilter.value
+        android.util.Log.d("EventPreviewViewModel", "toggleMatchingRulesFilter: ${current.showOnlyMatchingRules} -> ${!current.showOnlyMatchingRules}")
         updateFilter(current.copy(showOnlyMatchingRules = !current.showOnlyMatchingRules))
     }
     
