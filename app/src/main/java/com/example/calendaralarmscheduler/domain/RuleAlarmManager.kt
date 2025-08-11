@@ -21,6 +21,11 @@ class RuleAlarmManager(
     private val alarmSchedulingService: AlarmSchedulingService
 ) {
     
+    // Prevent duplicate operations on the same rule
+    private val activeOperations = mutableSetOf<String>()
+    private val operationTimeouts = mutableMapOf<String, Long>()
+    private val OPERATION_TIMEOUT_MS = 2000L // 2 second timeout for operations
+    
     data class RuleUpdateResult(
         val success: Boolean,
         val message: String,
@@ -36,9 +41,28 @@ class RuleAlarmManager(
      */
     suspend fun updateRuleEnabled(rule: Rule, enabled: Boolean): RuleUpdateResult {
         val logPrefix = "RuleAlarmManager_updateRuleEnabled"
+        val operationKey = "${rule.id}_${enabled}"
+        val currentTime = System.currentTimeMillis()
+        
+        // Clean up expired operations
+        cleanupExpiredOperations()
+        
+        // Check for duplicate operations
+        if (activeOperations.contains(operationKey)) {
+            Logger.w(logPrefix, "Ignoring duplicate rule update operation for '${rule.name}' (${if (enabled) "enable" else "disable"})")
+            return RuleUpdateResult(
+                success = true,
+                message = "Operation already in progress, ignoring duplicate request",
+                alarmsAffected = 0
+            )
+        }
+        
         Logger.i(logPrefix, "Updating rule '${rule.name}' enabled status: $enabled")
         
         return try {
+            activeOperations.add(operationKey)
+            operationTimeouts[operationKey] = currentTime + OPERATION_TIMEOUT_MS
+            
             if (!enabled) {
                 // Disabling rule - cancel all associated alarms
                 cancelAlarmsForRule(rule)
@@ -52,6 +76,24 @@ class RuleAlarmManager(
                 success = false,
                 message = "Failed to update rule: ${e.message}"
             )
+        } finally {
+            activeOperations.remove(operationKey)
+            operationTimeouts.remove(operationKey)
+        }
+    }
+    
+    /**
+     * Clean up expired operations to prevent memory leaks
+     */
+    private fun cleanupExpiredOperations() {
+        val currentTime = System.currentTimeMillis()
+        val expiredKeys = operationTimeouts.filter { (_, timeout) -> 
+            currentTime > timeout 
+        }.keys
+        
+        expiredKeys.forEach { key ->
+            activeOperations.remove(key)
+            operationTimeouts.remove(key)
         }
     }
     

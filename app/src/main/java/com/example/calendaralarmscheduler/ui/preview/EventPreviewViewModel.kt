@@ -89,6 +89,17 @@ class EventPreviewViewModel @Inject constructor(
     
     private val ruleMatcher = RuleMatcher()
     
+    // Enhanced recovery tracking to prevent duplicate recovery attempts
+    private val recentlyRecovered = mutableSetOf<String>()
+    private val recoveryAttempts = mutableMapOf<String, Int>()
+    private val lastRecoveryTimes = mutableMapOf<String, Long>()
+    private var lastRecoveryClear = 0L
+    private var lastFullRecoveryAttempt = 0L
+    private val RECOVERY_TRACKING_TIMEOUT_MS = 5 * 60 * 1000L // 5 minutes
+    private val RECOVERY_COOLDOWN_MS = 30 * 1000L // 30 seconds between full recovery attempts
+    private val MAX_RECOVERY_ATTEMPTS = 3 // Maximum recovery attempts per alarm
+    private val RECOVERY_BACKOFF_MS = 60 * 1000L // 1 minute backoff between attempts
+    
     private val _errorMessage = MutableSharedFlow<String>()
     val errorMessage: SharedFlow<String> = _errorMessage.asSharedFlow()
     
@@ -148,11 +159,12 @@ class EventPreviewViewModel @Inject constructor(
         viewModelScope.launch {
             // Track rules changes separately to avoid constant Flow re-combinations
             ruleRepository.getAllRules()
-                .debounce(300)
+                .debounce(500) // Increased debounce to reduce rapid-fire updates
                 .collect { rules ->
-                    android.util.Log.d("EventPreviewViewModel", "Rules changed - triggering refresh")
+                    android.util.Log.d("EventPreviewViewModel", "Rules changed - triggering READ-ONLY refresh (includeAlarmScheduling=false)")
                     // Get current alarms snapshot instead of reactive flow
                     val currentAlarms = alarmRepository.getActiveAlarmsSync()
+                    // CRITICAL: This must NEVER trigger alarm scheduling - only UI updates
                     refreshEventsUnified(rules, currentAlarms, includeAlarmScheduling = false)
                 }
         }
@@ -371,12 +383,14 @@ class EventPreviewViewModel @Inject constructor(
                 
                 // Schedule alarms if requested (for user-initiated refreshes)
                 if (includeAlarmScheduling && currentRules.isNotEmpty()) {
+                    android.util.Log.d("EventPreviewViewModel", "Performing ACTIVE refresh with alarm scheduling")
                     scheduleAlarmsForMatchingEvents(currentRules)
                     // Get updated alarm data after scheduling
                     val updatedAlarms = alarmRepository.getActiveAlarms().first()
                     buildEventsWithAlarms(currentRules, updatedAlarms)
                 } else {
                     // Read-only refresh (for combine observer)
+                    android.util.Log.d("EventPreviewViewModel", "Performing READ-ONLY refresh (no alarm scheduling)")
                     buildEventsWithAlarms(currentRules, currentAlarms)
                 }
                 
@@ -665,22 +679,59 @@ class EventPreviewViewModel @Inject constructor(
         return count
     }
     
+    private fun clearExpiredRecoveryTracking() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastRecoveryClear > RECOVERY_TRACKING_TIMEOUT_MS) {
+            val beforeSize = recentlyRecovered.size + recoveryAttempts.size + lastRecoveryTimes.size
+            
+            // Clear expired entries
+            recentlyRecovered.clear()
+            recoveryAttempts.clear()
+            lastRecoveryTimes.clear()
+            lastRecoveryClear = currentTime
+            
+            android.util.Log.d("EventPreviewViewModel", "Cleared recovery tracking cache (${beforeSize} entries)")
+        }
+    }
+    
+    private fun shouldAttemptRecovery(alarmId: String): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val attempts = recoveryAttempts[alarmId] ?: 0
+        val lastAttempt = lastRecoveryTimes[alarmId] ?: 0
+        
+        // Skip if max attempts reached
+        if (attempts >= MAX_RECOVERY_ATTEMPTS) {
+            android.util.Log.d("EventPreviewViewModel", "Skipping recovery for $alarmId - max attempts reached ($attempts)")
+            return false
+        }
+        
+        // Skip if within backoff period
+        if (currentTime - lastAttempt < RECOVERY_BACKOFF_MS) {
+            android.util.Log.d("EventPreviewViewModel", "Skipping recovery for $alarmId - within backoff period")
+            return false
+        }
+        
+        return true
+    }
+    
     private fun isAlarmScheduledInSystem(alarm: com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm): Boolean {
         return try {
-            val intent = Intent(context, AlarmReceiver::class.java).apply {
-                putExtra("ALARM_ID", alarm.id)
-                putExtra("EVENT_TITLE", alarm.eventTitle)
-                putExtra("RULE_ID", alarm.ruleId)
-            }
-            
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                alarm.pendingIntentRequestCode,
-                intent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            // Convert database alarm to domain model to use AlarmScheduler's consistent logic
+            val domainAlarm = ScheduledAlarm(
+                id = alarm.id,
+                eventId = alarm.eventId,
+                ruleId = alarm.ruleId,
+                eventTitle = alarm.eventTitle,
+                eventStartTimeUtc = alarm.eventStartTimeUtc,
+                alarmTimeUtc = alarm.alarmTimeUtc,
+                scheduledAt = alarm.scheduledAt,
+                userDismissed = alarm.userDismissed,
+                pendingIntentRequestCode = alarm.pendingIntentRequestCode,
+                lastEventModified = alarm.lastEventModified
             )
             
-            val isScheduled = pendingIntent != null
+            // Use AlarmScheduler's isAlarmScheduled method to ensure consistent intent matching
+            val isScheduled = alarmScheduler.isAlarmScheduled(domainAlarm)
             
             // Enhanced logging for debugging missing alarms
             if (!isScheduled) {
@@ -812,17 +863,68 @@ class EventPreviewViewModel @Inject constructor(
      * This is called when the system detects missing alarms to provide automatic recovery.
      */
     fun rescheduleAllMissingAlarms() {
+        val currentTime = System.currentTimeMillis()
+        
+        // Prevent rapid-fire recovery attempts
+        if (currentTime - lastFullRecoveryAttempt < RECOVERY_COOLDOWN_MS) {
+            android.util.Log.d("EventPreviewViewModel", "Skipping recovery attempt - within cooldown period")
+            return
+        }
+        
         viewModelScope.launch {
             try {
+                lastFullRecoveryAttempt = currentTime
                 android.util.Log.i("EventPreviewViewModel", "Starting automatic missing alarm recovery")
+                
+                // Clear expired recovery tracking entries
+                clearExpiredRecoveryTracking()
+                
                 val alarms = alarmRepository.getActiveAlarmsSync()
+                
+                // First, detect any request code collisions in the database
+                val domainAlarms = alarms.map { dbAlarm ->
+                    ScheduledAlarm(
+                        id = dbAlarm.id,
+                        eventId = dbAlarm.eventId,
+                        ruleId = dbAlarm.ruleId,
+                        eventTitle = dbAlarm.eventTitle,
+                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
+                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
+                        scheduledAt = dbAlarm.scheduledAt,
+                        userDismissed = dbAlarm.userDismissed,
+                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
+                        lastEventModified = dbAlarm.lastEventModified
+                    )
+                }
+                
+                val collisions = alarmScheduler.detectRequestCodeCollisions(domainAlarms)
+                if (collisions.isNotEmpty()) {
+                    android.util.Log.w("EventPreviewViewModel", "⚠️ Detected ${collisions.size} request code collisions during recovery")
+                }
+                
                 var rescheduledCount = 0
+                var skippedCount = 0
+                var collisionResolvedCount = 0
                 val failures = mutableListOf<AlarmSchedulingFailure>()
                 
                 for (alarm in alarms) {
                     if (!alarm.userDismissed && alarm.alarmTimeUtc > System.currentTimeMillis()) {
+                        
+                        // Enhanced recovery tracking - check attempts, backoff, etc.
+                        if (!shouldAttemptRecovery(alarm.id)) {
+                            skippedCount++
+                            continue
+                        }
+                        
                         if (!isAlarmScheduledInSystem(alarm)) {
                             try {
+                                // Update recovery tracking for this attempt
+                                val currentAttempts = recoveryAttempts.getOrDefault(alarm.id, 0) + 1
+                                recoveryAttempts[alarm.id] = currentAttempts
+                                lastRecoveryTimes[alarm.id] = currentTime
+                                
+                                android.util.Log.d("EventPreviewViewModel", "Attempting recovery for ${alarm.eventTitle} (attempt $currentAttempts/${MAX_RECOVERY_ATTEMPTS})")
+                                
                                 // Convert database alarm to domain model
                                 val domainAlarm = ScheduledAlarm(
                                     id = alarm.id,
@@ -840,7 +942,24 @@ class EventPreviewViewModel @Inject constructor(
                                 val result = alarmScheduler.scheduleAlarm(domainAlarm)
                                 if (result.success) {
                                     rescheduledCount++
-                                    android.util.Log.d("EventPreviewViewModel", "Successfully rescheduled missing alarm: ${alarm.eventTitle}")
+                                    
+                                    // If request code was changed during collision resolution, update database
+                                    if (result.alarm != null && result.alarm.pendingIntentRequestCode != alarm.pendingIntentRequestCode) {
+                                        try {
+                                            alarmRepository.updateAlarmRequestCode(alarm.id, result.alarm.pendingIntentRequestCode)
+                                            collisionResolvedCount++
+                                            android.util.Log.i("EventPreviewViewModel", 
+                                                "✓ Updated database with resolved request code for ${alarm.eventTitle}: ${alarm.pendingIntentRequestCode} -> ${result.alarm.pendingIntentRequestCode}")
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("EventPreviewViewModel", "Failed to update request code in database for ${alarm.eventTitle}", e)
+                                        }
+                                    }
+                                    
+                                    // Successful recovery - clear attempt tracking
+                                    recoveryAttempts.remove(alarm.id)
+                                    lastRecoveryTimes.remove(alarm.id)
+                                    recentlyRecovered.add(alarm.id)
+                                    android.util.Log.d("EventPreviewViewModel", "✅ Successfully rescheduled missing alarm: ${alarm.eventTitle}")
                                 } else {
                                     failures.add(
                                         AlarmSchedulingFailure(
@@ -873,7 +992,7 @@ class EventPreviewViewModel @Inject constructor(
                     _schedulingFailures.value = _schedulingFailures.value + failures
                 }
                 
-                android.util.Log.i("EventPreviewViewModel", "Automatic alarm recovery completed: $rescheduledCount alarms rescheduled, ${failures.size} failures")
+                android.util.Log.i("EventPreviewViewModel", "Automatic alarm recovery completed: $rescheduledCount alarms rescheduled, $collisionResolvedCount collisions resolved, $skippedCount skipped (recently recovered), ${failures.size} failures")
                 
                 // Allow time for the system to register newly scheduled alarms before checking status
                 if (rescheduledCount > 0) {

@@ -49,33 +49,48 @@ class AlarmScheduler(
                 )
             }
             
-            val intent = createAlarmIntent(alarm)
-            val pendingIntent = createPendingIntent(alarm, intent)
+            // Check for request code collision before scheduling
+            val collisionCheckResult = checkAndResolveRequestCodeCollision(alarm)
+            val finalAlarm = collisionCheckResult.resolvedAlarm
+            
+            if (!collisionCheckResult.success) {
+                return@withContext ScheduleResult(
+                    success = false,
+                    message = collisionCheckResult.message
+                )
+            }
+            
+            if (collisionCheckResult.wasCollisionResolved) {
+                Log.w(TAG, "⚠️ Resolved request code collision for ${finalAlarm.eventTitle}: ${collisionCheckResult.message}")
+            }
+            
+            val intent = createAlarmIntent(finalAlarm)
+            val pendingIntent = createPendingIntent(finalAlarm, intent)
             
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                alarm.alarmTimeUtc,
+                finalAlarm.alarmTimeUtc,
                 pendingIntent
             )
             
             // Verify the alarm was actually scheduled by checking if PendingIntent still exists
-            val verificationIntent = createAlarmIntent(alarm)
+            val verificationIntent = createAlarmIntent(finalAlarm)
             val verificationPendingIntent = PendingIntent.getBroadcast(
                 context,
-                alarm.pendingIntentRequestCode,
+                finalAlarm.pendingIntentRequestCode,
                 verificationIntent,
                 PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
             )
             
             if (verificationPendingIntent != null) {
-                Log.d(TAG, "✓ Verified alarm scheduled for ${alarm.eventTitle} at ${alarm.getLocalAlarmTime()}")
+                Log.d(TAG, "✓ Verified alarm scheduled for ${finalAlarm.eventTitle} at ${finalAlarm.getLocalAlarmTime()} (RequestCode: ${finalAlarm.pendingIntentRequestCode})")
                 return@withContext ScheduleResult(
                     success = true,
                     message = "Alarm scheduled and verified successfully",
-                    alarm = alarm
+                    alarm = finalAlarm
                 )
             } else {
-                Log.w(TAG, "⚠️ Alarm appeared to schedule but verification failed for ${alarm.eventTitle}")
+                Log.w(TAG, "⚠️ Alarm appeared to schedule but verification failed for ${finalAlarm.eventTitle}")
                 return@withContext ScheduleResult(
                     success = false,
                     message = "Alarm scheduling verification failed - PendingIntent not found after scheduling"
@@ -375,6 +390,139 @@ class AlarmScheduler(
     )
     
     /**
+     * Result of collision check and resolution
+     */
+    data class CollisionCheckResult(
+        val success: Boolean,
+        val message: String,
+        val resolvedAlarm: ScheduledAlarm,
+        val wasCollisionResolved: Boolean = false
+    )
+    
+    /**
+     * Enhanced collision detection and resolution system.
+     * Checks for request code collisions and resolves them using improved algorithms.
+     */
+    private suspend fun checkAndResolveRequestCodeCollision(alarm: ScheduledAlarm): CollisionCheckResult = withContext(Dispatchers.IO) {
+        try {
+            val originalRequestCode = alarm.pendingIntentRequestCode
+            var currentAlarm = alarm
+            var attempt = 0
+            val maxAttempts = 20 // Increased attempts for better collision resolution
+            val collisionMap = mutableMapOf<Int, String>() // Track what's using each request code
+            
+            while (attempt < maxAttempts) {
+                // Check if a PendingIntent with this request code already exists
+                val testIntent = createAlarmIntent(currentAlarm)
+                val existingPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    currentAlarm.pendingIntentRequestCode,
+                    testIntent,
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                )
+                
+                if (existingPendingIntent == null) {
+                    // No collision - request code is available
+                    if (attempt == 0) {
+                        // Original request code was fine
+                        return@withContext CollisionCheckResult(
+                            success = true,
+                            message = "No collision detected",
+                            resolvedAlarm = currentAlarm,
+                            wasCollisionResolved = false
+                        )
+                    } else {
+                        // We resolved a collision
+                        Log.i(TAG, "✓ Resolved request code collision for ${alarm.eventTitle}: ${originalRequestCode} -> ${currentAlarm.pendingIntentRequestCode} (attempt $attempt)")
+                        return@withContext CollisionCheckResult(
+                            success = true,
+                            message = "Collision resolved: changed request code from $originalRequestCode to ${currentAlarm.pendingIntentRequestCode}",
+                            resolvedAlarm = currentAlarm,
+                            wasCollisionResolved = true
+                        )
+                    }
+                }
+                
+                // Collision detected - track what's colliding and try alternative request code
+                attempt++
+                collisionMap[currentAlarm.pendingIntentRequestCode] = "Unknown existing alarm"
+                
+                // Use improved collision resolution algorithm
+                val alternativeRequestCode = generateImprovedAlternativeRequestCode(originalRequestCode, attempt, alarm.id)
+                
+                Log.w(TAG, "⚠️ Request code collision detected for ${alarm.eventTitle}: ${currentAlarm.pendingIntentRequestCode} -> trying $alternativeRequestCode (attempt $attempt)")
+                
+                // Create new alarm with alternative request code
+                currentAlarm = currentAlarm.copy(pendingIntentRequestCode = alternativeRequestCode)
+            }
+            
+            // Failed to resolve collision after max attempts
+            Log.e(TAG, "❌ Failed to resolve request code collision for ${alarm.eventTitle} after $maxAttempts attempts")
+            return@withContext CollisionCheckResult(
+                success = false,
+                message = "Failed to resolve request code collision after $maxAttempts attempts",
+                resolvedAlarm = alarm,
+                wasCollisionResolved = false
+            )
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking request code collision for ${alarm.eventTitle}", e)
+            return@withContext CollisionCheckResult(
+                success = false,
+                message = "Error checking collision: ${e.message}",
+                resolvedAlarm = alarm,
+                wasCollisionResolved = false
+            )
+        }
+    }
+    
+    /**
+     * Improved alternative request code generation using multiple strategies
+     */
+    private fun generateImprovedAlternativeRequestCode(originalRequestCode: Int, attempt: Int, alarmId: String): Int {
+        // Strategy 1: Use alarm ID hash with attempt multiplier (first few attempts)
+        if (attempt <= 5) {
+            val idHash = alarmId.hashCode()
+            val combined = (idHash.toLong() * 31 + originalRequestCode.toLong() * attempt).toInt()
+            return if (combined == 0) attempt + 1 else combined
+        }
+        
+        // Strategy 2: Use timestamp-based generation (middle attempts)
+        if (attempt <= 10) {
+            val timestamp = System.currentTimeMillis()
+            val timeHash = (timestamp % Int.MAX_VALUE).toInt()
+            val combined = (timeHash * 17 + originalRequestCode + attempt * 1009).toInt()
+            return if (combined == 0) attempt + 1000 else combined
+        }
+        
+        // Strategy 3: Random-like generation with large offsets (final attempts)
+        val prime = 1000003 // Large prime number
+        val combined = (originalRequestCode.toLong() * prime + attempt * 97 + alarmId.length * 307).toInt()
+        return if (combined == 0) attempt + 10000 else combined
+    }
+    
+    /**
+     * Detect existing request code collisions in a list of alarms
+     */
+    suspend fun detectRequestCodeCollisions(alarms: List<ScheduledAlarm>): List<Pair<ScheduledAlarm, ScheduledAlarm>> = withContext(Dispatchers.IO) {
+        val collisions = mutableListOf<Pair<ScheduledAlarm, ScheduledAlarm>>()
+        val requestCodeMap = mutableMapOf<Int, ScheduledAlarm>()
+        
+        for (alarm in alarms) {
+            val existing = requestCodeMap[alarm.pendingIntentRequestCode]
+            if (existing != null) {
+                // Found collision
+                collisions.add(Pair(existing, alarm))
+                Log.w(TAG, "⚠️ Detected request code collision: ${existing.eventTitle} and ${alarm.eventTitle} both use ${alarm.pendingIntentRequestCode}")
+            } else {
+                requestCodeMap[alarm.pendingIntentRequestCode] = alarm
+            }
+        }
+        
+        return@withContext collisions
+    }
+    
+    /**
      * Schedule alarm with individual parameters (for retry logic)
      */
     suspend fun scheduleAlarm(
@@ -429,6 +577,92 @@ class AlarmScheduler(
         }
     }
     
+    /**
+     * System state validation and health check
+     */
+    suspend fun validateSystemState(databaseAlarms: List<ScheduledAlarm>): SystemStateValidationResult = withContext(Dispatchers.IO) {
+        val issues = mutableListOf<String>()
+        val warnings = mutableListOf<String>()
+        
+        try {
+            Log.d(TAG, "Starting system state validation for ${databaseAlarms.size} alarms")
+            
+            // Check 1: Basic permissions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                issues.add("Exact alarm permission not granted")
+            }
+            
+            // Check 2: Active alarms consistency  
+            val activeDbAlarms = databaseAlarms.filter { !it.userDismissed && !it.isInPast() }
+            var systemAlarmsFound = 0
+            var missingAlarms = 0
+            val collisions = mutableListOf<String>()
+            
+            // Check 3: Request code collisions
+            val requestCodeCollisions = detectRequestCodeCollisions(activeDbAlarms)
+            if (requestCodeCollisions.isNotEmpty()) {
+                collisions.addAll(requestCodeCollisions.map { (alarm1, alarm2) ->
+                    "Request code collision: ${alarm1.eventTitle} and ${alarm2.eventTitle} both use ${alarm1.pendingIntentRequestCode}"
+                })
+            }
+            
+            // Check 4: System vs database consistency
+            for (alarm in activeDbAlarms) {
+                if (isAlarmScheduled(alarm)) {
+                    systemAlarmsFound++
+                } else {
+                    missingAlarms++
+                }
+            }
+            
+            // Compile results
+            if (missingAlarms > 0) {
+                warnings.add("$missingAlarms alarms missing from system AlarmManager")
+            }
+            
+            if (collisions.isNotEmpty()) {
+                issues.addAll(collisions)
+            }
+            
+            val healthScore = if (activeDbAlarms.isEmpty()) 100 else 
+                ((systemAlarmsFound.toFloat() / activeDbAlarms.size) * 100).toInt()
+            
+            Log.d(TAG, "System state validation completed: Health=${healthScore}%, Found=${systemAlarmsFound}/${activeDbAlarms.size}, Issues=${issues.size}, Warnings=${warnings.size}")
+            
+            return@withContext SystemStateValidationResult(
+                isHealthy = issues.isEmpty(),
+                healthScore = healthScore,
+                totalAlarms = activeDbAlarms.size,
+                systemAlarms = systemAlarmsFound,
+                missingAlarms = missingAlarms,
+                issues = issues,
+                warnings = warnings
+            )
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during system state validation", e)
+            return@withContext SystemStateValidationResult(
+                isHealthy = false,
+                healthScore = 0,
+                totalAlarms = 0,
+                systemAlarms = 0,
+                missingAlarms = 0,
+                issues = listOf("System validation failed: ${e.message}"),
+                warnings = emptyList()
+            )
+        }
+    }
+    
+    data class SystemStateValidationResult(
+        val isHealthy: Boolean,
+        val healthScore: Int, // 0-100 percentage
+        val totalAlarms: Int,
+        val systemAlarms: Int,
+        val missingAlarms: Int,
+        val issues: List<String>,
+        val warnings: List<String>
+    )
+
     /**
      * Schedule a test alarm for manual testing
      */

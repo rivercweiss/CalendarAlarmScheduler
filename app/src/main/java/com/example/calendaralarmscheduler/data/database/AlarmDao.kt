@@ -57,6 +57,9 @@ interface AlarmDao {
     @Query("UPDATE alarms SET userDismissed = :dismissed WHERE id = :id")
     suspend fun setAlarmDismissed(id: String, dismissed: Boolean)
     
+    @Query("UPDATE alarms SET pendingIntentRequestCode = :newRequestCode WHERE id = :id")
+    suspend fun updateAlarmRequestCode(id: String, newRequestCode: Int)
+    
     @Query("DELETE FROM alarms WHERE alarmTimeUtc < :cutoffTime")
     suspend fun deleteExpiredAlarms(cutoffTime: Long)
     

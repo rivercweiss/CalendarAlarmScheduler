@@ -11,7 +11,7 @@ import com.example.calendaralarmscheduler.utils.CrashHandler
 
 @Database(
     entities = [Rule::class, ScheduledAlarm::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Rule.Converters::class)
@@ -38,9 +38,9 @@ abstract class AppDatabase : RoomDatabase() {
                         DATABASE_NAME
                     )
                     
-                    Logger.d("AppDatabase", "Adding migrations and callbacks")
-                    builder.addMigrations()
-                        .addCallback(object : RoomDatabase.Callback() {
+                    Logger.d("AppDatabase", "Adding callbacks (no migrations - database will be recreated)")
+                    // No migrations - database version 2 will trigger schema recreation
+                    builder.addCallback(object : RoomDatabase.Callback() {
                             override fun onCreate(db: SupportSQLiteDatabase) {
                                 super.onCreate(db)
                                 Logger.i("AppDatabase", "Database created successfully")
@@ -78,13 +78,8 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // Future migrations can be added here
-        // Example:
-        // val MIGRATION_1_2 = object : Migration(1, 2) {
-        //     override fun migrate(database: SupportSQLiteDatabase) {
-        //         database.execSQL("ALTER TABLE rules ADD COLUMN newField TEXT")
-        //     }
-        // }
+        // Database version 2: Collision-resistant request codes
+        // No migration needed - database will be recreated with new schema
 
         fun destroyInstance() {
             Logger.i("AppDatabase", "Destroying database instance")

@@ -69,6 +69,9 @@ class AlarmRepository(
     suspend fun setAlarmDismissed(id: String, dismissed: Boolean = true) = 
         alarmDao.setAlarmDismissed(id, dismissed)
     
+    suspend fun updateAlarmRequestCode(id: String, newRequestCode: Int) = 
+        alarmDao.updateAlarmRequestCode(id, newRequestCode)
+    
     suspend fun deleteExpiredAlarms(cutoffTime: Long = System.currentTimeMillis() - (24 * 60 * 60 * 1000)) = 
         alarmDao.deleteExpiredAlarms(cutoffTime)
     
@@ -88,9 +91,13 @@ class AlarmRepository(
         lastEventModified: Long
     ): ScheduledAlarm {
         val alarmTimeUtc = eventStartTimeUtc - (leadTimeMinutes * 60 * 1000)
-        val requestCode = ScheduledAlarm.generateRequestCode(eventId, ruleId)
+        
+        // Generate unique alarm ID first, then collision-resistant request code
+        val alarmId = java.util.UUID.randomUUID().toString()
+        val requestCode = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm.generateRequestCodeFromAlarmId(alarmId)
         
         val alarm = ScheduledAlarm(
+            id = alarmId,
             eventId = eventId,
             ruleId = ruleId,
             eventTitle = eventTitle,

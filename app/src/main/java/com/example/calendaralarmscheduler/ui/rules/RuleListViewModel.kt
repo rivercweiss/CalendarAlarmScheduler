@@ -40,6 +40,10 @@ class RuleListViewModel @Inject constructor(
     private val _operationState = MutableStateFlow<UiState<Unit>>(UiState.Success(Unit))
     val operationState: StateFlow<UiState<Unit>> = _operationState.asStateFlow()
     
+    // Prevent duplicate operations on the same rule
+    private val activeOperations = mutableSetOf<String>()
+    private val operationDebounceMs = 1000L // 1 second debounce
+    
     val uiState: StateFlow<UiState<List<Rule>>> = repository.getAllRules()
         .map<List<Rule>, UiState<List<Rule>>> { ruleList ->
             UiState.Success(ruleList)
@@ -62,10 +66,20 @@ class RuleListViewModel @Inject constructor(
     }
     
     fun updateRuleEnabled(rule: Rule, isEnabled: Boolean) {
+        val operationKey = "${rule.id}_${isEnabled}_${System.currentTimeMillis() / operationDebounceMs}"
+        
+        // Prevent duplicate operations within the debounce window
+        if (activeOperations.contains(operationKey)) {
+            android.util.Log.d("RuleListViewModel", "Ignoring duplicate operation for rule '${rule.name}' (${if (isEnabled) "enable" else "disable"})")
+            return
+        }
+        
         viewModelScope.launch {
+            activeOperations.add(operationKey)
             _operationState.value = UiState.Loading
             
             try {
+                android.util.Log.d("RuleListViewModel", "Starting rule update: '${rule.name}' -> ${if (isEnabled) "enabled" else "disabled"}")
                 val result = repository.updateRuleEnabledWithAlarmManagement(rule, isEnabled)
                 
                 if (result.success) {
@@ -82,6 +96,8 @@ class RuleListViewModel @Inject constructor(
                 _statusMessage.emit("❌ $errorMessage")
                 _operationState.value = UiState.Error(errorMessage, e)
                 android.util.Log.e("RuleListViewModel", "Error updating rule '${rule.name}'", e)
+            } finally {
+                activeOperations.remove(operationKey)
             }
         }
     }
