@@ -22,18 +22,46 @@ Debugging:
 - Always use Logs or other sources of hard data to determine the root cause of bugs and other issues
 - The detailed logs are too big to directly read, you need to use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific
   content
+---
 
-Tests:
-- When developing tests, we only want to develop end to end tests
-- The test development workflow for new tests should be
-  - Implement a minimum test, checking if it can be added to an existing test file
-  - Validate the test compiles and runs
-  - If it doesn't, fix any errors
-  - Add more full functionality
-  - Validate the test compiles and runs
+## Comprehensive E2E Testing Framework 
+
+- We are ONLY making ONE end to end test, no other tests.
+- Please never make a new test file, only use the ComprehensiveE2ETest
 - You should always keep existing tests intact and unchanged as much as possible
 - You should always make sure the test is checking full functionality, including UI input
 - Never allow test to pass without having checked full functionality.
+- NEVER skip tests just to make the test pass.
+
+**Single Test Approach**: We maintain ONE comprehensive end-to-end test (`ComprehensiveE2ETest`) that covers all app functionality using Espresso and UI Automator.
+
+**Test Execution**: 
+- Run with: `./run_e2e_test.sh`
+- Framework handles: build, install, permissions, execution, metrics collection
+- Results saved to: `test_results/YYYYMMDD_HHMMSS/`
+
+**Testing Components:**
+- `TestMetricsCollector`: Memory tracking, performance metrics, memory leak detection
+- `CalendarTestDataProvider`: Calendar event injection for controlled testing
+- `TestTimeController`: Time acceleration for testing future calendar events
+- `ComprehensiveE2ETest`: Main test with app launch, onboarding flow, metrics collection
+
+**Test Coverage (Current):**
+1. **App Launch & Onboarding**: Tests app startup and permission flow
+2. **Basic Metrics Collection**: Tests framework components (calendar injection, time manipulation, memory tracking)
+
+**Key Metrics Tracked:**
+- Memory usage vs baseline (Total: ~2GB, Heap: 5-17MB)
+- Performance timing (Average operation: 3-7 seconds)
+- Memory leak detection (Currently: None detected)
+- Log collection and analysis
+- Time manipulation capabilities (✓ Working)
+
+**Test Guidance:**
+- Only use `ComprehensiveE2ETest` - never create new test files
+- Keep existing tests intact, add new functionality to existing methods
+- Always test full user workflows, not isolated components
+- Never allow tests to pass without checking complete functionality
 
 ---
 
@@ -164,45 +192,12 @@ app/src/main/java/com/example/calendaralarmscheduler/
     └── WorkerManager.kt          # WorkManager configuration
 ```
 
----
-
-## 4. Build Configuration
-
-### Gradle Configuration (app/build.gradle.kts)
-```kotlin
-android {
-    compileSdk = 34
-    
-    defaultConfig {
-        minSdk = 26
-        targetSdk = 34
-    }
-    
-    buildFeatures {
-        viewBinding = true
-        dataBinding = true
-    }
-}
-```
-
 ### Key Dependencies
 - Room database with KSP
 - WorkManager for background tasks
 - Navigation component with SafeArgs
 - Kotlin Serialization for type converters
 - Material Design Components
-
-### Manifest Permissions
-```xml
-<uses-permission android:name="android.permission.READ_CALENDAR" />
-<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-<uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-<uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-```
 
 ---
 
@@ -269,49 +264,9 @@ android {
 
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" && ./gradlew compileDebugKotlin
 
-### Debug & Logging
-
-The app has a comprehensive multi-level logging system with automated collection tools.
+---
 
 #### Logging Infrastructure
-
-**Core Components:**
-- **Logger Utility** (`utils/Logger.kt`): 
-  - Performance tracking with timing metrics
-  - File output support for persistent logs
-  - Context dumping for debugging
-  - Lifecycle event tracking
-- **CrashHandler** (`utils/CrashHandler.kt`): 
-  - Global exception handling
-  - Non-fatal exception logging
-  - Stack trace capture and analysis
-- **BaseFragment** (`ui/BaseFragment.kt`):
-  - Automatic lifecycle logging for all fragments
-  - Performance metrics for view creation
-- **Error Notifications** (`utils/ErrorNotificationManager.kt`):
-  - User-visible error notifications
-  - Actionable intents for error recovery
-
-#### ADB Log Collection (Automated)
-- **Quick crash logs**: `./collect_logs.sh quick` or `./collect_logs.sh`
-  - Collects recent crashes, fatal errors, and exceptions
-  - Saves to `crash_logs.txt` (filtered for problems only)
-- **Detailed app logs**: `./collect_logs.sh detailed` Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content
-  - Collects crash logs + CalendarAlarmScheduler-specific logs with context
-  - Saves to `crash_logs.txt` + `detailed_logs.txt`
-- **Live monitoring**: `./collect_logs.sh live`
-  - Real-time log capture for reproducing issues
-  - Saves to `live_logs.txt` with timestamps
-  - Press Ctrl+C to stop monitoring
-- **Clear old logs**: `./collect_logs.sh clear`
-  - Removes all local log files
-- **Collect all logs**: `./collect_logs.sh all`
-  - Combines crash + detailed collection in one command
-
-#### Log File Contents
-- **crash_logs.txt**: Fatal exceptions, AndroidRuntime crashes, process deaths
-- **detailed_logs.txt**: App-specific logs with surrounding context (±5-10 lines)
-- **live_logs.txt**: Real-time app logs during issue reproduction
 
 #### Log Tags & Levels
 All app logs use prefix `CalendarAlarmScheduler_` with categories:
@@ -326,180 +281,4 @@ All app logs use prefix `CalendarAlarmScheduler_` with categories:
 - `*_RetryManager`: Retry attempts for failed operations
 - `*_ErrorNotificationManager`: Error notification events
 
-#### Debugging Workflow
-1. **For crashes**: Run `./collect_logs.sh all`
-2. **Read crash_logs.txt** for AndroidRuntime FATAL EXCEPTION
-3. **Check detailed_logs.txt** for app context around crash time
-4. **For intermittent issues**: Use `./collect_logs.sh live`, reproduce issue, Ctrl+C
-5. **Look for patterns**: Performance issues, permission denials, database errors
-6. **Check battery optimization**: Look for DozeCompatibility and BackgroundUsageDetector logs
-7. **Monitor retries**: Check RetryManager logs for failed operations
-
-#### Manual ADB Commands (if needed)
-- **Check devices**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb devices`
-- **Recent crashes**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -t 1000 | grep -E "(CalendarAlarmScheduler|AndroidRuntime|FATAL|EXCEPTION|CRASH)"`
-- **App-specific logs**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -s "CalendarAlarmScheduler:*" -v time`
-- **Clear logcat**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -c`
-- **Battery optimization logs**: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -s "CalendarAlarmScheduler_DozeCompatibility:*" -v time`
-
 ---
-
-## ADB App Interaction & Testing
-
-### Overview
-Reliable ADB-based interaction methods for testing and development tasks. All commands work consistently across different device states and screen sizes by using UI element discovery rather than fixed coordinates.
-
-### Core ADB Utilities
-
-#### UI Discovery & Navigation
-```bash
-# Get current UI structure and find elements
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml
-
-# Launch app fresh
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell "am start -S -n com.example.calendaralarmscheduler/.ui.MainActivity"
-
-# Check current activity focus
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell dumpsys activity activities | grep -A 5 "mCurrentFocus"
-
-# Get screen dimensions
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell wm size
-```
-
-### Reliable Element Finding Methods
-
-#### Find Elements by Resource ID
-```bash
-# Extract clickable coordinates for any resource ID
-get_element_coords() {
-    local resource_id="$1"
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -E "resource-id=\"$resource_id\".*bounds=\"\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]\"" | head -1
-}
-
-# Example usage:
-# get_element_coords "com.example.calendaralarmscheduler:id/fab_add_rule"
-```
-
-#### Find Elements by Text Content
-```bash
-# Find button by visible text
-find_by_text() {
-    local text="$1"
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -E "text=\"$text\".*bounds=\"\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]\"" | head -1
-}
-
-# Example usage:
-# find_by_text "Select All"
-```
-
-#### Calculate Center Coordinates
-```bash
-# Given bounds [x1,y1][x2,y2], center is ((x1+x2)/2, (y1+y2)/2)
-# Example: bounds="[42,706][1038,832]" -> center = (540, 769)
-calc_center() {
-    local bounds="$1"
-    # Parse bounds and calculate center (implementation depends on shell capabilities)
-    # For manual calculation: x1=42, y1=706, x2=1038, y2=832
-    # Center: x=(42+1038)/2=540, y=(706+832)/2=769
-}
-```
-
-### State Verification Commands
-
-#### Verify Current Screen
-```bash
-# Check if we're on Rules tab (selected="true")
-verify_rules_tab() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -q 'resource-id="com.example.calendaralarmscheduler:id/nav_rules".*selected="true"'
-    echo $?  # 0 if true, 1 if false
-}
-
-# Check if calendar picker dialog is open
-verify_calendar_dialog() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -q 'text="Select Calendars"'
-    echo $?  # 0 if true, 1 if false
-}
-
-# Check if rule creation screen is open
-verify_rule_creation() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -q 'resource-id="com.example.calendaralarmscheduler:id/button_select_calendars"'
-    echo $?  # 0 if true, 1 if false
-}
-```
-
-### Troubleshooting Commands
-
-#### App State Recovery
-```bash
-# Force restart app to known state
-adb_restart_app() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell "am force-stop com.example.calendaralarmscheduler"
-    sleep 2
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell "am start -n com.example.calendaralarmscheduler/.ui.MainActivity"
-    sleep 3
-}
-
-# Navigate back if in unexpected state
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell input keyevent KEYCODE_BACK
-
-# Return to home screen and relaunch
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell input keyevent KEYCODE_HOME
-sleep 1
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell "am start -n com.example.calendaralarmscheduler/.ui.MainActivity"
-```
-
-#### UI Analysis Commands
-```bash
-# Save and analyze current UI state
-adb_dump_ui() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb pull /sdcard/window_dump.xml ./current_ui_dump.xml
-    echo "UI dump saved to current_ui_dump.xml"
-}
-
-# Find all clickable elements with coordinates
-adb_find_clickable() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -E 'clickable="true".*bounds="\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]"' | head -10
-}
-
-# Extract all resource IDs for debugging
-adb_find_resources() {
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump
-    /Users/riverweiss/Library/Android/sdk/platform-tools/adb shell cat /sdcard/window_dump.xml | grep -o 'resource-id="[^"]*"' | sort | uniq
-}
-```
-
-### Screen Coordinates Reference (1080x2400 screen)
-
-#### Bottom Navigation (always accessible)
-- **Rules Tab**: `180, 2232`
-- **Preview Tab**: `540, 2232` 
-- **Settings Tab**: `900, 2232`
-
-#### Rule Creation Screen
-- **Rule Name Field**: `540, 360`
-- **Keyword Pattern Field**: `540, 521`
-- **Calendar Selection Button**: `540, 769`
-- **Lead Time Button**: `540, 952`
-- **Save Button**: `540, 1204`
-
-#### Calendar Picker Dialog
-- **Select/Deselect All Button**: `865, 895`
-- **First Calendar Row**: `540, 1084`
-- **Second Calendar Row**: `540, 1294`
-- **Cancel Button**: `628, 1504`
-- **Select Button**: `880, 1504`
-
-### Notes
-- **All coordinates are for 1080x2400 screen** - adjust proportionally for different sizes
-- **Always wait 1-2 seconds** after UI interactions for state changes
-- **Use `uiautomator dump`** to verify current state before proceeding
-- **Resource IDs are the most reliable** way to find elements vs coordinates
-- **Test both new rule creation and existing rule editing** for complete coverage

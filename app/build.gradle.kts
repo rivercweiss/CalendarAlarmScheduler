@@ -47,6 +47,14 @@ android {
         unitTests {
             isReturnDefaultValues = true
         }
+        
+        // Enhanced instrumentation test configuration for comprehensive E2E testing
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        
+        animationsDisabled = true
+        
+        reportDir = "$projectDir/build/reports/androidTests"
+        resultsDir = "$projectDir/build/outputs/androidTest-results"
     }
 }
 
@@ -99,11 +107,34 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.work.testing)
     
-    // Additional dependencies for comprehensive E2E testing
+    // Comprehensive E2E Testing Framework
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
-    androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
-    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+    
+    // Enhanced UI Testing
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-accessibility:3.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-web:3.6.1")
+    
+    // Test Orchestration and Reporting
+    androidTestImplementation("androidx.test:orchestrator:1.5.0")
+    androidTestUtil("androidx.test:orchestrator:1.5.0")
+    
+    // Performance and Memory Monitoring
+    androidTestImplementation("androidx.benchmark:benchmark-junit4:1.3.0")
+    androidTestImplementation("androidx.test.services:test-services:1.5.0")
+    
+    // Calendar and ContentProvider Testing
+    androidTestImplementation("androidx.test:core:1.6.1")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")
+    
+    // Time and Date Mocking
+    androidTestImplementation("org.threeten:threetenbp:1.6.8")
+    
+    // Network Mocking (for any API interactions)
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }

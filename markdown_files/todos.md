@@ -105,3 +105,71 @@ Run the build, check warnings and then come up with a plan. Think hard
 
 - Background app refresh should not be a soft requirement, it must be a hard requirement for the app to function. Please make it mandatory for the app to function, along with all the other permissions. Update the CLAUDE.md as needed.
 - There should be no skip option in the permissions onboard.
+
+---
+
+Add toggle for “Only alarm for first event of the day."
+
+---
+
+We are planning and researching the best way to implement:
+
+A comprehensive end to end test which tests the app in the exact same interactive way as the user.
+
+We want to research the current best practices for how to implement this.
+
+Don’t look for any existing test setups, we want to make a completely new one based on best practices.
+
+Dig in, research online, read the relevant documentation, and prepare to discuss the ins and out of how it works. Think hard.
+
+  Phase 5: UI/UX Enhancements
+
+  5.1 Material Design 3 Consistency
+  - Audit and upgrade Material components
+  - Implement consistent theming patterns
+  - Use Material You dynamic colors where appropriate
+
+  5.2 Layout Optimization
+  - Optimize ConstraintLayout usage
+  - Implement view recycling best practices
+  - Use <merge> tags where appropriate
+
+---
+
+We are adding an automated, end to end test which tests the app in the exact same interactive way as the user, both on an emulator or a real connected device.
+
+We are going to use Espresso and UI Automator to accomplish this purpose.
+
+We are only going to make ONE, SINGLE test (one test file and flow), which will comprehensively test app functionality and can be used for regression testing.
+
+Please do these three tasks and ONLY these tasks:
+
+1) Research current best practices for using Espresso and UI Automator to develop automated, end to end test which runs both on an emulator or a real connected device. 
+2) Set up any necessary framework. We need to be able to track app memory usage compared to baseline phone memory usage, logs, and other app statistics during the test runs. We need to inject calendar events to test. We need to be able to speed up test times to test far out calendar events.
+3) Set up a SINGLE test which only opens the app and returns and is able to inspect and test comprehensive data including logs, memory usage, and any other important data.
+
+Ultrathink.
+
+We need to set up any necessary framework
+
+We are building an app which:
+
+<app_description>
+This app automatically sets **unmissable system alarms** a configurable amount of time before certain Google Calendar events. Users define **rules** to trigger alarms only for events whose titles contain specific keywords.
+
+Alarms MUST play regardless of phone state (silent mode, do not disturb, low power mode, etc.) to ensure users never miss important events.
+
+The app runs **fully locally** with **no backend**, using Android APIs to read calendar data and set exact alarms.
+<app_description>
+
+We are planning and researching the best way to implement:
+
+An automated, end to end test which tests the app in the exact same interactive way as the user, both on an emulator or a real connected device.
+
+We want to research the current best practices for how to implement this.
+
+Please research best practices and determine what to use for this purpose.
+
+Please run and verify the functionality of the test, fixing any issues.
+
+Then add a concise summary of whatever the next claude will need to know about the test to the CLAUDE.md.
