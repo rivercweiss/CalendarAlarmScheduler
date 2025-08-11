@@ -74,7 +74,7 @@ object PermissionUtils {
      * Check if the app has background usage permissions (replaces legacy battery optimization check)
      */
     fun isBatteryOptimizationWhitelisted(context: Context): Boolean {
-        // Use comprehensive background usage detection
+        // Use cached background usage detection (no blocking calls)
         val backgroundStatus = BackgroundUsageDetector.getDetailedBackgroundUsageStatus(context)
         
         Logger.d("PermissionUtils", "Background usage permission check:")

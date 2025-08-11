@@ -3,15 +3,23 @@ package com.example.calendaralarmscheduler
 import android.app.Application
 import android.content.BroadcastReceiver
 import com.example.calendaralarmscheduler.data.SettingsRepository
+import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
 class CalendarAlarmApplication : Application() {
+    
+    // Application-level coroutine scope
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     // Injected dependencies needed for application logic
     @Inject
@@ -118,6 +126,16 @@ class CalendarAlarmApplication : Application() {
             
             // Set up timezone change handling
             setupTimezoneChangeHandling()
+            
+            // Initialize background usage cache asynchronously to prevent main thread blocking
+            applicationScope.launch {
+                try {
+                    BackgroundUsageDetector.initializeBackgroundUsageCache(this@CalendarAlarmApplication)
+                    Logger.i("Application", "Background usage detection cache initialized successfully")
+                } catch (e: Exception) {
+                    Logger.w("Application", "Failed to initialize background usage cache (will use fallback)", e)
+                }
+            }
             
             val initTime = System.currentTimeMillis() - startTime
             Logger.logPerformance("Application", "Application.onCreate()", initTime)

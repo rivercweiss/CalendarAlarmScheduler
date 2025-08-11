@@ -12,6 +12,7 @@ import com.example.calendaralarmscheduler.ui.onboarding.PermissionOnboardingActi
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.CrashHandler
+import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -223,6 +224,10 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         Logger.logLifecycle("MainActivity", "onPause", "Activity pausing")
         super.onPause()
+        
+        // Invalidate background usage cache when app goes to background
+        // This ensures fresh detection when user returns to app
+        BackgroundUsageDetector.invalidateSessionCache()
     }
 
     override fun onStop() {

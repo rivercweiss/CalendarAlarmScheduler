@@ -40,8 +40,8 @@ class EventPreviewFragment : Fragment() {
         setupClickListeners()
         observeViewModel()
         
-        // Initial refresh
-        viewModel.refreshEvents()
+        // No initial refresh needed - the ViewModel's combine() observer 
+        // automatically loads data when the ViewModel is created
     }
     
     private fun setupRecyclerView() {
@@ -60,12 +60,13 @@ class EventPreviewFragment : Fragment() {
     
     private fun setupClickListeners() {
         binding.fabRefresh.setOnClickListener {
+            // Use lightweight refresh for normal refresh button (same as filter toggle)
             viewModel.refreshEvents()
         }
         
         binding.switchFilterMatching.setOnCheckedChangeListener { _, isChecked ->
             viewModel.toggleMatchingRulesFilter()
-            viewModel.refreshEvents()
+            // No need to call refreshEvents() - toggleMatchingRulesFilter() already updates the UI
         }
         
         // Long press on refresh FAB for test alarm
@@ -76,10 +77,27 @@ class EventPreviewFragment : Fragment() {
     }
     
     private fun observeViewModel() {
-        // Observe loading state StateFlow
+        // Observe events UI state
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoading.collect { isLoading ->
-                binding.layoutLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+            viewModel.eventsUiState.collect { uiState ->
+                when (uiState) {
+                    is UiState.Loading -> {
+                        binding.layoutLoading.visibility = View.VISIBLE
+                        binding.layoutEmpty.visibility = View.GONE
+                        binding.recyclerEvents.visibility = View.GONE
+                    }
+                    is UiState.Success -> {
+                        binding.layoutLoading.visibility = View.GONE
+                        adapter.submitList(uiState.data)
+                        updateEmptyState(uiState.data)
+                    }
+                    is UiState.Error -> {
+                        binding.layoutLoading.visibility = View.GONE
+                        binding.layoutEmpty.visibility = View.GONE
+                        binding.recyclerEvents.visibility = View.GONE
+                        Toast.makeText(requireContext(), "Error: ${uiState.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
         
@@ -90,18 +108,18 @@ class EventPreviewFragment : Fragment() {
             }
         }
         
-        // Observe events with alarms
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.eventsWithAlarms.collect { eventsWithAlarms ->
-                adapter.submitList(eventsWithAlarms)
-                updateEmptyState(eventsWithAlarms)
-            }
-        }
-        
         // Observe filter state
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.currentFilter.collect { filter ->
-                binding.switchFilterMatching.isChecked = filter.showOnlyMatchingRules
+                // Avoid UI updates during memory pressure - only update if state actually changed
+                if (binding.switchFilterMatching.isChecked != filter.showOnlyMatchingRules) {
+                    try {
+                        binding.switchFilterMatching.isChecked = filter.showOnlyMatchingRules
+                    } catch (e: OutOfMemoryError) {
+                        // Skip UI update if memory is exhausted - the switch state is not critical
+                        android.util.Log.w("EventPreviewFragment", "Skipping switch update due to memory pressure", e)
+                    }
+                }
             }
         }
         
@@ -124,10 +142,9 @@ class EventPreviewFragment : Fragment() {
     
     private fun updateEmptyState(events: List<EventWithAlarms>) {
         val isEmpty = events.isEmpty()
-        val isLoading = viewModel.isLoading.value
         
-        binding.layoutEmpty.visibility = if (isEmpty && !isLoading) View.VISIBLE else View.GONE
-        binding.recyclerEvents.visibility = if (isEmpty && !isLoading) View.GONE else View.VISIBLE
+        binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.recyclerEvents.visibility = if (isEmpty) View.GONE else View.VISIBLE
         
         // Update empty message based on filter state
         val filter = viewModel.currentFilter.value

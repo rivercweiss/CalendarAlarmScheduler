@@ -70,27 +70,48 @@ class RuleListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        // Observe rules StateFlow
+        // Observe UI state for rules data
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.rules.collect { rules ->
-                ruleAdapter.submitList(rules)
-                
-                // Show empty state if no rules
-                binding.emptyStateGroup.visibility = if (rules.isEmpty()) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
+            viewModel.uiState.collect { uiState ->
+                when (uiState) {
+                    is UiState.Loading -> {
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.emptyStateGroup.visibility = View.GONE
+                    }
+                    is UiState.Success -> {
+                        binding.progressBar.visibility = View.GONE
+                        ruleAdapter.submitList(uiState.data)
+                        
+                        // Show empty state if no rules
+                        binding.emptyStateGroup.visibility = if (uiState.data.isEmpty()) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+                    }
+                    is UiState.Error -> {
+                        binding.progressBar.visibility = View.GONE
+                        binding.emptyStateGroup.visibility = View.GONE
+                        Toast.makeText(requireContext(), "Error loading rules: ${uiState.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
         
-        // Observe loading state StateFlow
+        // Observe operation state for rule operations (update/delete)
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoading.collect { isLoading ->
-                binding.progressBar.visibility = if (isLoading) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
+            viewModel.operationState.collect { operationState ->
+                when (operationState) {
+                    is UiState.Loading -> {
+                        // Could show a different loading indicator for operations
+                        // For now, we'll rely on the operation completing quickly
+                    }
+                    is UiState.Success -> {
+                        // Operation completed successfully - no UI action needed
+                    }
+                    is UiState.Error -> {
+                        // Error handling is already done via statusMessage
+                    }
                 }
             }
         }

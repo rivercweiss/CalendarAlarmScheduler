@@ -10,6 +10,8 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.lang.reflect.Method
 
 /**
@@ -17,6 +19,25 @@ import java.lang.reflect.Method
  * Handles traditional battery optimization, modern background usage controls, and OEM customizations.
  */
 object BackgroundUsageDetector {
+
+    // Session-based cache for expensive background usage detection results
+    private var cachedResult: BackgroundUsageStatus? = null
+    private var isSessionCacheValid = false
+    
+    /**
+     * Check if cached result is still valid for this app session
+     */
+    private fun isCacheValid(): Boolean {
+        return cachedResult != null && isSessionCacheValid
+    }
+    
+    /**
+     * Invalidate session cache (call when app goes to background or on fresh start)
+     */
+    fun invalidateSessionCache() {
+        isSessionCacheValid = false
+        Logger.d("BackgroundUsageDetector", "Session cache invalidated - will refresh on next call")
+    }
 
     /**
      * Result of background usage detection
@@ -420,22 +441,69 @@ object BackgroundUsageDetector {
     }
     
     /**
-     * Get comprehensive background usage status with detailed logging
+     * Get cached background usage status (synchronous) - returns immediately if cached
+     * Falls back to basic detection if no session cache available
      */
     fun getDetailedBackgroundUsageStatus(context: Context): BackgroundUsageStatus {
-        Logger.i("BackgroundUsageDetector", "=== Detailed Background Usage Detection ===")
-        Logger.i("BackgroundUsageDetector", "Device: ${Build.MANUFACTURER} ${Build.MODEL}")
-        Logger.i("BackgroundUsageDetector", "Android API: ${Build.VERSION.SDK_INT}")
-        Logger.i("BackgroundUsageDetector", "Package: ${context.packageName}")
+        // Return cached result if available - no blocking operations
+        if (isCacheValid()) {
+            Logger.d("BackgroundUsageDetector", "Returning cached background usage result from session")
+            return cachedResult!!
+        }
         
-        val result = isBackgroundUsageAllowed(context)
+        // If no cache available, provide a basic synchronous fallback
+        Logger.w("BackgroundUsageDetector", "No session cache available, using basic fallback detection")
+        val basicResult = BackgroundUsageStatus(
+            isBackgroundUsageAllowed = true, // Conservative assumption
+            detectionMethod = DetectionMethod.FALLBACK,
+            apiLevel = Build.VERSION.SDK_INT,
+            details = mapOf("note" to "Fallback result - use initializeBackgroundUsageCache() for full detection")
+        )
         
-        Logger.i("BackgroundUsageDetector", "Final Result:")
-        Logger.i("BackgroundUsageDetector", "  Background Usage Allowed: ${result.isBackgroundUsageAllowed}")
-        Logger.i("BackgroundUsageDetector", "  Detection Method: ${result.detectionMethod}")
-        Logger.i("BackgroundUsageDetector", "  Details: ${result.details}")
-        Logger.i("BackgroundUsageDetector", "===========================================")
+        return basicResult
+    }
+    
+    /**
+     * Initialize background usage cache with full detection (async, should be called once per session)
+     * Runs expensive system calls on background thread to prevent ANR
+     */
+    suspend fun initializeBackgroundUsageCache(context: Context): BackgroundUsageStatus {
+        // Skip if already cached for this session
+        if (isCacheValid()) {
+            Logger.d("BackgroundUsageDetector", "Session cache already initialized")
+            return cachedResult!!
+        }
         
-        return result
+        // Run expensive system calls on background thread
+        return withContext(Dispatchers.IO) {
+            Logger.i("BackgroundUsageDetector", "=== Initializing Background Usage Session Cache (Background Thread) ===")
+            Logger.i("BackgroundUsageDetector", "Device: ${Build.MANUFACTURER} ${Build.MODEL}")
+            Logger.i("BackgroundUsageDetector", "Android API: ${Build.VERSION.SDK_INT}")
+            Logger.i("BackgroundUsageDetector", "Package: ${context.packageName}")
+            
+            val result = isBackgroundUsageAllowed(context)
+            
+            Logger.i("BackgroundUsageDetector", "Final Result:")
+            Logger.i("BackgroundUsageDetector", "  Background Usage Allowed: ${result.isBackgroundUsageAllowed}")
+            Logger.i("BackgroundUsageDetector", "  Detection Method: ${result.detectionMethod}")
+            Logger.i("BackgroundUsageDetector", "  Details: ${result.details}")
+            Logger.i("BackgroundUsageDetector", "===========================================")
+            
+            // Cache the result for the entire app session to prevent repeated expensive calls
+            cachedResult = result
+            isSessionCacheValid = true
+            Logger.d("BackgroundUsageDetector", "Background usage session cache initialized")
+            
+            result
+        }
+    }
+    
+    /**
+     * Clear the cache to force fresh detection (useful for testing or when user changes settings)
+     */
+    fun clearCache() {
+        cachedResult = null
+        isSessionCacheValid = false
+        Logger.d("BackgroundUsageDetector", "Cleared background usage detection cache")
     }
 }

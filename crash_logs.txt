@@ -1,17 +1,213 @@
-08-10 14:21:45.565 14912 14912 D AndroidRuntime: Shutting down VM
-08-10 14:22:01.214 14938 14938 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-08-10 14:22:01.220 14938 14938 I AndroidRuntime: Using default boot image
-08-10 14:22:01.220 14938 14938 I AndroidRuntime: Leaving lock profiling enabled
-08-10 14:22:01.310 14938 14938 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-08-10 14:22:01.503 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.503][V] Query: BEGIN DEFERRED TRANSACTION with args: []
-08-10 14:22:01.505 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.504][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_UPDATE` with args: []
-08-10 14:22:01.505 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.505][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_DELETE` with args: []
-08-10 14:22:01.505 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.505][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_INSERT` with args: []
-08-10 14:22:01.505 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.505][V] Query: TRANSACTION SUCCESSFUL with args: []
-08-10 14:22:01.506 14881 14951 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 14:22:01.506][V] Query: END TRANSACTION with args: []
-08-10 14:22:02.356 14938 14938 D AndroidRuntime: Shutting down VM
-08-10 14:22:24.808 14961 14961 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-08-10 14:22:24.814 14961 14961 I AndroidRuntime: Using default boot image
-08-10 14:22:24.815 14961 14961 I AndroidRuntime: Leaving lock profiling enabled
-08-10 14:22:24.932 14961 14961 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-08-10 14:22:26.013 14961 14961 D AndroidRuntime: Shutting down VM
+08-10 17:28:06.211 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.211][D] onAttach - Fragment attaching to context
+08-10 17:28:06.212 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.212][D] Context dump: Activity: MainActivity, isFinishing: false
+08-10 17:28:06.212 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.212][D] onAttach completed successfully
+08-10 17:28:06.213 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.213][D] onCreate - Fragment creating
+08-10 17:28:06.213 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.213][D] savedInstanceState: false
+08-10 17:28:06.213 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.213][D] onCreate completed successfully
+08-10 17:28:06.214 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.214][D] onCreateView - Creating view
+08-10 17:28:06.242 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:06.242][I] onCreateView took 28ms
+08-10 17:28:06.243 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.243][D] View created successfully in 28ms
+08-10 17:28:06.247 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.247][D] onViewCreated - View created, setting up
+08-10 17:28:06.248 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.248][D] Starting refresh interval description collection
+08-10 17:28:06.249 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.249][D] SettingsViewModel initialized
+08-10 17:28:06.249 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.249][I] Refresh interval UI update: '' -> ''
+08-10 17:28:06.250 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.250][D] UI text actually set to: ''
+08-10 17:28:06.250 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.250][D] Starting refresh interval StateFlow collection
+08-10 17:28:06.250 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.250][I] Refresh interval description updated: '' -> 'Every 30 minutes' (from 30 minutes)
+08-10 17:28:06.250 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.250][D] Starting atomic all-day time StateFlow collection
+08-10 17:28:06.251 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.251][I] All-day time description updated atomically: '' -> '8:00 PM' (from 20:0)
+08-10 17:28:06.252 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.252][D] Work status updated: ENQUEUED, scheduled: true
+08-10 17:28:06.252 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.252][D] Last sync description updated: Last sync: 52 minutes ago
+08-10 17:28:06.253 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.253][I] Refresh interval UI update: '' -> 'Every 30 minutes'
+08-10 17:28:06.253 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.253][D] UI text actually set to: 'Every 30 minutes'
+08-10 17:28:06.253 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.253][D] Starting all-day time description collection
+08-10 17:28:06.253 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.253][I] All-day time UI update: '' -> '8:00 PM'
+08-10 17:28:06.254 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.254][D] UI text actually set to: '8:00 PM'
+08-10 17:28:06.258 19848 19848 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:06.258][D] Returning cached background usage result from session
+08-10 17:28:06.259 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.259][D] Background usage permission check:
+08-10 17:28:06.259 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.259][D]   Result: true
+08-10 17:28:06.262 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.261][D]   Method: APP_STANDBY_BUCKET
+08-10 17:28:06.262 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.262][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:06.274 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:06.274][I] onViewCreated + setup took 27ms
+08-10 17:28:06.275 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.275][D] View setup completed successfully in 27ms
+08-10 17:28:06.275 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.275][D] onStart - Fragment starting
+08-10 17:28:06.276 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.276][D] onStart completed successfully
+08-10 17:28:06.428 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:06.427][D] onResume - Fragment resuming
+08-10 17:28:06.428 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.428][I] Performing defensive refresh of all settings
+08-10 17:28:06.428 19848 19848 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:06.428][I] Forcing refresh of all StateFlows from SharedPreferences
+08-10 17:28:06.429 19848 19848 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:06.429][D] StateFlow refresh completed
+08-10 17:28:06.431 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.431][D] Work status updated: ENQUEUED, scheduled: true
+08-10 17:28:06.432 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:06.432][D] Last sync description updated: Last sync: 52 minutes ago
+08-10 17:28:06.432 19848 19848 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:06.432][D] Returning cached background usage result from session
+08-10 17:28:06.433 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.433][D] Background usage permission check:
+08-10 17:28:06.433 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.433][D]   Result: true
+08-10 17:28:06.433 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:06.433][D]   Method: APP_STANDBY_BUCKET
+08-10 17:28:06.433 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.433][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:06.434 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:06.434][D] onResume completed successfully
+08-10 17:28:11.431 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.430][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 17:28:11.432 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.432][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_UPDATE` with args: []
+08-10 17:28:11.434 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.434][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_DELETE` with args: []
+08-10 17:28:11.435 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.435][V] Query: DROP TRIGGER IF EXISTS `room_table_modification_trigger_rules_INSERT` with args: []
+08-10 17:28:11.435 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.435][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 17:28:11.436 19848 19896 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:11.435][V] Query: END TRANSACTION with args: []
+08-10 17:28:19.214 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:19.214][D] onPause - Fragment pausing
+08-10 17:28:19.216 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:19.216][D] onPause completed successfully
+08-10 17:28:19.218 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:19.218][D] onStop - Fragment stopping
+08-10 17:28:19.219 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:19.219][D] onStop completed successfully
+08-10 17:28:19.252 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.252][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 17:28:19.252 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.252][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(0, 0) with args: []
+08-10 17:28:19.259 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.259][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_UPDATE` AFTER UPDATE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 17:28:19.268 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.268][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_DELETE` AFTER DELETE ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 17:28:19.270 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.270][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_rules_INSERT` AFTER INSERT ON `rules` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 0 AND invalidated = 0; END with args: []
+08-10 17:28:19.270 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.270][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 17:28:19.270 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.270][V] Query: END TRANSACTION with args: []
+08-10 17:28:19.271 19848 19902 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.271][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
+08-10 17:28:19.271 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.271][V] Query: BEGIN DEFERRED TRANSACTION with args: []
+08-10 17:28:19.271 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.271][V] Query: INSERT OR IGNORE INTO room_table_modification_log VALUES(1, 0) with args: []
+08-10 17:28:19.271 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.271][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_UPDATE` AFTER UPDATE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
+08-10 17:28:19.271 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.271][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_DELETE` AFTER DELETE ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
+08-10 17:28:19.272 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.272][V] Query: CREATE TEMP TRIGGER IF NOT EXISTS `room_table_modification_trigger_alarms_INSERT` AFTER INSERT ON `alarms` BEGIN UPDATE room_table_modification_log SET invalidated = 1 WHERE table_id = 1 AND invalidated = 0; END with args: []
+08-10 17:28:19.278 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.278][V] Query: TRANSACTION SUCCESSFUL with args: []
+08-10 17:28:19.282 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.282][V] Query: END TRANSACTION with args: []
+08-10 17:28:19.286 19848 19903 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:19.286][V] Query: SELECT * FROM alarms WHERE userDismissed = 0 AND alarmTimeUtc > ? ORDER BY alarmTimeUtc ASC with args: [1754872099245]
+08-10 17:28:19.404 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:19.403][D] onDestroyView - Destroying view
+08-10 17:28:19.404 19848 19848 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:19.404][D] Cleared background usage detection cache
+08-10 17:28:19.405 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:19.405][D] onDestroyView completed successfully
+08-10 17:28:19.405 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:19.405][D] onDestroy - Fragment destroying
+08-10 17:28:19.406 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:19.406][D] onDestroy completed successfully
+08-10 17:28:19.406 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:19.406][D] onDetach - Fragment detaching
+08-10 17:28:19.414 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:19.414][D] onDetach completed successfully
+08-10 17:28:20.386 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.386][D] onAttach - Fragment attaching to context
+08-10 17:28:20.388 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.388][D] Context dump: Activity: MainActivity, isFinishing: false
+08-10 17:28:20.388 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.388][D] onAttach completed successfully
+08-10 17:28:20.392 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.391][D] onCreate - Fragment creating
+08-10 17:28:20.392 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.392][D] savedInstanceState: true
+08-10 17:28:20.392 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.392][D] onCreate completed successfully
+08-10 17:28:20.393 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.393][D] onCreateView - Creating view
+08-10 17:28:20.416 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:20.416][I] onCreateView took 23ms
+08-10 17:28:20.417 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.417][D] View created successfully in 23ms
+08-10 17:28:20.419 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.418][D] onViewCreated - View created, setting up
+08-10 17:28:20.419 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.419][D] Starting refresh interval description collection
+08-10 17:28:20.419 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.419][I] Refresh interval UI update: '' -> 'Every 30 minutes'
+08-10 17:28:20.420 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.420][D] UI text actually set to: 'Every 30 minutes'
+08-10 17:28:20.420 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.420][D] Starting all-day time description collection
+08-10 17:28:20.420 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.420][I] All-day time UI update: '' -> '8:00 PM'
+08-10 17:28:20.420 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.420][D] UI text actually set to: '8:00 PM'
+08-10 17:28:20.422 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:20.421][W] No session cache available, using basic fallback detection
+08-10 17:28:20.422 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.422][D] Background usage permission check:
+08-10 17:28:20.422 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.422][D]   Result: true
+08-10 17:28:20.422 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.422][D]   Method: FALLBACK
+08-10 17:28:20.422 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.422][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:20.425 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:20.425][I] onViewCreated + setup took 6ms
+08-10 17:28:20.425 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.425][D] View setup completed successfully in 6ms
+08-10 17:28:20.426 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.426][D] onStart - Fragment starting
+08-10 17:28:20.426 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.426][D] onStart completed successfully
+08-10 17:28:20.578 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:20.578][D] onResume - Fragment resuming
+08-10 17:28:20.580 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:20.580][I] Performing defensive refresh of all settings
+08-10 17:28:20.580 19848 19848 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:20.580][I] Forcing refresh of all StateFlows from SharedPreferences
+08-10 17:28:20.580 19848 19848 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:20.580][D] StateFlow refresh completed
+08-10 17:28:20.581 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:20.581][D] Work status updated: ENQUEUED, scheduled: true
+08-10 17:28:20.582 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:20.582][D] Last sync description updated: Last sync: 52 minutes ago
+08-10 17:28:20.583 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:20.583][W] No session cache available, using basic fallback detection
+08-10 17:28:20.584 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.584][D] Background usage permission check:
+08-10 17:28:20.584 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.584][D]   Result: true
+08-10 17:28:20.584 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:20.584][D]   Method: FALLBACK
+08-10 17:28:20.584 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.584][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:20.585 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:20.585][D] onResume completed successfully
+08-10 17:28:44.812 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:44.811][D] onPause - Fragment pausing
+08-10 17:28:44.813 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:44.813][D] onPause completed successfully
+08-10 17:28:44.814 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:44.814][D] onStop - Fragment stopping
+08-10 17:28:44.814 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:44.814][D] onStop completed successfully
+08-10 17:28:44.846 19848 19871 V CalendarAlarmScheduler_AppDatabase: [2025-08-10 17:28:44.846][V] Query: SELECT * FROM rules ORDER BY createdAt DESC with args: []
+08-10 17:28:44.977 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:44.977][D] onDestroyView - Destroying view
+08-10 17:28:44.978 19848 19848 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:44.978][D] Cleared background usage detection cache
+08-10 17:28:44.978 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:44.978][D] onDestroyView completed successfully
+08-10 17:28:44.979 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:44.979][D] onDestroy - Fragment destroying
+08-10 17:28:44.979 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:44.979][D] onDestroy completed successfully
+08-10 17:28:44.979 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:44.979][D] onDetach - Fragment detaching
+08-10 17:28:44.980 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:44.980][D] onDetach completed successfully
+08-10 17:28:53.837 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:53.833][D] onAttach - Fragment attaching to context
+08-10 17:28:53.838 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.838][D] Context dump: Activity: MainActivity, isFinishing: false
+08-10 17:28:53.839 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.839][D] onAttach completed successfully
+08-10 17:28:53.839 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:53.839][D] onCreate - Fragment creating
+08-10 17:28:53.841 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.841][D] savedInstanceState: true
+08-10 17:28:53.842 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.842][D] onCreate completed successfully
+08-10 17:28:53.842 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:53.842][D] onCreateView - Creating view
+08-10 17:28:53.875 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:53.874][I] onCreateView took 32ms
+08-10 17:28:53.875 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.875][D] View created successfully in 32ms
+08-10 17:28:53.879 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:53.879][D] onViewCreated - View created, setting up
+08-10 17:28:53.881 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.881][D] Starting refresh interval description collection
+08-10 17:28:53.882 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.882][I] Refresh interval UI update: '' -> 'Every 30 minutes'
+08-10 17:28:53.882 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.882][D] UI text actually set to: 'Every 30 minutes'
+08-10 17:28:53.883 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.883][D] Starting all-day time description collection
+08-10 17:28:53.883 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.883][I] All-day time UI update: '' -> '8:00 PM'
+08-10 17:28:53.883 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.883][D] UI text actually set to: '8:00 PM'
+08-10 17:28:53.885 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:53.885][W] No session cache available, using basic fallback detection
+08-10 17:28:53.885 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:53.885][D] Background usage permission check:
+08-10 17:28:53.886 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:53.886][D]   Result: true
+08-10 17:28:53.886 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:53.886][D]   Method: FALLBACK
+08-10 17:28:53.886 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.886][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:53.887 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:53.887][I] onViewCreated + setup took 7ms
+08-10 17:28:53.887 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.887][D] View setup completed successfully in 7ms
+08-10 17:28:53.888 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:53.888][D] onStart - Fragment starting
+08-10 17:28:53.888 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:53.888][D] onStart completed successfully
+08-10 17:28:54.044 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:54.044][D] onResume - Fragment resuming
+08-10 17:28:54.045 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:54.044][I] Performing defensive refresh of all settings
+08-10 17:28:54.045 19848 19848 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:54.045][I] Forcing refresh of all StateFlows from SharedPreferences
+08-10 17:28:54.045 19848 19848 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:54.045][D] StateFlow refresh completed
+08-10 17:28:54.047 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:54.047][D] Work status updated: ENQUEUED, scheduled: true
+08-10 17:28:54.048 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:54.048][D] Last sync description updated: Last sync: 53 minutes ago
+08-10 17:28:54.050 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:54.050][W] No session cache available, using basic fallback detection
+08-10 17:28:54.050 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:54.050][D] Background usage permission check:
+08-10 17:28:54.050 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:54.050][D]   Result: true
+08-10 17:28:54.051 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:54.051][D]   Method: FALLBACK
+08-10 17:28:54.051 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:54.051][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:54.052 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:54.052][D] onResume completed successfully
+08-10 17:28:55.021 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:55.020][D] onPause - Fragment pausing
+08-10 17:28:55.023 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:55.022][D] onPause completed successfully
+08-10 17:28:55.025 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:55.025][D] onStop - Fragment stopping
+08-10 17:28:55.025 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:55.025][D] onStop completed successfully
+08-10 17:28:55.197 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:55.193][D] onDestroyView - Destroying view
+08-10 17:28:55.198 19848 19848 D CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:55.198][D] Cleared background usage detection cache
+08-10 17:28:55.198 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:55.198][D] onDestroyView completed successfully
+08-10 17:28:55.199 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:55.199][D] onDestroy - Fragment destroying
+08-10 17:28:55.199 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:55.199][D] onDestroy completed successfully
+08-10 17:28:55.199 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:55.199][D] onDetach - Fragment detaching
+08-10 17:28:55.200 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:55.200][D] onDetach completed successfully
+08-10 17:28:56.202 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.202][D] onAttach - Fragment attaching to context
+08-10 17:28:56.203 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.203][D] Context dump: Activity: MainActivity, isFinishing: false
+08-10 17:28:56.203 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.203][D] onAttach completed successfully
+08-10 17:28:56.204 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.204][D] onCreate - Fragment creating
+08-10 17:28:56.204 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.204][D] savedInstanceState: true
+08-10 17:28:56.204 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.204][D] onCreate completed successfully
+08-10 17:28:56.204 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.204][D] onCreateView - Creating view
+08-10 17:28:56.234 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:56.234][I] onCreateView took 29ms
+08-10 17:28:56.235 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.235][D] View created successfully in 29ms
+08-10 17:28:56.236 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.236][D] onViewCreated - View created, setting up
+08-10 17:28:56.237 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.237][D] Starting refresh interval description collection
+08-10 17:28:56.237 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.237][I] Refresh interval UI update: '' -> 'Every 30 minutes'
+08-10 17:28:56.237 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.237][D] UI text actually set to: 'Every 30 minutes'
+08-10 17:28:56.238 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.238][D] Starting all-day time description collection
+08-10 17:28:56.238 19848 19848 I CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.238][I] All-day time UI update: '' -> '8:00 PM'
+08-10 17:28:56.238 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.238][D] UI text actually set to: '8:00 PM'
+08-10 17:28:56.242 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:56.241][W] No session cache available, using basic fallback detection
+08-10 17:28:56.246 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.246][D] Background usage permission check:
+08-10 17:28:56.249 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.249][D]   Result: true
+08-10 17:28:56.250 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.250][D]   Method: FALLBACK
+08-10 17:28:56.250 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.250][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:56.251 19848 19848 I CalendarAlarmScheduler_Performance_SettingsFragment: [2025-08-10 17:28:56.251][I] onViewCreated + setup took 15ms
+08-10 17:28:56.252 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.251][D] View setup completed successfully in 15ms
+08-10 17:28:56.252 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.252][D] onStart - Fragment starting
+08-10 17:28:56.252 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.252][D] onStart completed successfully
+08-10 17:28:56.395 19848 19848 D CalendarAlarmScheduler_Lifecycle_SettingsFragment: [2025-08-10 17:28:56.395][D] onResume - Fragment resuming
+08-10 17:28:56.395 19848 19848 I CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:56.395][I] Performing defensive refresh of all settings
+08-10 17:28:56.396 19848 19848 I CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:56.396][I] Forcing refresh of all StateFlows from SharedPreferences
+08-10 17:28:56.396 19848 19848 D CalendarAlarmScheduler_SettingsRepository: [2025-08-10 17:28:56.396][D] StateFlow refresh completed
+08-10 17:28:56.397 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:56.397][D] Work status updated: ENQUEUED, scheduled: true
+08-10 17:28:56.398 19848 19848 D CalendarAlarmScheduler_SettingsViewModel: [2025-08-10 17:28:56.398][D] Last sync description updated: Last sync: 53 minutes ago
+08-10 17:28:56.399 19848 19848 W CalendarAlarmScheduler_BackgroundUsageDetector: [2025-08-10 17:28:56.399][W] No session cache available, using basic fallback detection
+08-10 17:28:56.399 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.399][D] Background usage permission check:
+08-10 17:28:56.399 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.399][D]   Result: true
+08-10 17:28:56.399 19848 19848 D CalendarAlarmScheduler_PermissionUtils: [2025-08-10 17:28:56.399][D]   Method: FALLBACK
+08-10 17:28:56.400 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.400][D] Updating permission status: PermissionStatus(hasCalendarPermission=true, hasNotificationPermission=true, hasExactAlarmPermission=true, hasFullScreenIntentPermission=true, isBatteryOptimizationWhitelisted=true)
+08-10 17:28:56.401 19848 19848 D CalendarAlarmScheduler_SettingsFragment: [2025-08-10 17:28:56.400][D] onResume completed successfully

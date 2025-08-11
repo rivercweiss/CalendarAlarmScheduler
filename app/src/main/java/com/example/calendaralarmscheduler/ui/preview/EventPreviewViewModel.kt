@@ -30,12 +30,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+
+/**
+ * Sealed interface representing different UI states for a data type T
+ */
+sealed interface UiState<out T> {
+    data object Loading : UiState<Nothing>
+    data class Success<T>(val data: T) : UiState<T>
+    data class Error(val message: String, val throwable: Throwable? = null) : UiState<Nothing>
+}
 
 data class EventWithAlarms(
     val event: CalendarEvent,
@@ -77,17 +87,14 @@ class EventPreviewViewModel @Inject constructor(
     
     private val ruleMatcher = RuleMatcher()
     
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
     private val _errorMessage = MutableSharedFlow<String>()
     val errorMessage: SharedFlow<String> = _errorMessage.asSharedFlow()
     
     private val _currentFilter = MutableStateFlow(EventFilter())
     val currentFilter: StateFlow<EventFilter> = _currentFilter.asStateFlow()
     
-    private val _eventsWithAlarms = MutableStateFlow<List<EventWithAlarms>>(emptyList())
-    val eventsWithAlarms: StateFlow<List<EventWithAlarms>> = _eventsWithAlarms.asStateFlow()
+    private val _eventsUiState = MutableStateFlow<UiState<List<EventWithAlarms>>>(UiState.Loading)
+    val eventsUiState: StateFlow<UiState<List<EventWithAlarms>>> = _eventsUiState.asStateFlow()
     
     private val _alarmSystemStatus = MutableStateFlow(AlarmSystemStatus(0, 0, 0, 0, emptyList()))
     val alarmSystemStatus: StateFlow<AlarmSystemStatus> = _alarmSystemStatus.asStateFlow()
@@ -95,18 +102,22 @@ class EventPreviewViewModel @Inject constructor(
     private val _schedulingFailures = MutableStateFlow<List<AlarmSchedulingFailure>>(emptyList())
     val schedulingFailures: StateFlow<List<AlarmSchedulingFailure>> = _schedulingFailures.asStateFlow()
     
+    // Store unfiltered events data to enable proper filter toggling
+    private var unfilteredEvents: List<EventWithAlarms> = emptyList()
+    
     init {
-        _isLoading.value = false
-        
-        // Observe rules and alarms and refresh when they change
+        // Single unified data loading observer - no more conflicting refresh paths
         viewModelScope.launch {
             combine(
                 ruleRepository.getAllRules(),
                 alarmRepository.getActiveAlarms()
             ) { rules, alarms ->
-                refreshEventsWithAlarms(rules, alarms)
-                updateAlarmSystemStatus(alarms)
+                android.util.Log.d("EventPreviewViewModel", "Data changed - triggering unified refresh")
+                refreshEventsUnified(rules, alarms, includeAlarmScheduling = false)
             }
+            // Moderate debounce to prevent excessive processing while keeping responsiveness
+            .debounce(300)
+            .collect { }
         }
     }
     
@@ -118,73 +129,153 @@ class EventPreviewViewModel @Inject constructor(
         )
     
     fun refreshEvents() {
+        // Use the SAME approach as filter toggle - just refresh UI with cached data
+        // No database calls, no memory checks, no heavy operations
+        android.util.Log.d("EventPreviewViewModel", "Refresh button pressed - refreshing UI display")
+        
+        if (unfilteredEvents.isNotEmpty()) {
+            // Use cached data like the filter toggle does
+            val currentFilter = _currentFilter.value
+            val filteredEvents = applyFilter(unfilteredEvents)
+            _eventsUiState.value = UiState.Success(filteredEvents)
+            android.util.Log.d("EventPreviewViewModel", "Refresh completed using cached data")
+        } else {
+            // No cached data available - let user know data is loading
+            // The combine observer will automatically load fresh data
+            _eventsUiState.value = UiState.Loading
+            android.util.Log.d("EventPreviewViewModel", "No cached data available, showing loading state")
+        }
+    }
+    
+    // Unified refresh control - prevents all types of concurrent data operations
+    private var isRefreshing = false
+    private var lastRefreshRequest = 0L
+    
+    /**
+     * UNIFIED DATA LOADING METHOD - All refresh operations delegate to this method
+     * This is the single source of truth for data loading to prevent conflicts
+     */
+    private fun refreshEventsUnified(
+        rules: List<Rule>? = null, 
+        alarms: List<com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm>? = null,
+        includeAlarmScheduling: Boolean = false
+    ) {
         if (!PermissionUtils.hasCalendarPermission(context)) {
-            viewModelScope.launch {
-                _errorMessage.emit("Calendar permission is required to view events")
-            }
+            _eventsUiState.value = UiState.Error("Calendar permission is required to view events")
             return
         }
         
+        // Request deduplication - prevent rapid successive calls
+        val now = System.currentTimeMillis()
+        if (isRefreshing && (now - lastRefreshRequest) < 1000) {
+            android.util.Log.d("EventPreviewViewModel", "Skipping duplicate refresh request")
+            return
+        }
+        lastRefreshRequest = now
+        
+        // Memory check - only block if truly critical (99%+) and only for heavy operations
+        if (includeAlarmScheduling) {
+            val runtime = Runtime.getRuntime()
+            val memoryUsagePercent = ((runtime.maxMemory() - runtime.freeMemory()).toDouble() / runtime.maxMemory().toDouble()) * 100
+            if (memoryUsagePercent > 99) {
+                android.util.Log.w("EventPreviewViewModel", "Skipping heavy refresh due to critical memory usage: ${memoryUsagePercent.toInt()}%")
+                _eventsUiState.value = UiState.Error("Low memory - please close other apps")
+                return
+            }
+        }
+        // Lightweight refreshes (no alarm scheduling) skip memory check entirely
+        
         viewModelScope.launch {
-            _isLoading.value = true
+            isRefreshing = true
+            android.util.Log.d("EventPreviewViewModel", "Starting unified refresh (scheduling: $includeAlarmScheduling)")
             
             try {
-                val rules = ruleRepository.getAllRulesSync()
-                val alarms = alarmRepository.getActiveAlarmsSync()
+                // Get data - use provided data if available, otherwise fetch
+                val currentRules = rules ?: ruleRepository.getAllRules().first()
+                val currentAlarms = alarms ?: alarmRepository.getActiveAlarms().first()
                 
-                // First schedule any missing alarms before refreshing the UI
-                scheduleAlarmsForMatchingEvents(rules)
+                // Schedule alarms if requested (for user-initiated refreshes)
+                if (includeAlarmScheduling && currentRules.isNotEmpty()) {
+                    scheduleAlarmsForMatchingEvents(currentRules)
+                    // Get updated alarm data after scheduling
+                    val updatedAlarms = alarmRepository.getActiveAlarms().first()
+                    buildEventsWithAlarms(currentRules, updatedAlarms)
+                } else {
+                    // Read-only refresh (for combine observer)
+                    buildEventsWithAlarms(currentRules, currentAlarms)
+                }
                 
-                // Then refresh the UI with updated alarm data
-                val updatedAlarms = alarmRepository.getActiveAlarmsSync()
-                refreshEventsWithAlarms(rules, updatedAlarms)
+                updateAlarmSystemStatus(currentAlarms)
+                android.util.Log.d("EventPreviewViewModel", "Unified refresh completed successfully")
+                
             } catch (e: Exception) {
-                _errorMessage.emit("Error loading events: ${e.message}")
-                android.util.Log.e("EventPreviewViewModel", "Error refreshing events", e)
+                val errorMessage = "Error loading events: ${e.message}"
+                android.util.Log.e("EventPreviewViewModel", "Unified refresh failed", e)
+                _errorMessage.emit(errorMessage)
+                _eventsUiState.value = UiState.Error(errorMessage, e)
+                unfilteredEvents = emptyList() // Clear stale cache
             } finally {
-                _isLoading.value = false
+                isRefreshing = false
             }
         }
     }
     
-    private suspend fun refreshEventsWithAlarms(rules: List<Rule>, alarms: List<com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm>) {
-        try {
-            val events = calendarRepository.getEventsInLookAheadWindow()
-            val eventsWithAlarms = mutableListOf<EventWithAlarms>()
+    /**
+     * Core data processing method - builds EventWithAlarms from rules and alarms
+     * This replaces the old refreshEventsWithAlarmsReadOnly and refreshEventsWithAlarms methods
+     */
+    private suspend fun buildEventsWithAlarms(
+        rules: List<Rule>, 
+        alarms: List<com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm>
+    ) {
+        val events = calendarRepository.getEventsInLookAheadWindow()
+        val eventsWithAlarms = mutableListOf<EventWithAlarms>()
+        
+        for (event in events) {
+            // Find matching rules for this event
+            val matchResults = ruleMatcher.findMatchingRulesForEvent(event, rules)
+            val matchingRules = matchResults.map { it.rule }
             
-            for (event in events) {
-                // Find matching rules for this event
-                val matchResults = ruleMatcher.findMatchingRulesForEvent(event, rules)
-                val matchingRules = matchResults.map { it.rule }
-                
-                // Find alarms for this event
-                val eventAlarms = alarms
-                    .filter { it.eventId == event.id }
-                    .map { dbAlarm ->
-                        // Convert database entity to domain model
-                        ScheduledAlarm(
-                            id = dbAlarm.id,
-                            eventId = dbAlarm.eventId,
-                            ruleId = dbAlarm.ruleId,
-                            eventTitle = dbAlarm.eventTitle,
-                            eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
-                            alarmTimeUtc = dbAlarm.alarmTimeUtc,
-                            scheduledAt = dbAlarm.scheduledAt,
-                            userDismissed = dbAlarm.userDismissed,
-                            pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
-                            lastEventModified = dbAlarm.lastEventModified
-                        )
-                    }
-                
-                eventsWithAlarms.add(EventWithAlarms(event, eventAlarms, matchingRules))
-            }
+            // Find alarms for this event
+            val eventAlarms = alarms
+                .filter { it.eventId == event.id }
+                .map { dbAlarm ->
+                    ScheduledAlarm(
+                        id = dbAlarm.id,
+                        eventId = dbAlarm.eventId,
+                        ruleId = dbAlarm.ruleId,
+                        eventTitle = dbAlarm.eventTitle,
+                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
+                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
+                        scheduledAt = dbAlarm.scheduledAt,
+                        userDismissed = dbAlarm.userDismissed,
+                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
+                        lastEventModified = dbAlarm.lastEventModified
+                    )
+                }
             
-            _eventsWithAlarms.value = applyFilter(eventsWithAlarms)
-        } catch (e: Exception) {
-            _errorMessage.emit("Error processing events: ${e.message}")
-            android.util.Log.e("EventPreviewViewModel", "Error in refreshEventsWithAlarms", e)
+            eventsWithAlarms.add(EventWithAlarms(event, eventAlarms, matchingRules))
         }
+        
+        // Store unfiltered events for filter toggling
+        unfilteredEvents = eventsWithAlarms
+        
+        // Apply current filter and update UI
+        _eventsUiState.value = UiState.Success(applyFilter(eventsWithAlarms))
     }
+    
+    /**
+     * Lightweight refresh that only updates UI without heavy alarm scheduling.
+     * Use this for tab switches and filter toggles.
+     * Now delegates to unified refresh method.
+     */
+    private fun refreshEventsLightweight() {
+        android.util.Log.d("EventPreviewViewModel", "Lightweight refresh requested")
+        refreshEventsUnified(includeAlarmScheduling = false)
+    }
+    
+    
+    
     
     private fun applyFilter(events: List<EventWithAlarms>): List<EventWithAlarms> {
         val filter = _currentFilter.value
@@ -210,10 +301,23 @@ class EventPreviewViewModel @Inject constructor(
     
     fun updateFilter(newFilter: EventFilter) {
         _currentFilter.value = newFilter
-        // Re-apply filter to existing events
-        val currentEvents = _eventsWithAlarms.value
-        if (currentEvents.isNotEmpty()) {
-            _eventsWithAlarms.value = applyFilter(currentEvents)
+        
+        // Apply filter to ORIGINAL unfiltered data to ensure proper toggle behavior
+        // This fixes the issue where toggling back to "show all" would lose events
+        if (unfilteredEvents.isNotEmpty()) {
+            // Use the original unfiltered events and apply the new filter
+            val filteredEvents = applyFilter(unfilteredEvents)
+            _eventsUiState.value = UiState.Success(filteredEvents)
+        } else {
+            // No unfiltered data available yet - check if we can use current data or need to refresh
+            val currentUiState = _eventsUiState.value
+            if (currentUiState is UiState.Loading) {
+                // If still loading, do nothing - filter will be applied when data arrives
+            } else {
+                // No unfiltered data available, trigger a lightweight refresh
+                // This ensures the filter toggle works even when starting fresh
+                refreshEventsLightweight()
+            }
         }
     }
     
@@ -327,18 +431,15 @@ class EventPreviewViewModel @Inject constructor(
      */
     fun scheduleAlarmsNow() {
         viewModelScope.launch {
-            _isLoading.value = true
             try {
                 val rules = ruleRepository.getAllRulesSync()
                 scheduleAlarmsForMatchingEvents(rules)
                 
-                // Refresh the UI to show newly scheduled alarms
-                refreshEvents()
+                // Refresh the UI to show newly scheduled alarms (lightweight since alarms just got scheduled)
+                refreshEventsLightweight()
             } catch (e: Exception) {
                 _errorMessage.emit("Error scheduling alarms: ${e.message}")
                 android.util.Log.e("EventPreviewViewModel", "Error in scheduleAlarmsNow", e)
-            } finally {
-                _isLoading.value = false
             }
         }
     }

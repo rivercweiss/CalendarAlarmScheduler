@@ -14,8 +14,19 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+/**
+ * Sealed interface representing different UI states for a data type T
+ */
+sealed interface UiState<out T> {
+    data object Loading : UiState<Nothing>
+    data class Success<T>(val data: T) : UiState<T>
+    data class Error(val message: String, val throwable: Throwable? = null) : UiState<Nothing>
+}
 
 @HiltViewModel
 class RuleListViewModel @Inject constructor(
@@ -23,17 +34,23 @@ class RuleListViewModel @Inject constructor(
     private val ruleAlarmManager: RuleAlarmManager
 ) : ViewModel() {
     
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
     private val _statusMessage = MutableSharedFlow<String>()
     val statusMessage: SharedFlow<String> = _statusMessage.asSharedFlow()
     
-    val rules: StateFlow<List<Rule>> = repository.getAllRules()
+    private val _operationState = MutableStateFlow<UiState<Unit>>(UiState.Success(Unit))
+    val operationState: StateFlow<UiState<Unit>> = _operationState.asStateFlow()
+    
+    val uiState: StateFlow<UiState<List<Rule>>> = repository.getAllRules()
+        .map<List<Rule>, UiState<List<Rule>>> { ruleList ->
+            UiState.Success(ruleList)
+        }
+        .catch { throwable ->
+            emit(UiState.Error("Failed to load rules: ${throwable.message}", throwable))
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = UiState.Loading
         )
     
     init {
@@ -43,46 +60,50 @@ class RuleListViewModel @Inject constructor(
     
     fun updateRuleEnabled(rule: Rule, isEnabled: Boolean) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _operationState.value = UiState.Loading
             
             try {
                 val result = repository.updateRuleEnabledWithAlarmManagement(rule, isEnabled)
                 
                 if (result.success) {
                     _statusMessage.emit("✅ ${result.message}")
+                    _operationState.value = UiState.Success(Unit)
                     android.util.Log.i("RuleListViewModel", "Rule '${rule.name}' ${if (isEnabled) "enabled" else "disabled"}: ${result.message}")
                 } else {
                     _statusMessage.emit("⚠️ ${result.message}")
+                    _operationState.value = UiState.Error(result.message)
                     android.util.Log.e("RuleListViewModel", "Failed to update rule '${rule.name}': ${result.message}")
                 }
             } catch (e: Exception) {
-                _statusMessage.emit("❌ Error updating rule: ${e.message}")
+                val errorMessage = "Error updating rule: ${e.message}"
+                _statusMessage.emit("❌ $errorMessage")
+                _operationState.value = UiState.Error(errorMessage, e)
                 android.util.Log.e("RuleListViewModel", "Error updating rule '${rule.name}'", e)
-            } finally {
-                _isLoading.value = false
             }
         }
     }
     
     fun deleteRule(rule: Rule) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _operationState.value = UiState.Loading
             
             try {
                 val result = repository.deleteRuleWithAlarmCleanup(rule)
                 
                 if (result.success) {
                     _statusMessage.emit("✅ ${result.message}")
+                    _operationState.value = UiState.Success(Unit)
                     android.util.Log.i("RuleListViewModel", "Rule '${rule.name}' deleted: ${result.message}")
                 } else {
                     _statusMessage.emit("⚠️ ${result.message}")
+                    _operationState.value = UiState.Error(result.message)
                     android.util.Log.e("RuleListViewModel", "Failed to delete rule '${rule.name}': ${result.message}")
                 }
             } catch (e: Exception) {
-                _statusMessage.emit("❌ Error deleting rule: ${e.message}")
+                val errorMessage = "Error deleting rule: ${e.message}"
+                _statusMessage.emit("❌ $errorMessage")
+                _operationState.value = UiState.Error(errorMessage, e)
                 android.util.Log.e("RuleListViewModel", "Error deleting rule '${rule.name}'", e)
-            } finally {
-                _isLoading.value = false
             }
         }
     }
