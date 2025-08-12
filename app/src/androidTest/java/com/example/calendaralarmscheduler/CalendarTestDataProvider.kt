@@ -58,83 +58,149 @@ class CalendarTestDataProvider {
     )
     
     /**
-     * Validate that test calendar environment is properly set up
+     * STRICT: Validate that LOCAL test calendar environment is properly set up
+     * NEVER uses user calendars - only validates events from LOCAL test calendar
      */
     fun validateTestCalendarSetup(): Boolean {
         return try {
-            val testEvents = queryTestEvents()
+            Log.i("CalendarTestData", "🔒 STRICT VALIDATION: Checking LOCAL test calendar setup only")
+            
+            // First, find the LOCAL test calendar
+            val testCalendarId = getLocalTestCalendarId()
+            if (testCalendarId == null) {
+                Log.e("CalendarTestData", "❌ VALIDATION FAILED: No LOCAL test calendar found")
+                Log.e("CalendarTestData", "Run setup_test_calendar.sh to create proper test environment")
+                return false
+            }
+            
+            Log.i("CalendarTestData", "✅ Found LOCAL test calendar with ID: $testCalendarId")
+            
+            // Only query events from the verified LOCAL test calendar
+            val testEvents = queryEventsFromTestCalendar(testCalendarId)
             val foundTitles = testEvents.map { it.title }
             
-            Log.i("CalendarTestData", "Found ${testEvents.size} total calendar events")
+            Log.i("CalendarTestData", "Found ${testEvents.size} events in LOCAL test calendar")
             
-            // Check for presence of key test events
+            if (testEvents.isEmpty()) {
+                Log.e("CalendarTestData", "❌ VALIDATION FAILED: No events found in LOCAL test calendar")
+                Log.e("CalendarTestData", "Run setup_test_calendar.sh to populate test calendar")
+                return false
+            }
+            
+            // Check for presence of key test events in LOCAL calendar only
             val keyEventsFound = EXPECTED_TEST_EVENTS.count { expectedTitle ->
                 foundTitles.any { it.contains(expectedTitle) }
             }
             
-            Log.i("CalendarTestData", "Found $keyEventsFound/${EXPECTED_TEST_EVENTS.size} expected test events")
+            Log.i("CalendarTestData", "Found $keyEventsFound/${EXPECTED_TEST_EVENTS.size} expected test events in LOCAL test calendar")
             
-            // Log some example events for debugging
+            // Log sample events for debugging
             testEvents.take(5).forEach { event ->
-                Log.i("CalendarTestData", "  Event: ${event.title} at ${Date(event.startTime)}")
+                Log.i("CalendarTestData", "  Test Event: ${event.title} at ${Date(event.startTime)} (Calendar: ${event.calendarId})")
             }
             
-            // Validate minimum test coverage
-            keyEventsFound >= 10 // At least 10 key test events should exist
+            // STRICT: Require minimum test coverage from LOCAL calendar only
+            if (keyEventsFound < 10) {
+                Log.e("CalendarTestData", "❌ VALIDATION FAILED: Only $keyEventsFound/10 required test events found in LOCAL test calendar")
+                Log.e("CalendarTestData", "Run setup_test_calendar.sh to create proper test events")
+                return false
+            }
+            
+            Log.i("CalendarTestData", "✅ STRICT VALIDATION PASSED: LOCAL test calendar properly configured")
+            true
+            
         } catch (e: Exception) {
-            Log.e("CalendarTestData", "Failed to validate test calendar setup", e)
+            Log.e("CalendarTestData", "❌ VALIDATION FAILED: Exception during test calendar validation", e)
             false
         }
     }
     
     /**
-     * Get existing primary calendar ID
+     * STRICT: Get LOCAL test calendar ID only - never returns user calendars
      */
-    fun getPrimaryCalendarId(): Long? {
+    fun getLocalTestCalendarId(): Long? {
         val projection = arrayOf(
             CalendarContract.Calendars._ID,
             CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
-            CalendarContract.Calendars.ACCOUNT_NAME
+            CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.ACCOUNT_TYPE
         )
         
         return try {
             contentResolver.query(
                 CalendarContract.Calendars.CONTENT_URI,
                 projection,
-                null,
-                null,
+                "${CalendarContract.Calendars.ACCOUNT_TYPE} = ? AND ${CalendarContract.Calendars.ACCOUNT_NAME} = ?",
+                arrayOf("LOCAL", "testlocal"),
                 null
             )?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     val calendarId = cursor.getLong(0)
                     val displayName = cursor.getString(1)
                     val accountName = cursor.getString(2)
+                    val accountType = cursor.getString(3)
                     
-                    Log.i("CalendarTestData", "Found calendar: $displayName (ID: $calendarId, Account: $accountName)")
-                    calendarId
-                } else null
+                    Log.i("CalendarTestData", "✅ Found LOCAL test calendar: $displayName (ID: $calendarId, Account: $accountName, Type: $accountType)")
+                    
+                    // Double-check this is actually a LOCAL calendar
+                    if (accountType == "LOCAL") {
+                        calendarId
+                    } else {
+                        Log.e("CalendarTestData", "❌ Calendar $calendarId is not LOCAL type: $accountType")
+                        null
+                    }
+                } else {
+                    Log.e("CalendarTestData", "❌ No LOCAL test calendar found with account 'testlocal'")
+                    null
+                }
             }
         } catch (e: Exception) {
-            Log.e("CalendarTestData", "Failed to get primary calendar", e)
+            Log.e("CalendarTestData", "Failed to get LOCAL test calendar", e)
             null
         }
     }
     
     /**
-     * Get events matching a specific keyword pattern (for rule testing)
-     * Note: Keywords match space-separated titles (Important matches "Important Client Call")
+     * STRICT: Query events only from verified LOCAL test calendar
+     */
+    fun queryEventsFromTestCalendar(testCalendarId: Long): List<CalendarEvent> {
+        return try {
+            queryEvents(calendarId = testCalendarId, fromTime = 0) // All events from test calendar
+        } catch (e: Exception) {
+            Log.e("CalendarTestData", "Failed to query events from test calendar $testCalendarId", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * @deprecated Use getLocalTestCalendarId() instead - this method could return user calendars
+     */
+    @Deprecated("Use getLocalTestCalendarId() to ensure only LOCAL test calendar is used")
+    fun getPrimaryCalendarId(): Long? {
+        Log.w("CalendarTestData", "⚠️ getPrimaryCalendarId() is deprecated - use getLocalTestCalendarId() for strict test isolation")
+        return getLocalTestCalendarId()
+    }
+    
+    /**
+     * STRICT: Get events matching keyword pattern from LOCAL test calendar only
      */
     fun getEventsMatchingKeyword(keyword: String): List<CalendarEvent> {
         return try {
-            queryEvents().filter { event ->
+            val testCalendarId = getLocalTestCalendarId()
+            if (testCalendarId == null) {
+                Log.e("CalendarTestData", "❌ No LOCAL test calendar found - cannot search for '$keyword' events")
+                return emptyList()
+            }
+            
+            queryEventsFromTestCalendar(testCalendarId).filter { event ->
                 // Match keyword in space-separated titles (case insensitive)
                 val title = event.title.lowercase()
                 val keywordLower = keyword.lowercase()
                 title.contains(keywordLower)
             }.also { matchingEvents ->
-                Log.i("CalendarTestData", "Found ${matchingEvents.size} events matching '$keyword'")
+                Log.i("CalendarTestData", "Found ${matchingEvents.size} events matching '$keyword' in LOCAL test calendar")
                 matchingEvents.take(3).forEach { event ->
-                    Log.i("CalendarTestData", "  Match: ${event.title}")
+                    Log.i("CalendarTestData", "  Match: ${event.title} (Calendar: ${event.calendarId})")
                 }
             }
         } catch (e: Exception) {
@@ -144,21 +210,27 @@ class CalendarTestDataProvider {
     }
     
     /**
-     * Query and validate predefined test events exist (replaces createTestEventSuite)
+     * STRICT: Query test events from LOCAL test calendar only
      */
     fun queryTestEvents(): List<CalendarEvent> {
         return try {
-            val allEvents = queryEvents()
-            Log.i("CalendarTestData", "Found ${allEvents.size} total calendar events")
-            
-            // Log sample of events for debugging
-            allEvents.take(10).forEach { event ->
-                Log.i("CalendarTestData", "  Event: ${event.title} at ${Date(event.startTime)}")
+            val testCalendarId = getLocalTestCalendarId()
+            if (testCalendarId == null) {
+                Log.e("CalendarTestData", "❌ No LOCAL test calendar found - cannot query test events")
+                return emptyList()
             }
             
-            allEvents
+            val testEvents = queryEventsFromTestCalendar(testCalendarId)
+            Log.i("CalendarTestData", "Found ${testEvents.size} events in LOCAL test calendar")
+            
+            // Log sample of events for debugging
+            testEvents.take(10).forEach { event ->
+                Log.i("CalendarTestData", "  Test Event: ${event.title} at ${Date(event.startTime)} (Calendar: ${event.calendarId})")
+            }
+            
+            testEvents
         } catch (e: Exception) {
-            Log.e("CalendarTestData", "Failed to query test events", e)
+            Log.e("CalendarTestData", "Failed to query test events from LOCAL calendar", e)
             emptyList()
         }
     }

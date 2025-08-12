@@ -198,12 +198,12 @@ Please research the syntax of adb commands in bash scripts, how best to set up t
 
 ---
 
-We are going to implement the full test flow.
+We are going to implement the full test flow. Some of the test flow has already been implemented.
 
 Full Test Flow:
 
 </setup>
-Start with a clean device in standard light mode with no other modes active with the Scheduler app not installed and any previous Scheduler app data cleaned.
+Start with a clean device in standard light mode with no other modes active with a fresh Scheduler install and any previous Scheduler app data cleaned.
 
 Also start with various test calendar events in place. 
 </setup>
@@ -224,7 +224,7 @@ Also start with various test calendar events in place.
 -  The test ends and returns valid data
 </test_flow>
 
-Lets make a plan. Dig in, read the relevant files and ultrathink. This plan MUST include running the full e2e test after every new test case/step addition to check the new test addition works as expected.
+Lets make a plan. Dig in, read the relevant files, research Espresso and UI Automator best practices and syntax and ultrathink. This plan MUST include running the full e2e test after every new test case/step addition to check the new test addition works as expected. Ultrathink
 
 ---
 

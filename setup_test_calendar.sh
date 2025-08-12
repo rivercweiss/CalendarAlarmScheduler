@@ -93,12 +93,23 @@ if [ -z "$CALENDAR_ID" ] || [ "$CALENDAR_ID" = "0" ]; then
 fi
 
 if [ -z "$CALENDAR_ID" ] || [ "$CALENDAR_ID" = "0" ]; then
-    print_error "Failed to create or identify local test calendar"
+    print_error "CRITICAL ERROR: Failed to create or identify local test calendar"
     print_error "Calendar query result was: $CALENDAR_QUERY_RESULT"
+    print_error "Cannot proceed without proper test calendar setup"
     exit 1
 fi
 
-print_success "Created local test calendar with ID: $CALENDAR_ID"
+# STRICT: Verify the calendar we found/created is actually a LOCAL test calendar
+print_step "Verifying test calendar is LOCAL account type..."
+CALENDAR_ACCOUNT_TYPE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 || echo "")
+
+if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
+    print_error "SAFETY CHECK FAILED: Calendar ID $CALENDAR_ID is not a LOCAL test calendar (type: $CALENDAR_ACCOUNT_TYPE)"
+    print_error "This could be a user calendar - refusing to proceed to protect user data"
+    exit 1
+fi
+
+print_success "✅ Created LOCAL test calendar with ID: $CALENDAR_ID"
 
 # Verify calendar is visible
 print_step "Verifying calendar visibility..."
@@ -159,14 +170,25 @@ print_success "Calendar permissions granted"
 # Clear ONLY existing test calendar events for clean deterministic setup
 print_step "Clearing existing test calendar events for clean test environment..."
 
-# First, try to find and delete events from previous test runs in our test calendar
+# STRICT: Only clear events from verified test calendar - NEVER touch user calendars
 if [ ! -z "$CALENDAR_ID" ]; then
+    # Verify this is actually a LOCAL test calendar before clearing anything
+    CALENDAR_ACCOUNT_TYPE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 || echo "")
+    
+    if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
+        print_error "SAFETY CHECK FAILED: Calendar ID $CALENDAR_ID is not a LOCAL test calendar (type: $CALENDAR_ACCOUNT_TYPE)"
+        print_error "Refusing to clear events from non-test calendar to protect user data"
+        exit 1
+    fi
+    
+    print_success "✅ Verified calendar ID $CALENDAR_ID is LOCAL test calendar - safe to clear"
     $ADB shell content delete --uri content://com.android.calendar/events --where "calendar_id=$CALENDAR_ID" 2>/dev/null || true
     print_success "Cleared events from test calendar (ID: $CALENDAR_ID)"
 else
-    # Fallback: delete events with test-specific titles to avoid destroying user data
-    $ADB shell content delete --uri content://com.android.calendar/events --where "title LIKE '%Test%' OR title LIKE '%Important Client Call%' OR title LIKE '%Doctor Appointment%'" 2>/dev/null || true
-    print_success "Cleared test events by title pattern"
+    print_error "CRITICAL ERROR: Could not identify test calendar ID"
+    print_error "Refusing to perform any cleanup without verified test calendar ID"
+    print_error "This prevents accidentally affecting user calendar data"
+    exit 1
 fi
 
 # Verify cleanup worked - count remaining events in test calendar
@@ -242,7 +264,7 @@ $ADB shell content query --uri content://com.android.calendar/events --projectio
 
 # Verify calendar properties
 print_step "Verifying calendar properties:"
-$ADB shell content query --uri content://com.android.calendar/calendars --projection "calendar_displayName,visible,sync_events" --where "_id=$CALENDAR_ID"
+$ADB shell content query --uri content://com.android.calendar/calendars --projection "_id,calendar_displayName,account_name,account_type,visible" --where "_id=$CALENDAR_ID" 2>/dev/null || true
 
 # Verify app can read the events
 print_step "Verifying app can read calendar events..."

@@ -177,41 +177,53 @@ class ComprehensiveE2ETest {
                 // Check calendar permissions
                 verifyCalendarPermissions()
                 
-                // Validate predefined test calendar environment
+                // STRICT: Validate LOCAL test calendar environment - FAIL if not properly set up
+                Log.i("ComprehensiveE2E", "🔒 STRICT MODE: Validating LOCAL test calendar setup (no fallbacks)")
                 val testCalendarValid = calendarDataProvider.validateTestCalendarSetup()
-                if (testCalendarValid) {
-                    Log.i("ComprehensiveE2E", "✅ Test calendar environment validated")
-                    
-                    // Query the test events for reference
-                    val testEvents = calendarDataProvider.queryTestEvents()
-                    testEventIds = testEvents.map { it.id }
-                    
-                    Log.i("ComprehensiveE2E", "📅 Found ${testEventIds.size} test calendar events")
-                    
-                    // Verify specific test event types exist
-                    val importantEvents = calendarDataProvider.getEventsMatchingKeyword("Important")
-                    val meetingEvents = calendarDataProvider.getEventsMatchingKeyword("Meeting")
-                    val doctorEvents = calendarDataProvider.getEventsMatchingKeyword("Doctor")
-                    
-                    Log.i("ComprehensiveE2E", "Event validation: Important=${importantEvents.size}, Meeting=${meetingEvents.size}, Doctor=${doctorEvents.size}")
-                    
-                    if (importantEvents.isNotEmpty() && meetingEvents.isNotEmpty() && doctorEvents.isNotEmpty()) {
-                        Log.i("ComprehensiveE2E", "✅ All required test event types found")
-                    } else {
-                        Log.w("ComprehensiveE2E", "Some test event types missing - continuing with available events")
-                    }
-                } else {
-                    Log.w("ComprehensiveE2E", "⚠️ Test calendar setup validation failed - using existing calendar events")
-                    // Use any available calendar events
-                    val availableEvents = calendarDataProvider.queryTestEvents()
-                    testEventIds = availableEvents.map { it.id }
-                    Log.i("ComprehensiveE2E", "Found ${testEventIds.size} available calendar events")
+                
+                if (!testCalendarValid) {
+                    val errorMsg = "❌ CRITICAL TEST SETUP FAILURE: LOCAL test calendar not properly configured"
+                    Log.e("ComprehensiveE2E", errorMsg)
+                    Log.e("ComprehensiveE2E", "Required: Run './setup_test_calendar.sh' before running E2E tests")
+                    Log.e("ComprehensiveE2E", "E2E test CANNOT run without proper LOCAL test calendar - no fallbacks allowed")
+                    throw AssertionError("Test calendar setup validation failed - run setup_test_calendar.sh")
                 }
                 
+                Log.i("ComprehensiveE2E", "✅ LOCAL test calendar environment validated")
+                
+                // Query events from verified LOCAL test calendar only
+                val testEvents = calendarDataProvider.queryTestEvents()
+                testEventIds = testEvents.map { it.id }
+                
+                Log.i("ComprehensiveE2E", "📅 Found ${testEventIds.size} events in LOCAL test calendar")
+                
+                if (testEventIds.isEmpty()) {
+                    val errorMsg = "❌ CRITICAL FAILURE: No events found in LOCAL test calendar"
+                    Log.e("ComprehensiveE2E", errorMsg)
+                    throw AssertionError("No test events found - run setup_test_calendar.sh to populate calendar")
+                }
+                
+                // Verify specific test event types exist in LOCAL calendar
+                val importantEvents = calendarDataProvider.getEventsMatchingKeyword("Important")
+                val meetingEvents = calendarDataProvider.getEventsMatchingKeyword("Meeting")
+                val doctorEvents = calendarDataProvider.getEventsMatchingKeyword("Doctor")
+                
+                Log.i("ComprehensiveE2E", "✅ Event validation (from LOCAL test calendar): Important=${importantEvents.size}, Meeting=${meetingEvents.size}, Doctor=${doctorEvents.size}")
+                
+                if (importantEvents.isEmpty() || meetingEvents.isEmpty() || doctorEvents.isEmpty()) {
+                    val errorMsg = "❌ CRITICAL FAILURE: Missing required test event types in LOCAL test calendar"
+                    Log.e("ComprehensiveE2E", errorMsg)
+                    Log.e("ComprehensiveE2E", "Required: Events with 'Important', 'Meeting', and 'Doctor' keywords")
+                    throw AssertionError("Missing required test event types - run setup_test_calendar.sh")
+                }
+                
+                Log.i("ComprehensiveE2E", "✅ All required test event types found in LOCAL test calendar")
+                
             } catch (e: Exception) {
-                Log.e("ComprehensiveE2E", "Failed to create test calendar events", e)
-                // Don't throw - allow test to continue without custom events
-                Log.w("ComprehensiveE2E", "Continuing test without custom calendar events")
+                Log.e("ComprehensiveE2E", "❌ CRITICAL FAILURE: Test calendar validation failed", e)
+                Log.e("ComprehensiveE2E", "E2E test CANNOT continue without proper LOCAL test calendar setup")
+                Log.e("ComprehensiveE2E", "Required action: Run './setup_test_calendar.sh' to create test environment")
+                throw e // Re-throw to fail the test - no fallbacks allowed
             }
         }
     }

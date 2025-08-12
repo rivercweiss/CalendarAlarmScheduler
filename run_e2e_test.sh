@@ -111,20 +111,25 @@ $ADB $ADB_DEVICE shell dumpsys package $PACKAGE_NAME | grep -A10 "requested perm
 
 print_success "Permissions configured"
 
-# Set up test calendar data for deterministic testing
-print_step "Setting up test calendar data..."
+# STRICT: Set up LOCAL test calendar data for deterministic testing - FAIL if setup fails
+print_step "Setting up LOCAL test calendar data (STRICT MODE - no fallbacks)..."
 if [ -f "./setup_test_calendar.sh" ]; then
     ./setup_test_calendar.sh
     SETUP_EXIT_CODE=$?
     if [ $SETUP_EXIT_CODE -eq 0 ]; then
-        print_success "✅ Test calendar data setup completed successfully"
+        print_success "✅ LOCAL test calendar data setup completed successfully"
     else
-        print_error "❌ Test calendar setup failed - tests may not work correctly"
-        print_warning "Continuing with existing calendar events (not recommended)"
+        print_error "❌ CRITICAL FAILURE: LOCAL test calendar setup failed"
+        print_error "E2E tests CANNOT run without proper test calendar environment"
+        print_error "This prevents accidentally using user calendar data"
+        print_error "Fix the calendar setup issues and try again"
+        exit 1
     fi
 else
-    print_warning "⚠️ setup_test_calendar.sh not found - using existing calendar events"
-    print_warning "This may result in unpredictable test results"
+    print_error "❌ CRITICAL FAILURE: setup_test_calendar.sh script not found"
+    print_error "E2E tests require LOCAL test calendar setup script"
+    print_error "Cannot run tests without proper calendar isolation"
+    exit 1
 fi
 
 # Clear logcat for clean test logs

@@ -65,14 +65,24 @@ else
 fi
 
 if [ -z "$CALENDAR_ID" ]; then
-    print_error "Could not find test calendar to clean up"
-    print_warning "Attempting fallback cleanup by title pattern..."
-    
-    # Fallback: delete events with test-specific titles
-    $ADB shell content delete --uri content://com.android.calendar/events --where "title LIKE '%Test%' OR title LIKE '%Important Client Call%' OR title LIKE '%Doctor Appointment%'" 2>/dev/null || true
-    print_warning "Fallback cleanup completed"
-    exit 0
+    print_error "CRITICAL ERROR: Could not find test calendar to clean up"
+    print_error "No test calendar ID available - unable to perform safe cleanup"
+    print_error "This prevents accidentally affecting user calendar data"
+    print_error "Please run setup script to create proper test calendar first"
+    exit 1
 fi
+
+# STRICT: Verify this is actually a LOCAL test calendar before doing anything
+print_step "Verifying calendar safety before cleanup..."
+CALENDAR_ACCOUNT_TYPE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 || echo "")
+
+if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
+    print_error "SAFETY CHECK FAILED: Calendar ID $CALENDAR_ID is not a LOCAL test calendar (type: $CALENDAR_ACCOUNT_TYPE)"
+    print_error "Refusing to clean up non-test calendar to protect user data"
+    exit 1
+fi
+
+print_success "✅ Verified calendar ID $CALENDAR_ID is LOCAL test calendar - safe to clean up"
 
 # Count events before cleanup
 EVENTS_BEFORE=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" 2>/dev/null | wc -l || echo "0")
@@ -96,15 +106,12 @@ fi
 EVENTS_AFTER=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" 2>/dev/null | wc -l || echo "0")
 print_success "Events remaining in test calendar: $EVENTS_AFTER"
 
-# Delete the test calendar itself
-print_step "Deleting test calendar..."
-$ADB shell content delete --uri "content://com.android.calendar/calendars?caller_is_syncadapter=true&account_name=testlocal&account_type=LOCAL" --where "_id=$CALENDAR_ID" 2>/dev/null
-
-if [ $? -eq 0 ]; then
-    print_success "✅ Deleted test calendar (ID: $CALENDAR_ID)"
-else
-    print_warning "⚠️ Could not delete test calendar - may require manual cleanup"
-fi
+# Note: Skipping calendar deletion as it can hang the script
+# The important part is clearing the events for test isolation
+print_step "Test calendar cleanup strategy..."
+print_success "✅ Test calendar events cleared - primary goal achieved"
+print_success "📝 Keeping test calendar (ID: $CALENDAR_ID) for reuse by future tests"
+print_success "🔄 Calendar will be cleared and reused by next test run"
 
 # Clean up our tracking file
 if [ -f ".test_calendar_id" ]; then
