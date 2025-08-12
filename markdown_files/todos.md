@@ -112,6 +112,10 @@ Add toggle for “Only alarm for first event of the day."
 
 ---
 
+Dismissing full screen alarm does not dismiss notification.
+
+---
+
 We are planning and researching the best way to implement:
 
 A comprehensive end to end test which tests the app in the exact same interactive way as the user.
@@ -173,3 +177,59 @@ Please research best practices and determine what to use for this purpose.
 Please run and verify the functionality of the test, fixing any issues.
 
 Then add a concise summary of whatever the next claude will need to know about the test to the CLAUDE.md.
+
+---
+We are trying to set up a reusable end to end test system for the app, which has a test calendar setup and teardown. 
+
+A previous developer was having issues getting this system to work.
+
+You need to check their work and fix their mistakes.
+
+They were struggling to make the system fully reusable and create entirely new test calendars and events each time (and remove them on test teardown). It is MANDATORY we setup and teardown a NEW and REPRODUCIBLE calendar system for the test.
+
+The main issues they were running into:
+1) The setup_test_calendar.sh thinks it is making calendar events, but neither I nor the app can see them in the emulator.
+2) The calendar ID made by the setup script seems to be wrong, it is returning a user calendar.
+3) The teardown is not fully working, but this could be an issue with the calendar ID.
+
+The CORE ISSUE is the app needs to see the calendar events. We need to figure out how to find the root cause.
+
+Please research the syntax of adb commands in bash scripts, how best to set up testable calendars in android emulators, and then make a plan to fix the previous developers work. Ultrathink.
+
+---
+
+We are going to implement the full test flow.
+
+Full Test Flow:
+
+</setup>
+Start with a clean device in standard light mode with no other modes active with the Scheduler app not installed and any previous Scheduler app data cleaned.
+
+Also start with various test calendar events in place. 
+</setup>
+
+</test_flow>
+- Install the app, with no default permissions (we are going to add all the permissions as if we were a user)
+- Launch the app, check memory usage stays under 30 megabytes.
+- Perform the permissions workflow, enabling the permissions.
+- Check there are no alarms scheduled, no rules scheduled, we can see the test calendar events in preview, and the settings permissions are shown correctly.
+- Add a rule, and check the rule is added, the alarm is scheduled, there are no unexpected toasts or notifications, and the preview page shows the correct alarm scheduled.
+- Change the system to dark mode, do not disturb, silent, bedtime mode and the maximum battery saver.
+- Accelerate time until the alarm fires, and check the scheduled alarm fires correctly.
+-  Add two more alarm rules that match different events. Check the rule is added, the alarm is scheduled, there are no unexpected toasts or notifications, and the preview page shows the correct alarm scheduled.
+-  Accelerate time until both alarms have fired, and check the scheduled alarms both fire correctly.
+-  Add a test calendar event 3 days out which matches one of the alarm rules. Check there is no alarm scheduled for this event.
+-  Close and fully quit the app, then accelerate time until the test calendar event 3 days in the future alarm fires. This checks background refresh and alarm setting.
+-  Add 100+ calendar events in the next 2 days in multiple calendars. Open the app and rapidly and randomly interact with the app only, closing and opening it and pressing all over the app to make it do random things. Check no crashes and memory usage is less than 30 mb.
+-  The test ends and returns valid data
+</test_flow>
+
+Lets make a plan. Dig in, read the relevant files and ultrathink. This plan MUST include running the full e2e test after every new test case/step addition to check the new test addition works as expected.
+
+---
+
+Renumber all the e2e test cases. Don’t changes anything else.
+
+---
+
+Something in the e2e test is causing the emulator to go black. Please dig deep into the logs to find a root cause. Look up how to fix any issues you find in the logs. ultrathink

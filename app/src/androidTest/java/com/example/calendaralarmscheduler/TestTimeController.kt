@@ -160,59 +160,21 @@ class TestTimeController {
     }
     
     /**
-     * Create events at specific time intervals for testing
+     * Get predefined events at specific time intervals for testing
+     * Note: With Option 3 approach, we use predefined calendar events instead of creating them
      */
-    fun createTimeBasedEvents(baseTime: Long = getCurrentTime()): List<CalendarTestDataProvider.TestCalendarEvent> {
-        return listOf(
-            // Immediate future (5 minutes)
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "Immediate Alert Test",
-                startTime = baseTime + FIVE_MINUTES,
-                endTime = baseTime + FIVE_MINUTES + THIRTY_MINUTES,
-                description = "Test immediate alarm firing"
-            ),
-            
-            // Near future (30 minutes)
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "Near Future Meeting",
-                startTime = baseTime + THIRTY_MINUTES,
-                endTime = baseTime + THIRTY_MINUTES + ONE_HOUR,
-                description = "Test near-future alarm scheduling"
-            ),
-            
-            // Medium future (2 hours)
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "Medium Range Event",
-                startTime = baseTime + (2 * ONE_HOUR),
-                endTime = baseTime + (3 * ONE_HOUR),
-                description = "Test medium-range alarm scheduling"
-            ),
-            
-            // Next day
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "Next Day Important",
-                startTime = baseTime + ONE_DAY,
-                endTime = baseTime + ONE_DAY + ONE_HOUR,
-                description = "Test next-day alarm scheduling"
-            ),
-            
-            // All-day event tomorrow
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "All Day Event",
-                startTime = baseTime + ONE_DAY,
-                endTime = baseTime + ONE_DAY + ONE_DAY,
-                allDay = true,
-                description = "Test all-day event alarm scheduling"
-            ),
-            
-            // Far future for acceleration testing
-            CalendarTestDataProvider.TestCalendarEvent(
-                title = "Far Future Conference",
-                startTime = baseTime + ONE_MONTH,
-                endTime = baseTime + ONE_MONTH + (4 * ONE_HOUR),
-                description = "Test time acceleration scenarios"
-            )
-        )
+    fun getTimeBasedTestEvents(calendarProvider: CalendarTestDataProvider): List<CalendarTestDataProvider.CalendarEvent> {
+        // Get predefined events that are useful for time-based testing
+        val allEvents = calendarProvider.queryAllEvents()
+        
+        return allEvents.filter { event ->
+            // Filter events that are useful for time acceleration testing
+            val title = event.title.lowercase()
+            title.contains("important") || 
+            title.contains("meeting") || 
+            title.contains("doctor") ||
+            title.contains("conference")
+        }.sortedBy { it.startTime }
     }
     
     /**

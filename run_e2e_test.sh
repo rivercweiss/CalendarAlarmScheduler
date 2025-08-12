@@ -83,9 +83,13 @@ print_success "APKs installed successfully"
 print_step "Preparing device for testing..."
 
 # Wake up device and dismiss any lock screens
+$ADB $ADB_DEVICE shell input keyevent KEYCODE_WAKEUP  # Wake up device
+sleep 1
 $ADB $ADB_DEVICE shell input keyevent 82  # Menu key (dismisses keyguard on some devices)
 $ADB $ADB_DEVICE shell input keyevent 26  # Power key
 $ADB $ADB_DEVICE shell input keyevent 82  # Menu key again
+$ADB $ADB_DEVICE shell input swipe 540 1500 540 800  # Swipe up to dismiss lock screen
+sleep 1
 
 # Clear app data for clean test environment
 $ADB $ADB_DEVICE shell pm clear $PACKAGE_NAME
@@ -95,9 +99,33 @@ print_step "Setting up permissions..."
 $ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.READ_CALENDAR 2>/dev/null || true
 $ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.WRITE_CALENDAR 2>/dev/null || true
 $ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.POST_NOTIFICATIONS 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.SCHEDULE_EXACT_ALARM 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.USE_EXACT_ALARM 2>/dev/null || true
 # Skip non-runtime permissions
 
+# Verify permissions were granted
+print_step "Verifying permissions..."
+$ADB $ADB_DEVICE shell pm list permissions -g | grep -A5 "android.permission-group.CALENDAR" || true
+echo "Calendar permissions for $PACKAGE_NAME:"
+$ADB $ADB_DEVICE shell dumpsys package $PACKAGE_NAME | grep -A10 "requested permissions:" | grep -E "(CALENDAR|NOTIFICATION|ALARM)" || true
+
 print_success "Permissions configured"
+
+# Set up test calendar data for deterministic testing
+print_step "Setting up test calendar data..."
+if [ -f "./setup_test_calendar.sh" ]; then
+    ./setup_test_calendar.sh
+    SETUP_EXIT_CODE=$?
+    if [ $SETUP_EXIT_CODE -eq 0 ]; then
+        print_success "✅ Test calendar data setup completed successfully"
+    else
+        print_error "❌ Test calendar setup failed - tests may not work correctly"
+        print_warning "Continuing with existing calendar events (not recommended)"
+    fi
+else
+    print_warning "⚠️ setup_test_calendar.sh not found - using existing calendar events"
+    print_warning "This may result in unpredictable test results"
+fi
 
 # Clear logcat for clean test logs
 print_step "Clearing device logs..."
@@ -168,16 +196,32 @@ EOF
 
 print_success "Results collected in: $RESULTS_DIR"
 
+# Clean up test calendar data
+print_step "Cleaning up test calendar data..."
+if [ -f "./teardown_test_calendar.sh" ]; then
+    ./teardown_test_calendar.sh
+    TEARDOWN_EXIT_CODE=$?
+    if [ $TEARDOWN_EXIT_CODE -eq 0 ]; then
+        print_success "✅ Test calendar cleanup completed successfully"
+    else
+        print_warning "⚠️ Test calendar cleanup had issues - manual cleanup may be needed"
+    fi
+else
+    print_warning "⚠️ teardown_test_calendar.sh not found - test data may remain on device"
+fi
+
 # Display final status
 echo ""
 if [ $TEST_EXIT_CODE -eq 0 ]; then
     print_success "=== COMPREHENSIVE E2E TEST PASSED ==="
     echo "✅ All tests completed successfully"
+    echo "🧹 Test environment cleaned up"
     echo "📊 Performance metrics and memory analysis available in: $RESULTS_DIR"
     echo "📝 Check test logs for detailed execution information"
 else
     print_error "=== COMPREHENSIVE E2E TEST FAILED ==="
     echo "❌ Test execution failed with exit code: $TEST_EXIT_CODE"
+    echo "🧹 Test environment cleaned up (regardless of test result)"
     echo "📋 Check logs in $RESULTS_DIR for failure details"
     echo "🔍 Review crash_logs.txt and app_logs.txt for error information"
 fi
@@ -186,5 +230,7 @@ echo ""
 echo "Results directory: $RESULTS_DIR"
 echo "To view detailed metrics: cat $RESULTS_DIR/test_metrics.txt"
 echo "To view app logs: cat $RESULTS_DIR/app_logs.txt"
+echo ""
+echo "🔄 Test environment is clean and ready for next test run"
 
 exit $TEST_EXIT_CODE

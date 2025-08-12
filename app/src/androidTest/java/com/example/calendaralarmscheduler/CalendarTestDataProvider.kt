@@ -1,76 +1,94 @@
 package com.example.calendaralarmscheduler
 
 import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
 import android.provider.CalendarContract
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.*
 
 /**
- * Test utility for injecting calendar events and managing test calendar data.
- * Provides controlled calendar environment for comprehensive E2E testing.
+ * Test utility for working with predefined test calendar events.
+ * Validates and provides access to deterministic calendar data created by setup_test_calendar.sh.
+ * No longer creates calendar events - works with pre-populated test data.
  */
 class CalendarTestDataProvider {
     
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val contentResolver: ContentResolver = context.contentResolver
-    private val createdEvents = mutableListOf<Long>()
-    private val createdCalendars = mutableListOf<Long>()
     
     companion object {
-        private const val TEST_CALENDAR_NAME = "CalendarAlarmScheduler_Test_Calendar"
-        private const val TEST_ACCOUNT_NAME = "test_account@calendaralarmscheduler.com"
-        private const val TEST_ACCOUNT_TYPE = "com.example.calendaralarmscheduler.test"
+        // Test calendar baseline: Monday Aug 11, 2025 9:00 AM PDT
+        private const val BASELINE_EPOCH = 1723392000000L
+        private const val ONE_HOUR = 3600000L
+        
+        // Expected test event titles for validation (proper titles with spaces)
+        private val EXPECTED_TEST_EVENTS = listOf(
+            "Important Client Call",
+            "Doctor Appointment Follow-up", 
+            "Team Meeting Weekly",
+            "Important Project Review",
+            "Morning Standup Meeting",
+            "Doctor Visit Annual",
+            "Important Conference Call",
+            "Weekly Team Meeting",
+            "Important Budget Meeting",
+            "Doctor Consultation",
+            "Important Quarterly Review",
+            "Conference Day Important",
+            "Training Workshop",
+            "Important Meeting Doctor Review",
+            "Important Doctor Consultation Meeting"
+        )
     }
     
-    data class TestCalendarEvent(
+    /**
+     * Simplified CalendarEvent data class for testing
+     */
+    data class CalendarEvent(
+        val id: Long,
         val title: String,
-        val description: String = "",
+        val description: String,
         val startTime: Long,
         val endTime: Long,
-        val allDay: Boolean = false,
-        val location: String = "",
-        val calendarId: Long? = null
+        val isAllDay: Boolean,
+        val location: String,
+        val calendarId: Long,
+        val lastModified: Long
     )
     
     /**
-     * Create a test calendar for isolated testing
+     * Validate that test calendar environment is properly set up
      */
-    fun createTestCalendar(): Long? {
+    fun validateTestCalendarSetup(): Boolean {
         return try {
-            val values = ContentValues().apply {
-                put(CalendarContract.Calendars.NAME, TEST_CALENDAR_NAME)
-                put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, "Test Calendar for E2E")
-                put(CalendarContract.Calendars.ACCOUNT_NAME, TEST_ACCOUNT_NAME)
-                put(CalendarContract.Calendars.ACCOUNT_TYPE, TEST_ACCOUNT_TYPE)
-                put(CalendarContract.Calendars.CALENDAR_COLOR, 0xFF0000FF.toInt())
-                put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER)
-                put(CalendarContract.Calendars.OWNER_ACCOUNT, TEST_ACCOUNT_NAME)
-                put(CalendarContract.Calendars.CALENDAR_TIME_ZONE, TimeZone.getDefault().id)
-                put(CalendarContract.Calendars.SYNC_EVENTS, 1)
-                put(CalendarContract.Calendars.VISIBLE, 1)
+            val testEvents = queryTestEvents()
+            val foundTitles = testEvents.map { it.title }
+            
+            Log.i("CalendarTestData", "Found ${testEvents.size} total calendar events")
+            
+            // Check for presence of key test events
+            val keyEventsFound = EXPECTED_TEST_EVENTS.count { expectedTitle ->
+                foundTitles.any { it.contains(expectedTitle) }
             }
             
-            val uri = contentResolver.insert(CalendarContract.Calendars.CONTENT_URI, values)
-            val calendarId = uri?.lastPathSegment?.toLongOrNull()
+            Log.i("CalendarTestData", "Found $keyEventsFound/${EXPECTED_TEST_EVENTS.size} expected test events")
             
-            if (calendarId != null) {
-                createdCalendars.add(calendarId)
-                Log.i("CalendarTestData", "Created test calendar with ID: $calendarId")
+            // Log some example events for debugging
+            testEvents.take(5).forEach { event ->
+                Log.i("CalendarTestData", "  Event: ${event.title} at ${Date(event.startTime)}")
             }
             
-            calendarId
+            // Validate minimum test coverage
+            keyEventsFound >= 10 // At least 10 key test events should exist
         } catch (e: Exception) {
-            Log.e("CalendarTestData", "Failed to create test calendar", e)
-            null
+            Log.e("CalendarTestData", "Failed to validate test calendar setup", e)
+            false
         }
     }
     
     /**
-     * Get existing calendar ID (uses primary Google Calendar if available)
+     * Get existing primary calendar ID
      */
     fun getPrimaryCalendarId(): Long? {
         val projection = arrayOf(
@@ -103,126 +121,109 @@ class CalendarTestDataProvider {
     }
     
     /**
-     * Inject a test calendar event
+     * Get events matching a specific keyword pattern (for rule testing)
+     * Note: Keywords match space-separated titles (Important matches "Important Client Call")
      */
-    fun injectEvent(event: TestCalendarEvent): Long? {
-        val calendarId = event.calendarId ?: getPrimaryCalendarId() ?: createTestCalendar()
-        
-        if (calendarId == null) {
-            Log.e("CalendarTestData", "No calendar available for event injection")
-            return null
-        }
-        
+    fun getEventsMatchingKeyword(keyword: String): List<CalendarEvent> {
         return try {
-            val values = ContentValues().apply {
-                put(CalendarContract.Events.TITLE, event.title)
-                put(CalendarContract.Events.DESCRIPTION, event.description)
-                put(CalendarContract.Events.CALENDAR_ID, calendarId)
-                put(CalendarContract.Events.DTSTART, event.startTime)
-                put(CalendarContract.Events.DTEND, event.endTime)
-                put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
-                put(CalendarContract.Events.EVENT_LOCATION, event.location)
-                
-                if (event.allDay) {
-                    put(CalendarContract.Events.ALL_DAY, 1)
-                    put(CalendarContract.Events.DTSTART, event.startTime)
-                    put(CalendarContract.Events.DTEND, event.endTime)
-                } else {
-                    put(CalendarContract.Events.ALL_DAY, 0)
+            queryEvents().filter { event ->
+                // Match keyword in space-separated titles (case insensitive)
+                val title = event.title.lowercase()
+                val keywordLower = keyword.lowercase()
+                title.contains(keywordLower)
+            }.also { matchingEvents ->
+                Log.i("CalendarTestData", "Found ${matchingEvents.size} events matching '$keyword'")
+                matchingEvents.take(3).forEach { event ->
+                    Log.i("CalendarTestData", "  Match: ${event.title}")
                 }
-                
-                put(CalendarContract.Events.HAS_ALARM, 0) // We'll manage alarms ourselves
-                put(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY)
             }
-            
-            val uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
-            val eventId = uri?.lastPathSegment?.toLongOrNull()
-            
-            if (eventId != null) {
-                createdEvents.add(eventId)
-                Log.i("CalendarTestData", "Injected event '$event.title' with ID: $eventId")
-            }
-            
-            eventId
         } catch (e: Exception) {
-            Log.e("CalendarTestData", "Failed to inject event: ${event.title}", e)
-            null
+            Log.e("CalendarTestData", "Failed to get events matching '$keyword'", e)
+            emptyList()
         }
     }
     
     /**
-     * Create a comprehensive set of test events for E2E testing
+     * Query and validate predefined test events exist (replaces createTestEventSuite)
      */
-    fun createTestEventSuite(): List<Long> {
-        val now = System.currentTimeMillis()
-        val oneHour = 60 * 60 * 1000L
-        val oneDay = 24 * oneHour
-        
-        val testEvents = listOf(
-            // Events matching typical alarm rules
-            TestCalendarEvent(
-                title = "Important Meeting",
-                description = "Critical business meeting",
-                startTime = now + (2 * oneHour),
-                endTime = now + (3 * oneHour)
-            ),
-            TestCalendarEvent(
-                title = "Doctor Appointment",
-                description = "Annual checkup",
-                startTime = now + (4 * oneHour),
-                endTime = now + (5 * oneHour)
-            ),
-            TestCalendarEvent(
-                title = "Team Standup",
-                description = "Daily team sync",
-                startTime = now + oneDay,
-                endTime = now + oneDay + oneHour
-            ),
-            // All-day event
-            TestCalendarEvent(
-                title = "Conference Day",
-                description = "Annual company conference",
-                startTime = now + (2 * oneDay),
-                endTime = now + (2 * oneDay) + oneDay,
-                allDay = true
-            ),
-            // Far future event for time acceleration testing
-            TestCalendarEvent(
-                title = "Future Planning Session",
-                description = "Long-term planning meeting",
-                startTime = now + (30 * oneDay),
-                endTime = now + (30 * oneDay) + (2 * oneHour)
-            ),
-            // Event with location
-            TestCalendarEvent(
-                title = "Client Presentation",
-                description = "Present quarterly results",
-                startTime = now + (6 * oneHour),
-                endTime = now + (8 * oneHour),
-                location = "Conference Room A"
-            ),
-            // Multiple events on same day
-            TestCalendarEvent(
-                title = "Morning Briefing",
-                description = "Start of day briefing",
-                startTime = now + oneDay + (8 * oneHour),
-                endTime = now + oneDay + (9 * oneHour)
-            ),
-            TestCalendarEvent(
-                title = "Lunch Meeting",
-                description = "Business lunch discussion",
-                startTime = now + oneDay + (12 * oneHour),
-                endTime = now + oneDay + (13 * oneHour)
-            )
-        )
-        
-        val eventIds = mutableListOf<Long>()
-        testEvents.forEach { event ->
-            injectEvent(event)?.let { eventIds.add(it) }
+    fun queryTestEvents(): List<CalendarEvent> {
+        return try {
+            val allEvents = queryEvents()
+            Log.i("CalendarTestData", "Found ${allEvents.size} total calendar events")
+            
+            // Log sample of events for debugging
+            allEvents.take(10).forEach { event ->
+                Log.i("CalendarTestData", "  Event: ${event.title} at ${Date(event.startTime)}")
+            }
+            
+            allEvents
+        } catch (e: Exception) {
+            Log.e("CalendarTestData", "Failed to query test events", e)
+            emptyList()
         }
-        
-        Log.i("CalendarTestData", "Created test suite with ${eventIds.size} events")
-        return eventIds
+    }
+    
+    /**
+     * Get predefined stress test events (replaces createStressTestEventSuite)
+     */
+    fun getStressTestEvents(): List<CalendarEvent> {
+        return try {
+            queryEvents().filter { event ->
+                event.title.startsWith("Stress Test Event")
+            }.also { stressEvents ->
+                Log.i("CalendarTestData", "Found ${stressEvents.size} stress test events")
+            }
+        } catch (e: Exception) {
+            Log.e("CalendarTestData", "Failed to get stress test events", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * Get predefined future events for background refresh testing
+     */
+    fun getFutureEvents(): List<CalendarEvent> {
+        return try {
+            val now = System.currentTimeMillis()
+            val threeDays = 3 * 24 * 60 * 60 * 1000L
+            
+            queryEvents().filter { event ->
+                event.startTime > (now + threeDays) // Events more than 3 days out
+            }.also { futureEvents ->
+                Log.i("CalendarTestData", "Found ${futureEvents.size} future events (3+ days out)")
+            }
+        } catch (e: Exception) {
+            Log.e("CalendarTestData", "Failed to get future events", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * Get events that should match multiple rules (for comprehensive testing)
+     * Note: Works with space-separated titles
+     */
+    fun getMultiRuleMatchingEvents(): List<CalendarEvent> {
+        return try {
+            queryEvents().filter { event ->
+                // Events containing multiple keywords (space-separated titles)
+                val title = event.title.lowercase()
+                val hasImportant = title.contains("important")
+                val hasMeeting = title.contains("meeting") 
+                val hasDoctor = title.contains("doctor")
+                
+                // Count how many keywords match
+                val matchCount = listOf(hasImportant, hasMeeting, hasDoctor).count { it }
+                matchCount >= 2 // Events matching 2+ keywords
+            }.also { multiMatchEvents ->
+                Log.i("CalendarTestData", "Found ${multiMatchEvents.size} events matching multiple rules")
+                multiMatchEvents.forEach { event ->
+                    Log.i("CalendarTestData", "  Multi-match: ${event.title}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("CalendarTestData", "Failed to get multi-rule matching events", e)
+            emptyList()
+        }
     }
     
     /**
@@ -285,53 +286,18 @@ class CalendarTestDataProvider {
     }
     
     /**
-     * Clean up all test data
+     * Get all events (including past ones) for comprehensive testing
      */
-    fun cleanup() {
-        // Remove created events
-        createdEvents.forEach { eventId ->
-            try {
-                val uri = Uri.withAppendedPath(CalendarContract.Events.CONTENT_URI, eventId.toString())
-                val deleted = contentResolver.delete(uri, null, null)
-                if (deleted > 0) {
-                    Log.d("CalendarTestData", "Deleted event ID: $eventId")
-                }
-            } catch (e: Exception) {
-                Log.w("CalendarTestData", "Failed to delete event ID: $eventId", e)
-            }
-        }
-        
-        // Remove created calendars
-        createdCalendars.forEach { calendarId ->
-            try {
-                val uri = Uri.withAppendedPath(CalendarContract.Calendars.CONTENT_URI, calendarId.toString())
-                val deleted = contentResolver.delete(uri, null, null)
-                if (deleted > 0) {
-                    Log.d("CalendarTestData", "Deleted calendar ID: $calendarId")
-                }
-            } catch (e: Exception) {
-                Log.w("CalendarTestData", "Failed to delete calendar ID: $calendarId", e)
-            }
-        }
-        
-        createdEvents.clear()
-        createdCalendars.clear()
-        
-        Log.i("CalendarTestData", "Cleanup completed")
+    fun queryAllEvents(): List<CalendarEvent> {
+        return queryEvents(fromTime = 0) // Get all events from epoch
     }
     
     /**
-     * Simplified CalendarEvent data class for testing
+     * Clean up any accidentally created test data (main test events should persist)
      */
-    data class CalendarEvent(
-        val id: Long,
-        val title: String,
-        val description: String,
-        val startTime: Long,
-        val endTime: Long,
-        val isAllDay: Boolean,
-        val location: String,
-        val calendarId: Long,
-        val lastModified: Long
-    )
+    fun cleanup() {
+        Log.i("CalendarTestData", "Cleanup completed - test calendar events preserved")
+        // Note: We no longer clean up test events since they're predefined
+        // The setup_test_calendar.sh script manages the test data lifecycle
+    }
 }
