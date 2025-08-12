@@ -224,7 +224,7 @@ Also start with various test calendar events in place.
 -  The test ends and returns valid data
 </test_flow>
 
-Lets make a plan. Dig in, read the relevant files, research Espresso and UI Automator best practices and syntax and ultrathink. This plan MUST include running the full e2e test after every new test case/step addition to check the new test addition works as expected. Ultrathink
+Lets make a plan. Dig in, read the relevant files, research Espresso and UI Automator best practices and syntax and ultrathink. This plan MUST include running AND VERIFYING THE OUTPUT OF the full e2e test after every new test case/step addition to check the new test addition works as expected. Ultrathink
 
 ---
 
@@ -233,3 +233,64 @@ Renumber all the e2e test cases. Don’t changes anything else.
 ---
 
 Something in the e2e test is causing the emulator to go black. Please dig deep into the logs to find a root cause. Look up how to fix any issues you find in the logs. ultrathink
+
+---
+
+We have an automated E2E test, but it is very slow. It needs to be as fast as possible, while still being very robust and capable of running on many devices/emulated devices with no flakiness. Your job is to make the test as fast as possible, WHILE MAINTAINING ALL TEST FUNCTIONALITY AND CURRENT COVERAGE, and making sure the test is bulletproof.
+
+Lets make a plan. Dig in, read the relevant files, research Espresso and UI Automator best practices and syntax and ultrathink. This plan MUST include running the full e2e test after every new speed improvement to check the new speed improvement works as expected. Ultrathink
+
+
+We have an automated calendar event loader setup_test_calendar.sh, but it is very slow. It needs to be as fast as possible, while still being very robust. Your job is to make the loader as fast as possible, WHILE MAINTAINING ALL FUNCTIONALITY AND CURRENT LOADED EVENTS.
+
+I want you to become an expert in Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible.
+
+The key outcome of this app we need to test:
+- Alarms ALWAYS fire correctly, with noise and a notification
+We need to be able to robustly test this behavior, along with all the other app behaviors.
+
+Lets become an expert in this topic. Dig in, deep research Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible. Ultrathink
+
+We need the run_e2e_test.sh to correctly uninstall and reinstall the application, and ensure all app files are deleted. Become an expert in any required topics to complete this exceptionally. Ultrathink.
+
+
+// NOTE: Infrastructure setup (APK install, permissions, calendar data) 
+// is handled by run_e2e_test.sh - no duplication here
+
+We are working on making a single end to end test case that tests the standard user flow using UI Automator.
+
+The flow:
+
+- Opens the app to the permissions onboarding
+- Steps through the permission onboarding, enabling permissions with UI Automator, as a user would
+- Go to settings and trigger the test alarm
+- Close the app
+- Verify the test alarm fires by waiting for the alarm to notify, then successfully dismissing the alarm
+
+There is one big issue with this test:
+
+- We are not correctly detecting the alarm notification.
+
+After each addition, run the E2E test to verify functionality. Remember, this is an end to end test, so we want to make sure we are properly testing functionality, NOT just getting the test to pass.
+
+Ultrathink, research and become an expert in notification detection. We NEED this alarm detection to be reusable between different alarm events we will be testing.
+
+Please start by becoming an expert, then examining the full logs (we just ran a test), and determine root cause.
+
+
+warning: The following options were not recognized by an
+    y processor: '[dagger.hilt.internal.useAggregatingRootPr
+    ocessor, dagger.fastInit, dagger.hilt.android.internal.d
+
+
+I want you to become an expert in Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible.
+
+The key outcome of this app we need to test:
+- Alarms ALWAYS fire correctly, with noise and a notification
+
+We need to be able to robustly test this behavior, along with all the other app behaviors.
+
+Lets not read any files for now, we will read them later. For now, all I want you to do is web searches to become an expert.
+
+Lets become an expert in this topic. Dig in, deep research Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible. Ultrathink
+

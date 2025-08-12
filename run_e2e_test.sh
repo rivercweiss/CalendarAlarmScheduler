@@ -72,12 +72,90 @@ fi
 
 print_success "Build completed successfully"
 
-# Install APKs
-print_step "Installing app and test APKs..."
-$ADB $ADB_DEVICE install -r "$APK_PATH"
-$ADB $ADB_DEVICE install -r "$TEST_APK_PATH"
+# Comprehensive App Cleanup and Uninstallation
+print_step "Performing comprehensive app cleanup and uninstallation..."
 
-print_success "APKs installed successfully"
+# Force stop any running instances of the app and test app
+print_step "Force stopping running app instances..."
+$ADB $ADB_DEVICE shell am force-stop $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell am force-stop ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Kill any background processes
+$ADB $ADB_DEVICE shell am kill $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell am kill ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Clear any existing app data before uninstalling (this ensures complete state reset)
+print_step "Clearing existing app data..."
+$ADB $ADB_DEVICE shell pm clear $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm clear ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Uninstall both main app and test app completely (all users)
+print_step "Uninstalling existing app packages..."
+$ADB $ADB_DEVICE shell pm uninstall $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm uninstall ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# For devices with multiple users (work profiles), ensure complete removal
+$ADB $ADB_DEVICE shell pm uninstall --user 0 $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm uninstall --user 0 ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Verify packages are completely removed
+print_step "Verifying complete package removal..."
+MAIN_PKG_EXISTS=$($ADB $ADB_DEVICE shell pm list packages | grep -c "$PACKAGE_NAME$" 2>/dev/null || echo "0")
+TEST_PKG_EXISTS=$($ADB $ADB_DEVICE shell pm list packages | grep -c "${PACKAGE_NAME}.test$" 2>/dev/null || echo "0")
+
+# Ensure we have valid integers for comparison
+if [ -z "$MAIN_PKG_EXISTS" ] || ! [[ "$MAIN_PKG_EXISTS" =~ ^[0-9]+$ ]]; then
+    MAIN_PKG_EXISTS=0
+fi
+if [ -z "$TEST_PKG_EXISTS" ] || ! [[ "$TEST_PKG_EXISTS" =~ ^[0-9]+$ ]]; then
+    TEST_PKG_EXISTS=0
+fi
+
+if [ "$MAIN_PKG_EXISTS" -eq "0" ] && [ "$TEST_PKG_EXISTS" -eq "0" ]; then
+    print_success "All packages successfully removed"
+else
+    print_warning "Some packages may still exist - attempting forced removal"
+    # Additional cleanup for stubborn packages
+    $ADB $ADB_DEVICE shell pm uninstall-system-updates $PACKAGE_NAME 2>/dev/null || true
+    $ADB $ADB_DEVICE shell pm uninstall-system-updates ${PACKAGE_NAME}.test 2>/dev/null || true
+fi
+
+# Clear package manager cache to ensure clean state
+print_step "Clearing package manager caches..."
+$ADB $ADB_DEVICE shell pm trim-caches 100M 2>/dev/null || true
+
+# Wait for system to stabilize after cleanup
+sleep 2
+
+print_success "Comprehensive app cleanup completed - device in clean state"
+
+# Clean Install APKs (no -r flag since packages were completely removed)
+print_step "Installing app and test APKs (clean installation)..."
+
+# Install main app APK
+if ! $ADB $ADB_DEVICE install "$APK_PATH"; then
+    print_error "Failed to install main app APK"
+    exit 1
+fi
+
+# Install test APK  
+if ! $ADB $ADB_DEVICE install "$TEST_APK_PATH"; then
+    print_error "Failed to install test app APK"
+    exit 1
+fi
+
+# Verify both packages are properly installed
+print_step "Verifying clean APK installation..."
+MAIN_INSTALLED=$($ADB $ADB_DEVICE shell pm list packages | grep -c "$PACKAGE_NAME$" || echo "0")
+TEST_INSTALLED=$($ADB $ADB_DEVICE shell pm list packages | grep -c "${PACKAGE_NAME}.test$" || echo "0")
+
+if [ "$MAIN_INSTALLED" -eq "1" ] && [ "$TEST_INSTALLED" -eq "1" ]; then
+    print_success "✅ Both APKs installed successfully with clean state"
+else
+    print_error "❌ APK installation verification failed"
+    print_error "Main app installed: $MAIN_INSTALLED, Test app installed: $TEST_INSTALLED"
+    exit 1
+fi
 
 # Prepare device for testing
 print_step "Preparing device for testing..."
@@ -91,25 +169,16 @@ $ADB $ADB_DEVICE shell input keyevent 82  # Menu key again
 $ADB $ADB_DEVICE shell input swipe 540 1500 540 800  # Swipe up to dismiss lock screen
 sleep 1
 
-# Clear app data for clean test environment
-$ADB $ADB_DEVICE shell pm clear $PACKAGE_NAME
+# Note: App data is already clean due to complete uninstall/reinstall process above
 
-# Set up permissions (only runtime permissions)
-print_step "Setting up permissions..."
-$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.READ_CALENDAR 2>/dev/null || true
-$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.WRITE_CALENDAR 2>/dev/null || true
-$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.POST_NOTIFICATIONS 2>/dev/null || true
-$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.SCHEDULE_EXACT_ALARM 2>/dev/null || true
-$ADB $ADB_DEVICE shell pm grant $PACKAGE_NAME android.permission.USE_EXACT_ALARM 2>/dev/null || true
-# Skip non-runtime permissions
+# REMOVED: Permission pre-granting for proper E2E onboarding flow testing
+# The test will handle permissions through the actual onboarding UI flow
+print_step "Skipping permission pre-granting - will be handled by onboarding flow test"
 
-# Verify permissions were granted
-print_step "Verifying permissions..."
-$ADB $ADB_DEVICE shell pm list permissions -g | grep -A5 "android.permission-group.CALENDAR" || true
-echo "Calendar permissions for $PACKAGE_NAME:"
-$ADB $ADB_DEVICE shell dumpsys package $PACKAGE_NAME | grep -A10 "requested permissions:" | grep -E "(CALENDAR|NOTIFICATION|ALARM)" || true
+# Note: Permissions will be granted through UI Automator during onboarding test
+# This ensures we test the actual user experience of permission granting
 
-print_success "Permissions configured"
+print_success "Permissions will be handled by onboarding flow"
 
 # STRICT: Set up LOCAL test calendar data for deterministic testing - FAIL if setup fails
 print_step "Setting up LOCAL test calendar data (STRICT MODE - no fallbacks)..."
@@ -214,6 +283,24 @@ if [ -f "./teardown_test_calendar.sh" ]; then
 else
     print_warning "⚠️ teardown_test_calendar.sh not found - test data may remain on device"
 fi
+
+# Post-test comprehensive cleanup for clean state
+print_step "Performing post-test comprehensive cleanup..."
+
+# Force stop any running app instances after test completion
+$ADB $ADB_DEVICE shell am force-stop $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell am force-stop ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Optional: Completely remove test apps for ultimate clean state (uncomment if desired)
+# print_step "Removing test applications for ultimate clean state..."
+# $ADB $ADB_DEVICE shell pm uninstall $PACKAGE_NAME 2>/dev/null || true
+# $ADB $ADB_DEVICE shell pm uninstall ${PACKAGE_NAME}.test 2>/dev/null || true
+
+# Clear any remaining app data to ensure clean state for next run
+$ADB $ADB_DEVICE shell pm clear $PACKAGE_NAME 2>/dev/null || true
+$ADB $ADB_DEVICE shell pm clear ${PACKAGE_NAME}.test 2>/dev/null || true
+
+print_success "✅ Post-test cleanup completed - device ready for next test run"
 
 # Display final status
 echo ""

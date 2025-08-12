@@ -363,13 +363,5 @@ class CalendarTestDataProvider {
     fun queryAllEvents(): List<CalendarEvent> {
         return queryEvents(fromTime = 0) // Get all events from epoch
     }
-    
-    /**
-     * Clean up any accidentally created test data (main test events should persist)
-     */
-    fun cleanup() {
-        Log.i("CalendarTestData", "Cleanup completed - test calendar events preserved")
-        // Note: We no longer clean up test events since they're predefined
-        // The setup_test_calendar.sh script manages the test data lifecycle
-    }
+
 }

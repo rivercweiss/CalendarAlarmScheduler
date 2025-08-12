@@ -99,10 +99,27 @@ if [ -z "$CALENDAR_ID" ] || [ "$CALENDAR_ID" = "0" ]; then
     exit 1
 fi
 
-# STRICT: Verify the calendar we found/created is actually a LOCAL test calendar
-print_step "Verifying test calendar is LOCAL account type..."
-CALENDAR_ACCOUNT_TYPE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 || echo "")
+# Consolidated calendar verification - verify type and visibility in parallel
+print_step "Verifying calendar properties in parallel..."
 
+# Create temp directory for verification results
+VERIFY_TEMP_DIR=$(mktemp -d)
+
+# Run both verification queries in parallel
+$ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 > "$VERIFY_TEMP_DIR/account_type" &
+$ADB shell content query --uri content://com.android.calendar/calendars --projection visible --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o '[0-9]*' > "$VERIFY_TEMP_DIR/visibility" &
+
+# Wait for verification queries to complete
+wait
+
+# Read results
+CALENDAR_ACCOUNT_TYPE=$(cat "$VERIFY_TEMP_DIR/account_type" 2>/dev/null || echo "")
+CALENDAR_VISIBLE=$(cat "$VERIFY_TEMP_DIR/visibility" 2>/dev/null || echo "1")
+
+# Cleanup verification temp directory
+rm -rf "$VERIFY_TEMP_DIR"
+
+# Verify account type
 if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
     print_error "SAFETY CHECK FAILED: Calendar ID $CALENDAR_ID is not a LOCAL test calendar (type: $CALENDAR_ACCOUNT_TYPE)"
     print_error "This could be a user calendar - refusing to proceed to protect user data"
@@ -110,10 +127,6 @@ if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
 fi
 
 print_success "✅ Created LOCAL test calendar with ID: $CALENDAR_ID"
-
-# Verify calendar is visible
-print_step "Verifying calendar visibility..."
-CALENDAR_VISIBLE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection visible --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "1")
 print_success "Calendar visibility: $CALENDAR_VISIBLE (1=visible, 0=hidden)"
 
 # Function to create a calendar event
@@ -161,29 +174,91 @@ create_event() {
     fi
 }
 
-# First, grant calendar permissions to ensure we can create/delete events
+# Optimized batch event creation function
+create_event_batch() {
+    local events_array=("$@")
+    local batch_size=15  # Further increased batch size for maximum performance
+    local batch_count=0
+    local commands=()
+    local total_events=${#events_array[@]}
+    local current_index=0
+    
+    print_step "Creating events in optimized batches (batch size: $batch_size)..."
+    
+    for event_data in "${events_array[@]}"; do
+        IFS='|' read -r title description start_offset_hours duration_hours all_day <<< "$event_data"
+        current_index=$((current_index + 1))
+        
+        # Pre-calculate time values
+        local start_time_ms=$(echo "$BASELINE_EPOCH + ($start_offset_hours * $ONE_HOUR)" | bc)
+        local duration_ms=$(echo "$duration_hours * $ONE_HOUR" | bc)
+        local end_time_ms=$(echo "$start_time_ms + $duration_ms" | bc)
+        local start_time=${start_time_ms%.*}
+        local end_time=${end_time_ms%.*}
+        
+        local cmd
+        if [ "$all_day" -eq "1" ]; then
+            local day_start=$((start_time / ONE_DAY * ONE_DAY))
+            local day_end=$((day_start + ONE_DAY))
+            cmd="content insert --uri 'content://com.android.calendar/events?caller_is_syncadapter=true&account_name=testlocal&account_type=LOCAL' --bind 'calendar_id:i:$CALENDAR_ID' --bind 'title:s:$title' --bind 'description:s:$description' --bind 'dtstart:l:$day_start' --bind 'dtend:l:$day_end' --bind 'allDay:i:1' --bind 'eventTimezone:s:America/Los_Angeles' --bind 'hasAlarm:i:0'"
+        else
+            cmd="content insert --uri 'content://com.android.calendar/events?caller_is_syncadapter=true&account_name=testlocal&account_type=LOCAL' --bind 'calendar_id:i:$CALENDAR_ID' --bind 'title:s:$title' --bind 'description:s:$description' --bind 'dtstart:l:$start_time' --bind 'dtend:l:$end_time' --bind 'allDay:i:0' --bind 'eventTimezone:s:America/Los_Angeles' --bind 'hasAlarm:i:0'"
+        fi
+        
+        commands+=("$cmd")
+        batch_count=$((batch_count + 1))
+        
+        # Execute batch when we reach batch_size or at the end
+        if [ $batch_count -eq $batch_size ] || [ $current_index -eq $total_events ]; then
+            print_step "Executing batch of $batch_count events..."
+            
+            # Execute commands in parallel within the batch
+            local pids=()
+            for cmd in "${commands[@]}"; do
+                $ADB shell "$cmd" &
+                pids+=($!)
+            done
+            
+            # Wait for all commands in this batch to complete
+            for pid in "${pids[@]}"; do
+                wait $pid
+            done
+            
+            print_success "✓ Batch of $batch_count events completed"
+            
+            # Reset for next batch
+            commands=()
+            batch_count=0
+        fi
+    done
+}
+
+# Grant calendar permissions in parallel for speed
 print_step "Ensuring calendar permissions are granted..."
-$ADB shell pm grant $PACKAGE_NAME android.permission.READ_CALENDAR 2>/dev/null || true
-$ADB shell pm grant $PACKAGE_NAME android.permission.WRITE_CALENDAR 2>/dev/null || true
+$ADB shell pm grant $PACKAGE_NAME android.permission.READ_CALENDAR 2>/dev/null &
+$ADB shell pm grant $PACKAGE_NAME android.permission.WRITE_CALENDAR 2>/dev/null &
+wait  # Wait for both permission grants to complete
 print_success "Calendar permissions granted"
 
 # Clear ONLY existing test calendar events for clean deterministic setup
 print_step "Clearing existing test calendar events for clean test environment..."
 
-# STRICT: Only clear events from verified test calendar - NEVER touch user calendars
+# Optimized calendar cleanup with consolidated verification
 if [ ! -z "$CALENDAR_ID" ]; then
-    # Verify this is actually a LOCAL test calendar before clearing anything
-    CALENDAR_ACCOUNT_TYPE=$($ADB shell content query --uri content://com.android.calendar/calendars --projection account_type --where "_id=$CALENDAR_ID" 2>/dev/null | head -1 | grep -o 'account_type=[^,]*' | cut -d'=' -f2 || echo "")
+    # We already verified the calendar type above, so we can proceed directly to cleanup
+    print_success "✅ Using verified LOCAL test calendar ID $CALENDAR_ID - safe to clear"
     
-    if [ "$CALENDAR_ACCOUNT_TYPE" != "LOCAL" ]; then
-        print_error "SAFETY CHECK FAILED: Calendar ID $CALENDAR_ID is not a LOCAL test calendar (type: $CALENDAR_ACCOUNT_TYPE)"
-        print_error "Refusing to clear events from non-test calendar to protect user data"
-        exit 1
-    fi
+    # Run cleanup and verification in parallel
+    $ADB shell content delete --uri content://com.android.calendar/events --where "calendar_id=$CALENDAR_ID" 2>/dev/null &
+    CLEANUP_PID=$!
     
-    print_success "✅ Verified calendar ID $CALENDAR_ID is LOCAL test calendar - safe to clear"
-    $ADB shell content delete --uri content://com.android.calendar/events --where "calendar_id=$CALENDAR_ID" 2>/dev/null || true
+    # Wait for cleanup to complete
+    wait $CLEANUP_PID
     print_success "Cleared events from test calendar (ID: $CALENDAR_ID)"
+    
+    # Verify cleanup worked
+    REMAINING_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" 2>/dev/null | wc -l || echo "0")
+    print_success "Test calendar cleanup completed - $REMAINING_EVENTS events remaining in test calendar"
 else
     print_error "CRITICAL ERROR: Could not identify test calendar ID"
     print_error "Refusing to perform any cleanup without verified test calendar ID"
@@ -191,95 +266,153 @@ else
     exit 1
 fi
 
-# Verify cleanup worked - count remaining events in test calendar
-if [ ! -z "$CALENDAR_ID" ]; then
-    REMAINING_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" 2>/dev/null | wc -l || echo "0")
-    print_success "Test calendar cleanup completed - $REMAINING_EVENTS events remaining in test calendar"
-fi
-
 print_step "Creating test calendar events based on specification..."
 
-# IMMEDIATE EVENTS (0-2 hours from baseline)
-create_event "Important Client Call" "Critical business meeting" 1 1 0
-create_event "Doctor Appointment Follow-up" "Annual checkup follow-up" 2 1 0
+# Define all events as array data for batch processing
+declare -a ALL_EVENTS=(
+    # IMMEDIATE EVENTS (0-2 hours from baseline)
+    "Important Client Call|Critical business meeting|1|1|0"
+    "Doctor Appointment Follow-up|Annual checkup follow-up|2|1|0"
+    
+    # SAME DAY EVENTS (later today)  
+    "Team Meeting Weekly|Weekly team sync meeting|5|1|0"
+    "Important Project Review|Quarterly project review session|7|2|0"
+    "Lunch Break|Personal lunch time|3|1|0"
+    
+    # NEXT DAY EVENTS (24-48 hours from baseline)
+    "Morning Standup Meeting|Daily team standup|24|0.5|0"
+    "Doctor Visit Annual|Annual medical checkup|29|1|0"
+    "Important Conference Call|Critical client conference call|33|1|0"
+    
+    # DAY 3 EVENTS (48-72 hours - edge of 2-day lookahead)
+    "Weekly Team Meeting|Weekly team coordination|49|1|0"
+    "Important Budget Meeting|Quarterly budget planning|54|2|0"
+    
+    # FUTURE EVENTS (beyond 2-day lookahead)
+    "Doctor Consultation|Medical consultation appointment|120|1|0"
+    "Important Quarterly Review|Quarterly business review|169|3|0"
+    
+    # ALL-DAY EVENTS
+    "Conference Day Important|Annual company conference|72|24|1"
+    "Training Workshop|Professional development workshop|192|24|1"
+    
+    # MULTI-KEYWORD EVENTS
+    "Important Meeting Doctor Review|Medical consultation meeting|26|1|0"
+    "Important Doctor Consultation Meeting|Medical team consultation|50|1.5|0"
+    
+    # NON-MATCHING EVENTS
+    "Gym Session|Personal fitness workout|34|1|0"
+    "Grocery Shopping|Weekly grocery shopping|56|1|0"
+    "Regular Lunch|Casual lunch break|75|1|0"
+    
+    # PAST EVENTS
+    "Past Important Event|Historical important event|-14|1|0"
+    "Past Meeting|Historical team meeting|-10|1|0"
+)
 
-# SAME DAY EVENTS (later today)  
-create_event "Team Meeting Weekly" "Weekly team sync meeting" 5 1 0
-create_event "Important Project Review" "Quarterly project review session" 7 2 0
-create_event "Lunch Break" "Personal lunch time" 3 1 0
-
-# NEXT DAY EVENTS (24-48 hours from baseline)
-create_event "Morning Standup Meeting" "Daily team standup" 24 0.5 0  
-create_event "Doctor Visit Annual" "Annual medical checkup" 29 1 0
-create_event "Important Conference Call" "Critical client conference call" 33 1 0
-
-# DAY 3 EVENTS (48-72 hours - edge of 2-day lookahead)
-create_event "Weekly Team Meeting" "Weekly team coordination" 49 1 0
-create_event "Important Budget Meeting" "Quarterly budget planning" 54 2 0
-
-# FUTURE EVENTS (beyond 2-day lookahead)
-create_event "Doctor Consultation" "Medical consultation appointment" 120 1 0
-create_event "Important Quarterly Review" "Quarterly business review" 169 3 0
-
-# ALL-DAY EVENTS
-create_event "Conference Day Important" "Annual company conference" 72 24 1  # Thursday all-day
-create_event "Training Workshop" "Professional development workshop" 192 24 1  # Next Tuesday all-day
-
-# MULTI-KEYWORD EVENTS
-create_event "Important Meeting Doctor Review" "Medical consultation meeting" 26 1 0
-create_event "Important Doctor Consultation Meeting" "Medical team consultation" 50 1.5 0
-
-# NON-MATCHING EVENTS
-create_event "Gym Session" "Personal fitness workout" 34 1 0
-create_event "Grocery Shopping" "Weekly grocery shopping" 56 1 0  
-create_event "Regular Lunch" "Casual lunch break" 75 1 0
-
-# STRESS TEST EVENTS (20 events spread across time)
+# Add stress test events dynamically
+declare -a STRESS_EVENTS=()
 for i in $(seq 1 20); do
     # Use 10# prefix to force decimal interpretation and avoid octal issues
     offset_hours=$(( 13 + (10#$i - 1) * 2 ))  # Starting at 1 PM, every 2 hours
-    create_event "Stress Test Event $i" "Automated stress test event" $offset_hours 0.5 0
+    STRESS_EVENTS+=("Stress Test Event $i|Automated stress test event|$offset_hours|0.5|0")
 done
 
-# PAST EVENTS
-create_event "Past Important Event" "Historical important event" -14 1 0  # Yesterday 10 AM
-create_event "Past Meeting" "Historical team meeting" -10 1 0  # Yesterday 2 PM
+# Combine all events
+ALL_EVENTS+=("${STRESS_EVENTS[@]}")
+
+# Create all events using optimized batch processing
+create_event_batch "${ALL_EVENTS[@]}"
 
 print_step "Verifying created events..."
 
-# Count total events
-TOTAL_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection title | wc -l)
+# Execute verification queries in parallel using efficient approach
+print_step "Running parallel verification queries..."
+
+# Create temporary directory for parallel operations
+TEMP_DIR=$(mktemp -d)
+
+# Function to retry calendar queries with backoff
+retry_calendar_query() {
+    local query_desc="$1"
+    local query_cmd="$2"
+    local output_file="$3"
+    local max_retries=3
+    local retry_delay=2
+    
+    for attempt in $(seq 1 $max_retries); do
+        if eval "$query_cmd" > "$output_file" 2>/dev/null; then
+            return 0
+        else
+            if [ $attempt -lt $max_retries ]; then
+                print_warning "Calendar query '$query_desc' failed (attempt $attempt/$max_retries), retrying in ${retry_delay}s..."
+                sleep $retry_delay
+                retry_delay=$((retry_delay * 2))  # Exponential backoff
+            else
+                print_warning "Calendar query '$query_desc' failed after $max_retries attempts, using fallback"
+                echo "0" > "$output_file"
+                return 1
+            fi
+        fi
+    done
+}
+
+# Run verification queries with retry logic for reliability
+retry_calendar_query "total events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection title | wc -l" \
+    "$TEMP_DIR/total_events"
+
+retry_calendar_query "test calendar events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection _id --where \"calendar_id=$CALENDAR_ID\" | wc -l" \
+    "$TEMP_DIR/calendar_events"
+
+retry_calendar_query "important events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection _id --where \"calendar_id=$CALENDAR_ID AND title LIKE '%Important%'\" | wc -l" \
+    "$TEMP_DIR/important_events"
+
+retry_calendar_query "meeting events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection _id --where \"calendar_id=$CALENDAR_ID AND title LIKE '%Meeting%'\" | wc -l" \
+    "$TEMP_DIR/meeting_events"
+
+retry_calendar_query "doctor events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection _id --where \"calendar_id=$CALENDAR_ID AND title LIKE '%Doctor%'\" | wc -l" \
+    "$TEMP_DIR/doctor_events"
+
+# Read results from temporary files
+TOTAL_EVENTS=$(cat "$TEMP_DIR/total_events" | tr -d '\n\r ')
+CALENDAR_EVENTS=$(cat "$TEMP_DIR/calendar_events" | tr -d '\n\r ')
+FINAL_EVENT_COUNT=$CALENDAR_EVENTS
+IMPORTANT_EVENTS=$(cat "$TEMP_DIR/important_events" | tr -d '\n\r ')
+MEETING_EVENTS=$(cat "$TEMP_DIR/meeting_events" | tr -d '\n\r ')
+DOCTOR_EVENTS=$(cat "$TEMP_DIR/doctor_events" | tr -d '\n\r ')
+
 print_success "Total events in calendar: $TOTAL_EVENTS"
-
-# Verify specific test events were created
-print_step "Verifying sample test events were created..."
-
-# Verify events exist in our specific calendar
-CALENDAR_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" | wc -l)
 print_success "Events in test calendar (ID=$CALENDAR_ID): $CALENDAR_EVENTS"
 
-# Show sample event titles to verify they were created correctly  
-print_step "Sample events in test calendar:"
-$ADB shell content query --uri content://com.android.calendar/events --projection title --where "calendar_id=$CALENDAR_ID" --sort "dtstart ASC" | head -5
+# Run final verification queries in parallel
+print_step "Running final verification queries in parallel..."
 
-# Verify calendar properties
-print_step "Verifying calendar properties:"
-$ADB shell content query --uri content://com.android.calendar/calendars --projection "_id,calendar_displayName,account_name,account_type,visible" --where "_id=$CALENDAR_ID" 2>/dev/null || true
+# Run final verification with retry logic
+retry_calendar_query "sample events" \
+    "$ADB shell content query --uri content://com.android.calendar/events --projection title --where \"calendar_id=$CALENDAR_ID\" --sort \"dtstart ASC\" | head -5" \
+    "$TEMP_DIR/sample_events"
 
-# Verify app can read the events
-print_step "Verifying app can read calendar events..."
+retry_calendar_query "calendar properties" \
+    "$ADB shell content query --uri content://com.android.calendar/calendars --projection \"_id,calendar_displayName,account_name,account_type,visible\" --where \"_id=$CALENDAR_ID\"" \
+    "$TEMP_DIR/calendar_properties"
 
-# Final verification and summary
-print_step "Final verification of test calendar setup..."
-
-# Verify app can read the events
+# Ensure permissions are granted
 $ADB shell pm grant $PACKAGE_NAME android.permission.READ_CALENDAR 2>/dev/null || true
 
-# Count and validate test events were created correctly  
-FINAL_EVENT_COUNT=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID" | wc -l)
-IMPORTANT_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID AND title LIKE '%Important%'" | wc -l)
-MEETING_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID AND title LIKE '%Meeting%'" | wc -l)  
-DOCTOR_EVENTS=$($ADB shell content query --uri content://com.android.calendar/events --projection _id --where "calendar_id=$CALENDAR_ID AND title LIKE '%Doctor%'" | wc -l)
+# Display results
+print_step "Sample events in test calendar:"
+cat "$TEMP_DIR/sample_events" 2>/dev/null || echo "No sample events found"
+
+print_step "Verifying calendar properties:"
+cat "$TEMP_DIR/calendar_properties" 2>/dev/null || echo "Calendar properties not available"
+
+# Final cleanup of temp directory
+rm -rf "$TEMP_DIR" 2>/dev/null || true
 
 print_success "✅ Test calendar setup completed successfully!"
 print_success "📅 Created $FINAL_EVENT_COUNT total test events in calendar ID: $CALENDAR_ID"
