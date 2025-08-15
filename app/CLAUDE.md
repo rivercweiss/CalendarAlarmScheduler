@@ -12,19 +12,34 @@ The app runs **fully locally** with **no backend**, using Android APIs to read c
 
 ## Development Workflow
 
-When working on hard problems, always tackle them small step at a time, verifying along the way things still compile and run successfully.
-
 Don't worry about compatibility, rather keep the code clean and robust.
+Remember, we want to try to ONLY edit existing files, not creating new files unless absolutely necessary.
+Always use output data, screenshots of the app, or logs (only hard data) to determine the root cause of bugs and other issues.
 
-Remember, we want to try to only edit existing files, not creating new files unless absolutely necessary.
-
-Debugging:
-- Always use Logs or other sources of hard data to determine the root cause of bugs and other issues
-- The detailed logs are too big to directly read, you need to use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific
-  content
 ---
 
-## Comprehensive E2E Testing Framework 
+## Codebase Index Files
+
+To help Claude understand the codebase quickly, two index files are maintained:
+
+### general_index.md
+- **Purpose**: Quick overview of all source files in the codebase
+- **Content**: File paths with simple descriptions of what each file does
+- **Use Case**: When you need to quickly locate functionality or understand project structure
+
+### detailed_index.md  
+- **Purpose**: Comprehensive function documentation for the entire codebase
+- **Content**: All functions in each file with signatures, modifiers, and descriptions
+- **Use Case**: When you need to understand specific function implementations or API contracts
+
+**Important Notes:**
+- These index files may not always be up-to-date with the latest code changes
+- When making significant changes that affect file structure or function signatures, please update the relevant index files
+- Use these files as a starting point for understanding the codebase, but always verify against the actual source files when making changes
+
+---
+
+## E2E Testing Framework 
 
 - We are ONLY making ONE end to end test, no other tests.
 - Please never make a new test file, only use the ComprehensiveE2ETest
@@ -38,24 +53,13 @@ Debugging:
 **Test Execution**: 
 - Run with: `./run_e2e_test.sh`
 - Framework handles: build, install, permissions, execution, metrics collection
-- Results saved to: `test_results/YYYYMMDD_HHMMSS/`
+- You (Claude) need to directly inspect the log outputs of the emulated or connected device to determine why the test passed or failed.
 
 **Testing Components:**
 - `TestMetricsCollector`: Memory tracking, performance metrics, memory leak detection
 - `CalendarTestDataProvider`: Calendar event injection for controlled testing
 - `TestTimeController`: Time acceleration for testing future calendar events
 - `ComprehensiveE2ETest`: Main test with app launch, onboarding flow, metrics collection
-
-**Test Coverage (Current):**
-1. **App Launch & Onboarding**: Tests app startup and permission flow
-2. **Basic Metrics Collection**: Tests framework components (calendar injection, time manipulation, memory tracking)
-
-**Key Metrics Tracked:**
-- Memory usage vs baseline (Total: ~2GB, Heap: 5-17MB)
-- Performance timing (Average operation: 3-7 seconds)
-- Memory leak detection (Currently: None detected)
-- Log collection and analysis
-- Time manipulation capabilities (✓ Working)
 
 **Test Guidance:**
 - Only use `ComprehensiveE2ETest` - never create new test files
@@ -93,7 +97,7 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 
 4. **Alarm Scheduler**
    * Uses `AlarmManager.setExactAndAllowWhileIdle()` to set exact alarms.
-   * Creates **full-screen alarm activity** that works in all phone states.
+   * Creates alarm notification that works in all phone states.
    * Tracks scheduled and user-dismissed alarms to avoid duplicates.
 
 5. **UI Layer**
@@ -123,81 +127,6 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Settings migration system with versioning.
    * Battery optimization completion tracking.
    * Defensive refresh mechanisms for UI consistency.
-
----
-
-## 3. File Structure
-
-```
-app/src/main/java/com/example/calendaralarmscheduler/
-├── CalendarAlarmApplication.kt     # Application class with global initialization
-├── data/
-│   ├── AlarmRepository.kt         # Manages scheduled alarms
-│   ├── CalendarRepository.kt      # Queries Google Calendar events
-│   ├── RuleRepository.kt          # Manages user-defined rules
-│   ├── SettingsRepository.kt      # Reactive settings with StateFlow
-│   └── database/
-│       ├── AppDatabase.kt         # Room database configuration
-│       ├── AlarmDao.kt            # DAO for alarm operations
-│       ├── RuleDao.kt             # DAO for rule operations
-│       └── entities/
-│           ├── Rule.kt            # Rule entity
-│           └── ScheduledAlarm.kt  # Alarm entity
-├── domain/
-│   ├── AlarmScheduler.kt          # Schedules alarms via AlarmManager
-│   ├── RuleMatcher.kt             # Matches events to rules
-│   └── models/
-│       ├── CalendarEvent.kt      # Calendar event model
-│       ├── DuplicateHandlingMode.kt # Enum for duplicate handling
-│       └── ScheduledAlarm.kt     # Domain alarm model
-├── receivers/
-│   ├── AlarmReceiver.kt          # Handles alarm broadcasts
-│   ├── BootReceiver.kt           # Re-registers alarms after reboot
-│   └── TimezoneChangeReceiver.kt # Handles timezone changes
-├── ui/
-│   ├── BaseFragment.kt           # Base fragment with lifecycle logging
-│   ├── MainActivity.kt            # Main activity with navigation
-│   ├── alarm/
-│   │   └── AlarmActivity.kt      # Full-screen unmissable alarm
-│   ├── onboarding/
-│   │   ├── OnboardingPagerAdapter.kt
-│   │   ├── OnboardingStepFragment.kt
-│   │   └── PermissionOnboardingActivity.kt
-│   ├── preview/
-│   │   ├── EventPreviewAdapter.kt
-│   │   ├── EventPreviewFragment.kt
-│   │   └── EventPreviewViewModel.kt
-│   ├── rules/
-│   │   ├── CalendarPicker*.kt    # Calendar selection components
-│   │   ├── LeadTimePicker*.kt    # Lead time selection
-│   │   ├── RuleAdapter.kt
-│   │   ├── RuleEditFragment.kt
-│   │   ├── RuleEditViewModel.kt
-│   │   ├── RuleListFragment.kt
-│   │   └── RuleListViewModel.kt
-│   └── settings/
-│       ├── SettingsFragment.kt
-│       └── SettingsViewModel.kt
-├── utils/
-│   ├── BackgroundUsageDetector.kt # Multi-method background detection
-│   ├── CrashHandler.kt           # Global exception handling
-│   ├── DozeCompatibilityUtils.kt # Doze mode & OEM detection
-│   ├── ErrorNotificationManager.kt # Error notifications
-│   ├── Logger.kt                 # Comprehensive logging system
-│   ├── PermissionUtils.kt        # Permission utilities
-│   ├── RetryManager.kt           # Exponential backoff retry
-│   └── TimezoneUtils.kt          # Timezone conversions
-└── workers/
-    ├── CalendarRefreshWorker.kt  # Periodic background refresh
-    └── WorkerManager.kt          # WorkManager configuration
-```
-
-### Key Dependencies
-- Room database with KSP
-- WorkManager for background tasks
-- Navigation component with SafeArgs
-- Kotlin Serialization for type converters
-- Material Design Components
 
 ---
 
@@ -269,7 +198,7 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" &
 #### Logging Infrastructure
 
 #### Log Tags & Levels
-All app logs use prefix `CalendarAlarmScheduler_` with categories:
+All app logs MUST use prefix `CalendarAlarmScheduler_` with categories:
 - `*_Logger`: General app information
 - `*_CrashHandler`: Uncaught exceptions
 - `*_Performance_*`: Timing metrics for operations

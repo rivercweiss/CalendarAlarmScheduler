@@ -17,9 +17,4 @@ data class ScheduledAlarm(
     val pendingIntentRequestCode: Int,
     val lastEventModified: Long              // From CalendarContract
 ) {
-    companion object {
-        fun generateRequestCode(eventId: String, ruleId: String): Int {
-            return (eventId + ruleId).hashCode()
-        }
-    }
 }

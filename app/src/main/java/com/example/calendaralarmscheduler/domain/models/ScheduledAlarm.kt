@@ -116,14 +116,6 @@ data class ScheduledAlarm(
             )
         }
         
-        /**
-         * Legacy method - kept for backward compatibility but should not be used for new alarms
-         * @deprecated Use generateRequestCodeFromAlarmId instead to avoid hash collisions
-         */
-        @Deprecated("Use generateRequestCodeFromAlarmId to avoid hash collisions")
-        fun generateRequestCode(eventId: String, ruleId: String): Int {
-            return (eventId + ruleId).hashCode()
-        }
         
         /**
          * Enhanced collision-resistant request code generation from alarm ID.

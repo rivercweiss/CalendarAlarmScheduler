@@ -91,18 +91,6 @@ object PermissionUtils {
         return BackgroundUsageDetector.getDetailedBackgroundUsageStatus(context)
     }
     
-    /**
-     * Legacy method - kept for compatibility but uses modern detection
-     */
-    @Deprecated("Use isBatteryOptimizationWhitelisted instead", ReplaceWith("isBatteryOptimizationWhitelisted(context)"))
-    fun isLegacyBatteryOptimizationWhitelisted(context: Context): Boolean {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            powerManager.isIgnoringBatteryOptimizations(context.packageName)
-        } else {
-            true // No battery optimization on pre-M devices
-        }
-    }
 
     /**
      * Check all critical permissions at once
@@ -455,42 +443,8 @@ object PermissionUtils {
         }
     }
 
-    /**
-     * Get an intent to request battery optimization whitelist (legacy)
-     */
-    @Deprecated("Use getBestBatteryOptimizationIntent instead")
-    fun getBatteryOptimizationWhitelistIntent(context: Context): Intent? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent().apply {
-                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                data = Uri.parse("package:${context.packageName}")
-            }.takeIf { canResolveIntent(context, it) }
-        } else {
-            null
-        }
-    }
     
-    /**
-     * Get an intent to open battery optimization settings list (legacy)
-     */
-    @Deprecated("Use getBestBatteryOptimizationIntent instead")
-    fun getBatteryOptimizationSettingsIntent(): Intent? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent().apply {
-                action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-            }
-        } else {
-            null
-        }
-    }
 
-    /**
-     * Get an intent to open battery optimization settings (legacy with fallbacks)
-     */
-    @Deprecated("Use getBestBatteryOptimizationIntent instead")
-    fun getBatteryOptimizationIntent(context: Context): Intent {
-        return getBestBatteryOptimizationIntent(context).intent
-    }
     
     /**
      * Check if an intent can be resolved by the system

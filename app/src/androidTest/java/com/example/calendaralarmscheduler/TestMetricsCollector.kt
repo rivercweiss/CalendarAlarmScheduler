@@ -148,7 +148,7 @@ class TestMetricsCollector {
         try {
             val process = Runtime.getRuntime().exec(arrayOf(
                 "logcat", "-d", "-t", maxEntries.toString(), 
-                "-s", "CalendarAlarmScheduler:*", "AndroidRuntime:E"
+                "-s", "CalendarAlarmScheduler:*"
             ))
             
             process.inputStream.bufferedReader().useLines { lines ->

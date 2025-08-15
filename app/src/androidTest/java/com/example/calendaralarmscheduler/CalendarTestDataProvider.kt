@@ -172,14 +172,6 @@ class CalendarTestDataProvider {
         }
     }
     
-    /**
-     * @deprecated Use getLocalTestCalendarId() instead - this method could return user calendars
-     */
-    @Deprecated("Use getLocalTestCalendarId() to ensure only LOCAL test calendar is used")
-    fun getPrimaryCalendarId(): Long? {
-        Log.w("CalendarTestData", "⚠️ getPrimaryCalendarId() is deprecated - use getLocalTestCalendarId() for strict test isolation")
-        return getLocalTestCalendarId()
-    }
     
     /**
      * STRICT: Get events matching keyword pattern from LOCAL test calendar only
