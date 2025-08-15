@@ -119,8 +119,8 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Handles timezone changes reactively via dedicated TimezoneChangeReceiver.
 
 7. **Battery Management**
-   * Basic Doze mode detection and compatibility testing.
-   * Simple background usage permission detection.
+   * Simple battery optimization whitelist detection and management.
+   * Background usage permission detection for reliable alarm delivery.
    * Generic OEM guidance for common manufacturers.
    * Battery optimization setup tracking.
 
@@ -214,7 +214,7 @@ All app logs use prefix `CalendarAlarmScheduler_` with categories:
 - `*_Lifecycle_*`: Activity/Fragment state changes
 - `*_Database_*`: Room operations with timing
 - `*_Permission_*`: Permission state changes
-- `*_DozeCompatibility`: Battery optimization detection
+- `*_BatteryOptimization`: Battery optimization detection and management
 - `*_ErrorNotificationManager`: Generic error notification events
 
 **Note**: All logging goes to Android logcat only (no file logging for simplicity).

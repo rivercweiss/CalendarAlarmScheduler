@@ -249,16 +249,29 @@ class SettingsFragment : BaseFragment() {
         
         
         // Battery optimization
-        val batteryOptimized = status.isBatteryOptimizationWhitelisted
-        updatePermissionRow(
-            iconView = binding.iconBatteryOptimization,
-            textView = binding.textBatteryOptimization,
-            buttonView = binding.btnBatteryOptimization,
-            hasPermission = batteryOptimized,
-            grantedText = "App is whitelisted from battery optimization",
-            deniedText = "Recommended for reliable background operation",
-            isWarning = true
-        )
+        if (status.isBatteryOptimizationAvailable) {
+            val batteryOptimized = status.isBatteryOptimizationWhitelisted
+            updatePermissionRow(
+                iconView = binding.iconBatteryOptimization,
+                textView = binding.textBatteryOptimization,
+                buttonView = binding.btnBatteryOptimization,
+                hasPermission = batteryOptimized,
+                grantedText = "App is whitelisted from battery optimization",
+                deniedText = "Recommended for reliable background operation",
+                isWarning = true
+            )
+        } else {
+            // Battery optimization not available on this device
+            updatePermissionRow(
+                iconView = binding.iconBatteryOptimization,
+                textView = binding.textBatteryOptimization,
+                buttonView = binding.btnBatteryOptimization,
+                hasPermission = true, // Show as "granted" since feature doesn't exist
+                grantedText = "Not applicable on this device",
+                deniedText = "", // Won't be used
+                isWarning = false
+            )
+        }
     }
     
     private fun updatePermissionRow(
@@ -359,6 +372,16 @@ class SettingsFragment : BaseFragment() {
         
         val result = PermissionUtils.getBestBatteryOptimizationIntent(context)
         lastBatteryOptimizationResult = result
+        
+        if (!result.isAvailable) {
+            Logger.i("SettingsFragment", "Battery optimization not available on this device")
+            Toast.makeText(
+                requireContext(),
+                "Battery optimization is not available on this device. Alarms should work reliably.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
         
         Logger.d("SettingsFragment", "Opening battery optimization settings")
         showBatteryOptimizationGuidance(result) {

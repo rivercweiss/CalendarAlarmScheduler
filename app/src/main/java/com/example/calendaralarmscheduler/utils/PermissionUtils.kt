@@ -56,26 +56,59 @@ object PermissionUtils {
     }
 
     /**
-     * Check if app is whitelisted from battery optimization using simple detection
+     * Check if battery optimization feature is available on this device
+     * Some devices (especially emulators) don't support battery optimization
+     */
+    fun isBatteryOptimizationFeatureAvailable(context: Context): Boolean {
+        // Try direct whitelist intent first
+        val directIntent = Intent().apply {
+            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+            data = Uri.parse("package:${context.packageName}")
+        }
+        
+        if (canResolveIntent(context, directIntent)) {
+            return true
+        }
+        
+        // Try battery optimization settings list
+        val settingsIntent = Intent().apply {
+            action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+        }
+        
+        if (canResolveIntent(context, settingsIntent)) {
+            return true
+        }
+        
+        // If neither intent resolves, battery optimization is not available
+        return false
+    }
+
+    /**
+     * Check if app is whitelisted from battery optimization
+     * Only call this if isBatteryOptimizationFeatureAvailable() returns true
      */
     fun isBatteryOptimizationWhitelisted(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            powerManager.isIgnoringBatteryOptimizations(context.packageName)
-        } else {
-            true
-        }
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     /**
      * Check all critical permissions at once
      */
     fun getAllPermissionStatus(context: Context): PermissionStatus {
+        val batteryOptimizationAvailable = isBatteryOptimizationFeatureAvailable(context)
+        val batteryOptimizationWhitelisted = if (batteryOptimizationAvailable) {
+            isBatteryOptimizationWhitelisted(context)
+        } else {
+            true // Consider it "whitelisted" if feature doesn't exist
+        }
+        
         return PermissionStatus(
             hasCalendarPermission = hasCalendarPermission(context),
             hasNotificationPermission = hasNotificationPermission(context),
             hasExactAlarmPermission = hasExactAlarmPermission(context),
-            isBatteryOptimizationWhitelisted = isBatteryOptimizationWhitelisted(context)
+            isBatteryOptimizationAvailable = batteryOptimizationAvailable,
+            isBatteryOptimizationWhitelisted = batteryOptimizationWhitelisted
         )
     }
 
@@ -134,16 +167,17 @@ object PermissionUtils {
     }
 
     /**
-     * Get simple battery optimization intent with fallback strategy
+     * Get battery optimization intent with availability detection
      */
     fun getBestBatteryOptimizationIntent(context: Context): BatteryOptimizationResult {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+        if (!isBatteryOptimizationFeatureAvailable(context)) {
             return BatteryOptimizationResult(
                 intent = getAppSettingsIntent(context),
-                guidance = "Battery optimization not available on this Android version"
+                guidance = "Battery optimization is not available on this device",
+                isAvailable = false
             )
         }
-
+        
         // Try direct whitelist intent first
         val directIntent = Intent().apply {
             action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
@@ -153,7 +187,8 @@ object PermissionUtils {
         if (canResolveIntent(context, directIntent)) {
             return BatteryOptimizationResult(
                 intent = directIntent,
-                guidance = "Tap 'Allow' to whitelist this app from battery optimization"
+                guidance = "Tap 'Allow' to whitelist this app from battery optimization",
+                isAvailable = true
             )
         }
 
@@ -165,14 +200,16 @@ object PermissionUtils {
         if (canResolveIntent(context, settingsIntent)) {
             return BatteryOptimizationResult(
                 intent = settingsIntent,
-                guidance = "Find 'Calendar Alarm Scheduler' and set to 'Don't optimize'"
+                guidance = "Find 'Calendar Alarm Scheduler' and set to 'Don't optimize'",
+                isAvailable = true
             )
         }
 
         // Fallback to app settings
         return BatteryOptimizationResult(
             intent = getAppSettingsIntent(context),
-            guidance = "Look for Battery settings and disable optimization for this app"
+            guidance = "Look for Battery settings and disable optimization for this app",
+            isAvailable = true
         )
     }
 
@@ -250,7 +287,7 @@ object PermissionUtils {
             )
         }
 
-        if (!status.isBatteryOptimizationWhitelisted) {
+        if (status.isBatteryOptimizationNeeded()) {
             messages.add(
                 PermissionMessage(
                     title = "Battery Optimization",
@@ -317,6 +354,7 @@ object PermissionUtils {
         val hasCalendarPermission: Boolean,
         val hasNotificationPermission: Boolean,
         val hasExactAlarmPermission: Boolean,
+        val isBatteryOptimizationAvailable: Boolean,
         val isBatteryOptimizationWhitelisted: Boolean
     ) {
         fun areAllGranted(): Boolean {
@@ -324,7 +362,12 @@ object PermissionUtils {
         }
         
         fun areAllOptimal(): Boolean {
-            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && isBatteryOptimizationWhitelisted
+            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && 
+                   (!isBatteryOptimizationAvailable || isBatteryOptimizationWhitelisted)
+        }
+        
+        fun isBatteryOptimizationNeeded(): Boolean {
+            return isBatteryOptimizationAvailable && !isBatteryOptimizationWhitelisted
         }
     }
 
@@ -337,6 +380,7 @@ object PermissionUtils {
 
     data class BatteryOptimizationResult(
         val intent: Intent,
-        val guidance: String
+        val guidance: String,
+        val isAvailable: Boolean = true
     )
 }

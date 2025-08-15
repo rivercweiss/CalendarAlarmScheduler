@@ -72,7 +72,7 @@ class WorkerManager(private val context: Context) {
             // Check battery optimization status and warn if needed
             checkBatteryOptimizationStatus()
             
-            // Check Doze mode compatibility
+            // Check battery optimization compatibility
             checkDozeCompatibility()
             
         } catch (e: Exception) {
@@ -158,7 +158,7 @@ class WorkerManager(private val context: Context) {
         return Constraints.Builder()
             // No network required - we're reading local calendar provider
             .setRequiredNetworkType(androidx.work.NetworkType.NOT_REQUIRED)
-            // Allow work during device idle (doze mode compatibility)
+            // Allow work during device idle (battery optimization compatibility)
             .setRequiresDeviceIdle(false)
             // Don't require charging - calendar refresh is lightweight
             .setRequiresCharging(false)
@@ -230,7 +230,7 @@ class WorkerManager(private val context: Context) {
     }
     
     /**
-     * Check Doze mode compatibility and log warnings
+     * Check battery optimization compatibility and log warnings
      */
     private fun checkDozeCompatibility() {
         try {

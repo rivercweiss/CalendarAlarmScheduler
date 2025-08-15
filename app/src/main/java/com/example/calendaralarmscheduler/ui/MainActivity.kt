@@ -283,6 +283,7 @@ class MainActivity : AppCompatActivity() {
                 hasCalendarPermission = false,
                 hasNotificationPermission = false,
                 hasExactAlarmPermission = false,
+                isBatteryOptimizationAvailable = false,
                 isBatteryOptimizationWhitelisted = false
             )
         }

@@ -100,7 +100,10 @@ class OnboardingStepFragment : Fragment() {
                 }
             }
             OnboardingStep.BATTERY_OPTIMIZATION -> {
-                if (PermissionUtils.isBatteryOptimizationWhitelisted(requireContext())) {
+                val status = PermissionUtils.getAllPermissionStatus(requireContext())
+                if (!status.isBatteryOptimizationAvailable) {
+                    "✅ Not applicable on this device"
+                } else if (status.isBatteryOptimizationWhitelisted) {
                     "✅ Battery optimization disabled"
                 } else {
                     "⚠️ Battery optimization enabled (recommended to disable)"

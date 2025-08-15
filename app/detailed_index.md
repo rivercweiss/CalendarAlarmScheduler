@@ -352,4 +352,4 @@ This index provides comprehensive documentation of all functions in the codebase
 - `isBatteryOptimizationIgnored(): Boolean` - Check if battery optimization is ignored (app is whitelisted)
 - `validateInterval(intervalMinutes: Int): Boolean` - Validate interval value
 - `getIntervalDescription(intervalMinutes: Int): String` - Get human-readable interval description
-- `checkDozeCompatibility()` - **private** - Check Doze mode and log warnings if not whitelisted
+- `checkDozeCompatibility()` - **private** - Check battery optimization status and log compatibility warnings

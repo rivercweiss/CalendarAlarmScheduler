@@ -180,6 +180,13 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     private fun openBatteryOptimizationSettings() {
         try {
             val result = PermissionUtils.getBestBatteryOptimizationIntent(this)
+            if (!result.isAvailable) {
+                // Battery optimization not available, show message and continue
+                android.util.Log.i("PermissionOnboarding", "Battery optimization not available on this device")
+                // Auto-advance since feature is not available
+                checkAllPermissionsAndProceed()
+                return
+            }
             startActivity(result.intent)
         } catch (e: Exception) {
             // Fallback to app settings
