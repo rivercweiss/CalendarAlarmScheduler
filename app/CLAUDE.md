@@ -10,6 +10,12 @@ The app runs **fully locally** with **no backend**, using Android APIs to read c
 
 ---
 
+# Key Coding Goals
+
+Try to do everything as ***simply***, ***modularly*** and ***robustly*** as possible, while *deleting as much code as possible*, while *maintaining core functionality*. Think hard
+
+---
+
 ## Development Workflow
 
 Don't worry about compatibility, rather keep the code clean and robust.
@@ -211,4 +217,56 @@ All app logs MUST use prefix `CalendarAlarmScheduler_` with categories:
 - `*_RetryManager`: Retry attempts for failed operations
 - `*_ErrorNotificationManager`: Error notification events
 
+#### Debugging & Log Collection
+For efficient debugging and log collection during development:
+
+**Basic Log Monitoring:**
+```bash
+# Monitor specific components in real-time
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat | grep -E "CalendarAlarmScheduler|CalendarRepository"
+
+# Check recent logs from device buffer (faster than real-time)
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep "CalendarRepository" | tail -20
+```
+
+**UI Navigation Debugging:**
+```bash
+# Dump UI hierarchy to find element coordinates
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell uiautomator dump /sdcard/ui_dump.xml
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb pull /sdcard/ui_dump.xml /tmp/ui_dump.xml
+
+# Search for specific UI elements
+grep -i "preview" /tmp/ui_dump.xml
+
+# Tap UI elements using found coordinates
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell input tap 540 2232
+```
+
+**Manual Calendar Debugging Commands:**
+```bash
+# List all calendars with visibility status
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell content query --uri content://com.android.calendar/calendars --projection _id:calendar_displayName:visible:account_name
+
+# List all calendar events to verify existence
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb shell content query --uri content://com.android.calendar/events --projection _id:title:dtstart:dtend:calendar_id
+
+# Convert timestamp to readable date (macOS)
+date -r 1755370800
+
+# Check time differences for debugging lookahead windows
+echo "Current time: $(date +%s)"; echo "Event start: 1755370800"; echo "Difference hours: $(( (1755370800 - $(date +%s)) / 3600 ))"
+```
+
+**Log Management Best Practices:**
+- Clear logs before testing: `/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -c`
+- Use `-d` flag for device buffer (faster than real-time streaming)
+- Filter by component-specific tags for focused debugging
+- Use `tail -N` to limit output to recent entries
+- Combine grep patterns with `|` for multiple components
+
 ---
+
+# Key Coding Goals
+
+Try to do everything as ***simply***, ***modularly*** and ***robustly*** as possible, while *deleting as much code as possible*, while *maintaining core functionality*. Think hard
+

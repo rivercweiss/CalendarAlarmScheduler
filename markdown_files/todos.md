@@ -312,20 +312,11 @@ Lets execute Priority 4: Fix Circular Dependencies and update the index files to
 
 Lets execute Priority 6: Simplify Over-Engineering and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
 
-When the app is freshly installed it fetches calendar events properly, but the refresh button does not actually refresh or fetch new calendar events. Please fix this issue in a memory safe way, trying to delete as much code as possible in the process. Try to do this as simply, modularly and robustly as possible. Think hard.
+The app is not fetching calendar events properly. 
 
-We are getting these warnings:
+For example, there is currently a Calendar event called Test 2 that the Preview is not showing, and alarms are not being scheduled when a matching rule is created for this event.
 
-> Task :app:compileDebugKotlin
-w: file:///Users/riverweiss/AndroidStudioProjects/CalendarAlarmScheduler/app/src/main/java/com/example/calendaralarmscheduler/ui/preview/EventPreviewViewModel.kt:122:10 This declaration is in a preview state and can be changed in a backwards-incompatible manner with a best-effort migration. Its usage should be marked with '@kotlinx.coroutines.FlowPreview' or '@OptIn(kotlinx.coroutines.FlowPreview::class)' if you accept the drawback of relying on preview API
-w: file:///Users/riverweiss/AndroidStudioProjects/CalendarAlarmScheduler/app/src/main/java/com/example/calendaralarmscheduler/ui/preview/EventPreviewViewModel.kt:162:18 This declaration is in a preview state and can be changed in a backwards-incompatible manner with a best-effort migration. Its usage should be marked with '@kotlinx.coroutines.FlowPreview' or '@OptIn(kotlinx.coroutines.FlowPreview::class)' if you accept the drawback of relying on preview API
-
-> Task :app:compileDebugJavaWithJavac
-warning: The following options were not recognized by any processor: '[dagger.hilt.internal.useAggregatingRootProcessor, dagger.fastInit, dagger.hilt.android.internal.disableAndroidSuperclassValidation, dagger.hilt.android.internal.projectType]'
-1 warning
-
-Please fix this issue. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible. Think hard.
-
+Please fix this issue in a memory safe way. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
 
 
 We removed the full screen part of the notification entirely, and just have an unmissable notification that rings an alarm independent of phone state (silent, dnd, battery saver) that we can dismiss in standard ways.
@@ -333,3 +324,5 @@ We removed the full screen part of the notification entirely, and just have an u
 We need to update the settings UI and underlying code with this change, and not require full screen permissions.
 
 Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+
+Yay! Can you add how you accessed calendar events manually to the CLAUDE.md in the correct location?

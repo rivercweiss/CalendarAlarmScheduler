@@ -84,25 +84,8 @@ data class CalendarEvent(
         ): CalendarEvent {
             val isAllDay = allDay == 1
             
-            val startUtc = if (isAllDay) {
-                dtstart
-            } else {
-                if (eventTimezone != null) {
-                    convertToUtc(dtstart, eventTimezone)
-                } else {
-                    dtstart
-                }
-            }
-            
-            val endUtc = if (isAllDay) {
-                dtend
-            } else {
-                if (eventTimezone != null) {
-                    convertToUtc(dtend, eventTimezone)
-                } else {
-                    dtend
-                }
-            }
+            val startUtc = dtstart
+            val endUtc = dtend
             
             return CalendarEvent(
                 id = id,
@@ -119,14 +102,7 @@ data class CalendarEvent(
         }
         
         private fun convertToUtc(timeMillis: Long, timezoneId: String): Long {
-            return try {
-                val timezone = TimeZone.getTimeZone(timezoneId)
-                val instant = Instant.ofEpochMilli(timeMillis)
-                val zonedDateTime = instant.atZone(ZoneId.of(timezoneId))
-                zonedDateTime.toInstant().toEpochMilli()
-            } catch (e: Exception) {
-                timeMillis
-            }
+            return timeMillis
         }
     }
 }
