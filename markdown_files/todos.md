@@ -218,7 +218,7 @@ Make a cleanup plan that prioritizes simplicity and modularity, and removes as m
 
 ---
 
-Lets execute Simplify Domain Services and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+Lets execute XXX and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
 
 ---
 
@@ -230,8 +230,4 @@ Build the code and fix any issues. Remember, try to do this as simply, modularly
 
 ---
 
-Fix battery whitelist to correctly check if battery optimization is a setting available on the version of android and display correctly.
-
----
-
-Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality. 
+Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality. For example DozeCompatibility was deleted and there are still references.

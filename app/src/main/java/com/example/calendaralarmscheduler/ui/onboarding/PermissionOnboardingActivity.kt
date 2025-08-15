@@ -2,42 +2,30 @@ package com.example.calendaralarmscheduler.ui.onboarding
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager2.widget.ViewPager2
 import com.example.calendaralarmscheduler.databinding.ActivityPermissionOnboardingBinding
 import com.example.calendaralarmscheduler.utils.PermissionUtils
-import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PermissionOnboardingActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityPermissionOnboardingBinding
-    private lateinit var adapter: OnboardingPagerAdapter
     
     // Permission launcher for single permissions (calendar, notification)
     private val singlePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            checkAllPermissionsAndProceed()
-        } else {
-            // Stay on current page, user can try again
-            showPermissionDeniedMessage()
-        }
+    ) { 
+        updateAllPermissionStatus()
     }
     
     // Multiple permissions launcher
     private val multiplePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            checkAllPermissionsAndProceed()
-        } else {
-            showPermissionDeniedMessage()
-        }
+    ) { 
+        updateAllPermissionStatus()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,124 +33,108 @@ class PermissionOnboardingActivity : AppCompatActivity() {
         binding = ActivityPermissionOnboardingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        setupViewPager()
         setupButtons()
-        checkInitialPermissions()
-    }
-    
-    private fun setupViewPager() {
-        adapter = OnboardingPagerAdapter(this) { step ->
-            handleStepAction(step)
-        }
-        
-        binding.viewPager.adapter = adapter
-        binding.viewPager.isUserInputEnabled = false // Disable swipe
-        
-        // Setup tab dots
-        TabLayoutMediator(binding.tabLayout, binding.viewPager) { _, _ ->
-            // Empty implementation - just creates dots
-        }.attach()
-        
-        // Listen for page changes
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                updateButtons(position)
-            }
-        })
+        updateAllPermissionStatus()
     }
     
     private fun setupButtons() {
-        binding.buttonBack.setOnClickListener {
-            val currentItem = binding.viewPager.currentItem
-            if (currentItem > 0) {
-                binding.viewPager.currentItem = currentItem - 1
-            }
+        // Calendar permission button
+        binding.buttonCalendar.setOnClickListener {
+            requestCalendarPermission()
         }
         
-        binding.buttonNext.setOnClickListener {
-            val currentItem = binding.viewPager.currentItem
-            val totalItems = adapter.itemCount
-            
-            if (currentItem < totalItems - 1) {
-                binding.viewPager.currentItem = currentItem + 1
-            } else {
-                // Last page - finish onboarding
-                finishOnboarding()
-            }
+        // Notification permission button
+        binding.buttonNotification.setOnClickListener {
+            requestNotificationPermission()
         }
         
-        binding.buttonSkip.setOnClickListener {
+        // Exact alarm permission button
+        binding.buttonExactAlarm.setOnClickListener {
+            openExactAlarmSettings()
+        }
+        
+        // Battery optimization button
+        binding.buttonBattery.setOnClickListener {
+            openBatteryOptimizationSettings()
+        }
+        
+        // Continue button
+        binding.buttonContinue.setOnClickListener {
             finishOnboarding()
         }
     }
     
-    private fun checkInitialPermissions() {
-        // Check if all permissions are already granted
-        if (PermissionUtils.hasAllCriticalPermissions(this)) {
-            // Jump to completion page
-            binding.viewPager.currentItem = adapter.itemCount - 1
+    private fun updateAllPermissionStatus() {
+        val status = PermissionUtils.getAllPermissionStatus(this)
+        
+        // Update calendar permission status
+        updateCalendarPermissionStatus(status.hasCalendarPermission)
+        
+        // Update notification permission status
+        updateNotificationPermissionStatus(status.hasNotificationPermission)
+        
+        // Update exact alarm permission status
+        updateExactAlarmPermissionStatus(status.hasExactAlarmPermission)
+        
+        // Update battery optimization status
+        updateBatteryOptimizationStatus(status)
+        
+        // Update continue button
+        val allCriticalGranted = status.hasCalendarPermission && 
+                                status.hasNotificationPermission && 
+                                status.hasExactAlarmPermission
+        binding.buttonContinue.isEnabled = allCriticalGranted
+    }
+    
+    private fun updateCalendarPermissionStatus(granted: Boolean) {
+        if (granted) {
+            binding.textCalendarStatus.text = "✅ Permission granted"
+            binding.buttonCalendar.visibility = View.GONE
+        } else {
+            binding.textCalendarStatus.text = "❌ Permission required"
+            binding.buttonCalendar.visibility = View.VISIBLE
         }
     }
     
-    private fun updateButtons(position: Int) {
-        val totalItems = adapter.itemCount
-        
-        binding.buttonBack.visibility = if (position == 0) {
-            android.view.View.INVISIBLE
+    private fun updateNotificationPermissionStatus(granted: Boolean) {
+        if (granted) {
+            binding.textNotificationStatus.text = "✅ Permission granted"
+            binding.buttonNotification.visibility = View.GONE
         } else {
-            android.view.View.VISIBLE
-        }
-        
-        binding.buttonNext.text = if (position == totalItems - 1) {
-            "Get Started"
-        } else {
-            "Next"
-        }
-        
-        // Show skip button only on first few pages
-        binding.buttonSkip.visibility = if (position < totalItems - 2) {
-            android.view.View.VISIBLE
-        } else {
-            android.view.View.INVISIBLE
+            binding.textNotificationStatus.text = "❌ Permission required"
+            binding.buttonNotification.visibility = View.VISIBLE
         }
     }
     
-    private fun handleStepAction(step: OnboardingStep) {
-        when (step) {
-            OnboardingStep.CALENDAR_PERMISSION -> {
-                requestCalendarPermission()
-            }
-            OnboardingStep.NOTIFICATION_PERMISSION -> {
-                requestNotificationPermission()
-            }
-            OnboardingStep.EXACT_ALARM_PERMISSION -> {
-                openExactAlarmSettings()
-            }
-            OnboardingStep.BATTERY_OPTIMIZATION -> {
-                openBatteryOptimizationSettings()
-            }
-            else -> {
-                // No action needed for welcome and completion steps
-            }
+    private fun updateExactAlarmPermissionStatus(granted: Boolean) {
+        if (granted) {
+            binding.textExactAlarmStatus.text = "✅ Permission granted"
+            binding.buttonExactAlarm.visibility = View.GONE
+        } else {
+            binding.textExactAlarmStatus.text = "❌ Permission required"
+            binding.buttonExactAlarm.visibility = View.VISIBLE
+        }
+    }
+    
+    private fun updateBatteryOptimizationStatus(status: PermissionUtils.PermissionStatus) {
+        if (!status.isBatteryOptimizationAvailable) {
+            binding.textBatteryStatus.text = "✅ Not applicable on this device"
+            binding.buttonBattery.visibility = View.GONE
+        } else if (status.isBatteryOptimizationWhitelisted) {
+            binding.textBatteryStatus.text = "✅ App whitelisted from optimization"
+            binding.buttonBattery.visibility = View.GONE
+        } else {
+            binding.textBatteryStatus.text = "⚠️ Recommended to whitelist app"
+            binding.buttonBattery.visibility = View.VISIBLE
         }
     }
     
     private fun requestCalendarPermission() {
-        if (PermissionUtils.shouldShowCalendarPermissionRationale(this)) {
-            // Show explanation first, then request
-            PermissionUtils.requestCalendarPermission(singlePermissionLauncher)
-        } else {
-            PermissionUtils.requestCalendarPermission(singlePermissionLauncher)
-        }
+        PermissionUtils.requestCalendarPermission(singlePermissionLauncher)
     }
     
     private fun requestNotificationPermission() {
-        if (PermissionUtils.shouldShowNotificationPermissionRationale(this)) {
-            // Show explanation first, then request
-            PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
-        } else {
-            PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
-        }
+        PermissionUtils.requestNotificationPermission(singlePermissionLauncher)
     }
     
     private fun openExactAlarmSettings() {
@@ -171,7 +143,6 @@ class PermissionOnboardingActivity : AppCompatActivity() {
             try {
                 startActivity(intent)
             } catch (e: Exception) {
-                // Fallback to app settings
                 startActivity(PermissionUtils.getAppSettingsIntent(this))
             }
         }
@@ -180,35 +151,10 @@ class PermissionOnboardingActivity : AppCompatActivity() {
     private fun openBatteryOptimizationSettings() {
         try {
             val result = PermissionUtils.getBestBatteryOptimizationIntent(this)
-            if (!result.isAvailable) {
-                // Battery optimization not available, show message and continue
-                android.util.Log.i("PermissionOnboarding", "Battery optimization not available on this device")
-                // Auto-advance since feature is not available
-                checkAllPermissionsAndProceed()
-                return
-            }
             startActivity(result.intent)
         } catch (e: Exception) {
-            // Fallback to app settings
             startActivity(PermissionUtils.getAppSettingsIntent(this))
         }
-    }
-    
-    private fun checkAllPermissionsAndProceed() {
-        if (PermissionUtils.hasAllCriticalPermissions(this)) {
-            // All critical permissions granted, but let user manually proceed to completion
-            // Don't auto-advance to avoid confusion - let user click Next when ready
-            adapter.refreshCurrentStep()
-        } else {
-            // Some permissions still missing, refresh current page
-            adapter.refreshCurrentStep()
-        }
-    }
-    
-    private fun showPermissionDeniedMessage() {
-        // Could show a snackbar or dialog explaining why permissions are needed
-        // For now, just refresh the current step
-        adapter.refreshCurrentStep()
     }
     
     private fun finishOnboarding() {
@@ -226,14 +172,13 @@ class PermissionOnboardingActivity : AppCompatActivity() {
             finish()
         } catch (e: Exception) {
             android.util.Log.e("PermissionOnboarding", "Error finishing onboarding", e)
-            finish() // Still finish even on error
+            finish()
         }
     }
     
     override fun onResume() {
         super.onResume()
         // Refresh permission status when returning from settings
-        // Don't auto-advance - let user control the flow
-        adapter.refreshCurrentStep()
+        updateAllPermissionStatus()
     }
 }
