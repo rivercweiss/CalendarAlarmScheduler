@@ -70,10 +70,6 @@ class SettingsFragment : BaseFragment() {
         
         Logger.d("SettingsFragment", "Returned from system settings")
         Logger.d("SettingsFragment", "Time spent in settings: ${timeSpentInSettings}ms")
-        if (::settingsRepository.isInitialized) {
-            Logger.d("SettingsFragment", "Battery optimization attempts: ${settingsRepository.getBatteryOptimizationAttempts()}")
-            Logger.d("SettingsFragment", "User previously skipped: ${settingsRepository.getUserSkippedBatteryOptimization()}")
-        }
         
         // Clear background usage cache since user may have changed settings
         BackgroundUsageDetector.clearCache()
@@ -101,7 +97,7 @@ class SettingsFragment : BaseFragment() {
                 // Record successful completion
                 val methodUsed = lastBatteryOptimizationResult?.type?.name ?: "unknown"
                 if (::settingsRepository.isInitialized) {
-                    settingsRepository.setBatteryOptimizationSetupCompleted(true, methodUsed)
+                    settingsRepository.setBatteryOptimizationSetupCompleted(true)
                 }
                 
                 val successMessage = when (backgroundStatus.detectionMethod) {
@@ -220,9 +216,6 @@ class SettingsFragment : BaseFragment() {
             openExactAlarmSettings()
         }
         
-        binding.btnFullscreenIntentPermission.setOnClickListener {
-            openFullScreenIntentSettings()
-        }
         
         binding.btnBatteryOptimization.setOnClickListener {
             openBatteryOptimizationSettings()
@@ -284,15 +277,6 @@ class SettingsFragment : BaseFragment() {
             deniedText = "Required for precise alarm timing on Android 12+"
         )
         
-        // Full-screen intent permission
-        updatePermissionRow(
-            iconView = binding.iconFullscreenIntentPermission,
-            textView = binding.textFullscreenIntentPermission,
-            buttonView = binding.btnFullscreenIntentPermission,
-            hasPermission = status.hasFullScreenIntentPermission,
-            grantedText = "Full-screen alarms can be displayed",
-            deniedText = "Required to show alarms when app is closed (Android 14+)"
-        )
         
         // Battery optimization
         val batteryOptimized = status.isBatteryOptimizationWhitelisted
@@ -398,15 +382,6 @@ class SettingsFragment : BaseFragment() {
         }
     }
     
-    private fun openFullScreenIntentSettings() {
-        val intent = PermissionUtils.getFullScreenIntentSettingsIntent(requireContext())
-        if (intent != null) {
-            Logger.d("SettingsFragment", "Opening full-screen intent settings")
-            systemSettingsLauncher.launch(intent)
-        } else {
-            Toast.makeText(requireContext(), "Full-screen intent settings not available on this device", Toast.LENGTH_SHORT).show()
-        }
-    }
     
     private fun openBatteryOptimizationSettings() {
         val context = requireContext()
@@ -448,20 +423,7 @@ class SettingsFragment : BaseFragment() {
      * Check if we can try an alternative battery optimization method
      */
     private fun canTryAlternativeMethod(): Boolean {
-        if (!::settingsRepository.isInitialized) {
-            return true // Allow retry if settings not initialized yet
-        }
-        
-        val attempts = settingsRepository.getBatteryOptimizationAttempts()
-        val userSkipped = settingsRepository.getUserSkippedBatteryOptimization()
-        
-        // Don't retry if user explicitly skipped or if we've tried too many times
-        if (userSkipped || attempts >= 5) {
-            return false
-        }
-        
-        // Allow retry for different methods or if we haven't tried many times
-        return true
+        return true // Always allow retry - simplified approach
     }
     
     private fun handleQuickReturnFallback() {
@@ -632,17 +594,11 @@ class SettingsFragment : BaseFragment() {
             .setTitle("Skip Battery Optimization?")
             .setMessage("WARNING: Without battery optimization disabled, alarms may not work reliably when your phone is in battery saver mode or doze mode.\n\nYou can always enable this later in Settings.")
             .setPositiveButton("I Understand") { _, _ ->
-                // User acknowledged the risk - record that they skipped
-                if (::settingsRepository.isInitialized) {
-                    settingsRepository.setUserSkippedBatteryOptimization(true)
-                }
+                // User acknowledged the risk
                 Logger.i("SettingsFragment", "User chose to skip battery optimization setup")
             }
             .setNeutralButton("Remind Me Later") { _, _ ->
-                // Don't mark as skipped, just increment reminder count
-                if (::settingsRepository.isInitialized) {
-                    settingsRepository.recordBatteryOptimizationReminderShown()
-                }
+                // Don't mark as skipped
                 Logger.i("SettingsFragment", "User chose to be reminded about battery optimization later")
             }
             .setNegativeButton("Try Again") { _, _ ->

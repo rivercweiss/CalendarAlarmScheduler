@@ -92,9 +92,9 @@ class AlarmRepository(
     ): ScheduledAlarm {
         val alarmTimeUtc = eventStartTimeUtc - (leadTimeMinutes * 60 * 1000)
         
-        // Generate unique alarm ID first, then collision-resistant request code
+        // Generate unique alarm ID and simple request code
         val alarmId = java.util.UUID.randomUUID().toString()
-        val requestCode = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm.generateRequestCodeFromAlarmId(alarmId)
+        val requestCode = ScheduledAlarm.generateRequestCode(eventId, ruleId)
         
         val alarm = ScheduledAlarm(
             id = alarmId,
@@ -180,7 +180,7 @@ class AlarmRepository(
         return emptyList()
     }
     
-    suspend fun handleDismissedAlarms(dismissedAlarms: List<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>) {
+    suspend fun handleDismissedAlarms(dismissedAlarms: List<ScheduledAlarm>) {
         for (alarm in dismissedAlarms) {
             setAlarmDismissed(alarm.id, true)
         }

@@ -1,7 +1,7 @@
 package com.example.calendaralarmscheduler.domain
 
 import com.example.calendaralarmscheduler.data.AlarmRepository
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 
 /**
@@ -17,16 +17,9 @@ class AlarmSchedulingService(
         val scheduledCount: Int = 0,
         val updatedCount: Int = 0,
         val skippedCount: Int = 0,
-        val failedCount: Int = 0,
-        val failedEvents: List<String> = emptyList(),
-        val success: Boolean = true,
-        val message: String = ""
+        val failedCount: Int = 0
     )
     
-    /**
-     * Processes a list of rule matches and schedules/updates alarms as needed.
-     * Handles duplicate detection, dismissed alarm checking, and modified event handling.
-     */
     suspend fun processMatchesAndScheduleAlarms(
         matches: List<RuleMatcher.MatchResult>,
         logPrefix: String = "AlarmSchedulingService"
@@ -35,12 +28,10 @@ class AlarmSchedulingService(
         var updatedCount = 0
         var skippedCount = 0
         var failedCount = 0
-        val failedEvents = mutableListOf<String>()
         
-        Logger.d("${logPrefix}_processMatches", "Processing ${matches.size} matches for alarm scheduling")
+        Logger.d(logPrefix, "Processing ${matches.size} matches for alarm scheduling")
         
         try {
-            // Process each match
             for (match in matches) {
                 val event = match.event
                 val rule = match.rule
@@ -50,38 +41,16 @@ class AlarmSchedulingService(
                 val existingAlarm = alarmRepository.getAlarmByEventAndRule(event.id, rule.id)
                 
                 if (existingAlarm != null) {
-                    // Check if event was modified - this resets dismissal status for modified events
+                    // Check if event was modified - this resets dismissal status
                     val eventWasModified = event.lastModified > existingAlarm.lastEventModified
-                    val alarmWasDismissed = existingAlarm.userDismissed
                     
                     if (eventWasModified) {
-                        Logger.d("${logPrefix}_processMatches", "Event modified: ${event.title}, lastModified: ${event.lastModified} > ${existingAlarm.lastEventModified}")
-                        
-                        // If event was modified, reset dismissal status (treat as new event)
-                        if (alarmWasDismissed) {
-                            Logger.i("${logPrefix}_processMatches", "Resetting dismissal status for modified event: ${event.title}")
-                        }
-                        
-                        // Convert existing database alarm to domain model for AlarmScheduler
-                        val existingDomainAlarm = ScheduledAlarm(
-                            id = existingAlarm.id,
-                            eventId = existingAlarm.eventId,
-                            ruleId = existingAlarm.ruleId,
-                            eventTitle = existingAlarm.eventTitle,
-                            eventStartTimeUtc = existingAlarm.eventStartTimeUtc,
-                            alarmTimeUtc = existingAlarm.alarmTimeUtc,
-                            scheduledAt = existingAlarm.scheduledAt,
-                            userDismissed = existingAlarm.userDismissed,
-                            pendingIntentRequestCode = existingAlarm.pendingIntentRequestCode,
-                            lastEventModified = existingAlarm.lastEventModified
-                        )
-                        
                         // Cancel old alarm and schedule new one
-                        val cancelResult = alarmScheduler.cancelAlarm(existingDomainAlarm)
-                        if (cancelResult.success) {
-                            val scheduleResult = alarmScheduler.scheduleAlarm(newAlarm)
-                            if (scheduleResult.success) {
-                                // Update in database and reset dismissal status
+                        val cancelSuccess = alarmScheduler.cancelAlarm(existingAlarm)
+                        if (cancelSuccess) {
+                            val scheduleSuccess = alarmScheduler.scheduleAlarm(newAlarm)
+                            if (scheduleSuccess) {
+                                // Update in database
                                 alarmRepository.updateAlarmForChangedEvent(
                                     eventId = event.id,
                                     ruleId = rule.id,
@@ -92,34 +61,32 @@ class AlarmSchedulingService(
                                 )
                                 
                                 // Reset dismissal status for modified events
-                                if (alarmWasDismissed) {
+                                if (existingAlarm.userDismissed) {
                                     alarmRepository.undismissAlarm(existingAlarm.id)
-                                    Logger.i("${logPrefix}_processMatches", "Reset dismissal status for modified event: ${event.title}")
+                                    Logger.i(logPrefix, "Reset dismissal status for modified event: ${event.title}")
                                 }
                                 
                                 updatedCount++
-                                Logger.d("${logPrefix}_processMatches", "Updated alarm for modified event: ${event.title}")
+                                Logger.d(logPrefix, "Updated alarm for modified event: ${event.title}")
                             } else {
-                                Logger.w("${logPrefix}_processMatches", "Failed to reschedule alarm for ${event.title}: ${scheduleResult.message}")
+                                Logger.w(logPrefix, "Failed to reschedule alarm for ${event.title}")
                                 failedCount++
-                                failedEvents.add(event.title)
                             }
                         } else {
-                            Logger.w("${logPrefix}_processMatches", "Failed to cancel old alarm for ${event.title}: ${cancelResult.message}")
+                            Logger.w(logPrefix, "Failed to cancel old alarm for ${event.title}")
                             failedCount++
-                            failedEvents.add(event.title)
                         }
-                    } else if (alarmWasDismissed) {
+                    } else if (existingAlarm.userDismissed) {
                         skippedCount++
-                        Logger.d("${logPrefix}_processMatches", "Skipped dismissed alarm for unmodified event: ${event.title}")
+                        Logger.d(logPrefix, "Skipped dismissed alarm for unmodified event: ${event.title}")
                     } else {
                         skippedCount++
-                        Logger.d("${logPrefix}_processMatches", "Skipped existing alarm for unmodified event: ${event.title}")
+                        Logger.d(logPrefix, "Skipped existing alarm for unmodified event: ${event.title}")
                     }
                 } else {
                     // New alarm - schedule it
-                    val scheduleResult = alarmScheduler.scheduleAlarm(newAlarm)
-                    if (scheduleResult.success) {
+                    val scheduleSuccess = alarmScheduler.scheduleAlarm(newAlarm)
+                    if (scheduleSuccess) {
                         // Save to database
                         alarmRepository.scheduleAlarmForEvent(
                             eventId = event.id,
@@ -130,11 +97,10 @@ class AlarmSchedulingService(
                             lastEventModified = event.lastModified
                         )
                         scheduledCount++
-                        Logger.d("${logPrefix}_processMatches", "Scheduled new alarm for event: ${event.title}")
+                        Logger.d(logPrefix, "Scheduled new alarm for event: ${event.title}")
                     } else {
-                        Logger.w("${logPrefix}_processMatches", "Failed to schedule alarm for ${event.title}: ${scheduleResult.message}")
+                        Logger.w(logPrefix, "Failed to schedule alarm for ${event.title}")
                         failedCount++
-                        failedEvents.add(event.title)
                     }
                 }
             }
@@ -143,7 +109,7 @@ class AlarmSchedulingService(
             alarmRepository.cleanupOldAlarms()
             
             val totalProcessed = scheduledCount + updatedCount + skippedCount + failedCount
-            Logger.i("${logPrefix}_processMatches", 
+            Logger.i(logPrefix, 
                 "Alarm scheduling completed. " +
                 "Scheduled: $scheduledCount, Updated: $updatedCount, Skipped: $skippedCount, Failed: $failedCount (Total: $totalProcessed)")
             
@@ -151,23 +117,13 @@ class AlarmSchedulingService(
                 scheduledCount = scheduledCount,
                 updatedCount = updatedCount,
                 skippedCount = skippedCount,
-                failedCount = failedCount,
-                failedEvents = failedEvents,
-                success = failedCount == 0,
-                message = if (failedCount == 0) {
-                    "Successfully processed $totalProcessed alarm(s)"
-                } else {
-                    "Processed $totalProcessed alarm(s) with $failedCount failure(s)"
-                }
+                failedCount = failedCount
             )
             
         } catch (e: Exception) {
-            Logger.e("${logPrefix}_processMatches", "Critical error during alarm scheduling", e)
+            Logger.e(logPrefix, "Critical error during alarm scheduling", e)
             return SchedulingResult(
-                failedCount = matches.size,
-                failedEvents = matches.map { it.event.title },
-                success = false,
-                message = "Critical error during alarm scheduling: ${e.message}"
+                failedCount = matches.size
             )
         }
     }

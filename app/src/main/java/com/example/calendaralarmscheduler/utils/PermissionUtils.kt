@@ -56,19 +56,6 @@ object PermissionUtils {
         }
     }
 
-    /**
-     * Check if we have full-screen intent permission (Android 14+)
-     * This is required for full-screen intent notifications to bypass BAL restrictions
-     */
-    fun hasFullScreenIntentPermission(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.canUseFullScreenIntent()
-        } else {
-            // Pre-Android 14, full-screen intents work without special permission
-            true
-        }
-    }
 
     /**
      * Check if the app has background usage permissions (replaces legacy battery optimization check)
@@ -100,7 +87,6 @@ object PermissionUtils {
             hasCalendarPermission = hasCalendarPermission(context),
             hasNotificationPermission = hasNotificationPermission(context),
             hasExactAlarmPermission = hasExactAlarmPermission(context),
-            hasFullScreenIntentPermission = hasFullScreenIntentPermission(context),
             isBatteryOptimizationWhitelisted = isBatteryOptimizationWhitelisted(context)
         )
     }
@@ -163,19 +149,6 @@ object PermissionUtils {
         }
     }
 
-    /**
-     * Get an intent to open full-screen intent settings (Android 14+)
-     */
-    fun getFullScreenIntentSettingsIntent(context: Context): Intent? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            Intent().apply {
-                action = Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
-                data = Uri.parse("package:${context.packageName}")
-            }
-        } else {
-            null
-        }
-    }
 
     /**
      * Result of battery optimization intent analysis
@@ -942,15 +915,14 @@ object PermissionUtils {
         val hasCalendarPermission: Boolean,
         val hasNotificationPermission: Boolean,
         val hasExactAlarmPermission: Boolean,
-        val hasFullScreenIntentPermission: Boolean,
         val isBatteryOptimizationWhitelisted: Boolean
     ) {
         fun areAllGranted(): Boolean {
-            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && hasFullScreenIntentPermission
+            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission
         }
         
         fun areAllOptimal(): Boolean {
-            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && hasFullScreenIntentPermission && isBatteryOptimizationWhitelisted
+            return hasCalendarPermission && hasNotificationPermission && hasExactAlarmPermission && isBatteryOptimizationWhitelisted
         }
     }
 

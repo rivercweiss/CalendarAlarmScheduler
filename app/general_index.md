@@ -20,7 +20,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **AlarmRepository.kt** - Manages scheduled alarms persistence and lifecycle with auto-cleanup and tracking
 - **CalendarRepository.kt** - Fetches and manages Google Calendar events with change detection and filtering
 - **RuleRepository.kt** - Manages alarm rules persistence with calendar filters and pattern validation
-- **SettingsRepository.kt** - Manages app settings with DataStore, migration, and battery optimization tracking
+- **SettingsRepository.kt** - Simple app settings management with reactive StateFlows
 
 #### Database (`data/database/`)
 - **AppDatabase.kt** - Room database configuration with migrations and type converters
@@ -29,19 +29,18 @@ This index provides a quick overview of all source files in the codebase to help
 
 #### Entities (`data/database/entities/`)
 - **Rule.kt** - Database entity for alarm rules with keyword patterns and calendar filters
-- **ScheduledAlarm.kt** - Database entity for scheduled alarms with timezone handling 
+- **ScheduledAlarm.kt** - Database entity for scheduled alarms with basic utility methods
 
 ### Domain Layer (`domain/`)
 
 #### Core Services
-- **AlarmScheduler.kt** - Core alarm scheduling system using AlarmManager with exact alarm handling
-- **AlarmSchedulingService.kt** - Shared alarm scheduling logic for workers and UI components
+- **AlarmScheduler.kt** - Simple alarm scheduling using AlarmManager with essential methods only
+- **AlarmSchedulingService.kt** - Simple alarm scheduling service for processing rule matches
 - **RuleAlarmManager.kt** - Manages relationship between rules and alarms with lifecycle management
 - **RuleMatcher.kt** - Rule matching engine that finds events matching alarm rules with validation
 
 #### Models (`domain/models/`)
 - **CalendarEvent.kt** - Domain model for calendar events with UI formatting and recurrence handling
-- **ScheduledAlarm.kt** - Domain model for scheduled alarms with enhanced collision-resistant request code generation
 
 ### Dependency Injection (`di/`)
 - **AlarmModule.kt** - Hilt module providing alarm-related dependencies
@@ -61,8 +60,6 @@ This index provides a quick overview of all source files in the codebase to help
 - **BaseFragment.kt** - Base fragment class with common functionality
 - **MainActivity.kt** - Main activity with navigation and permission handling
 
-#### Alarm UI (`ui/alarm/`)
-- **AlarmActivity.kt** - Full-screen alarm display that bypasses do-not-disturb
 
 #### Onboarding (`ui/onboarding/`)
 - **OnboardingPagerAdapter.kt** - ViewPager adapter for onboarding flow
@@ -91,7 +88,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **SettingsViewModel.kt** - ViewModel managing settings state
 
 ### Utilities (`utils/`)
-- **AlarmNotificationManager.kt** - Creates and manages alarm notifications
+- **AlarmNotificationManager.kt** - Creates unmissable alarm notifications that bypass DND and silent mode
 - **BackgroundUsageDetector.kt** - Detects background usage permissions across Android versions
 - **BackgroundUsageTest.kt** - Tests background usage permission status
 - **CrashHandler.kt** - Global exception handling with logging and recovery
@@ -103,7 +100,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **TimezoneUtils.kt** - Timezone handling and conversion utilities
 
 ### Background Workers (`workers/`)
-- **CalendarRefreshWorker.kt** - Periodic background worker that scans calendar and schedules alarms
+- **CalendarRefreshWorker.kt** - Simple background worker for calendar scanning and alarm scheduling
 - **WorkerManager.kt** - Manages WorkManager scheduling with battery optimization checking
 
 ## Key Architecture Patterns

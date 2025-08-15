@@ -56,9 +56,6 @@ class RuleEditViewModel @Inject constructor(
     private var pendingCalendarIds: List<Long>? = null // For storing calendar IDs while calendars are loading
     
     init {
-        // Set up RuleAlarmManager in the repository
-        ruleRepository.setRuleAlarmManager(ruleAlarmManager)
-        
         loadAvailableCalendars()
     }
     

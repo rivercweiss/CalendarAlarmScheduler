@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
@@ -42,16 +41,6 @@
             android:exported="false"
             android:theme="@style/Theme.CalendarAlarmScheduler" />
 
-        <!-- Full-screen Alarm Activity -->
-        <activity
-            android:name=".ui.alarm.AlarmActivity"
-            android:exported="false"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:theme="@style/Theme.CalendarAlarmScheduler.FullScreenAlarm"
-            android:excludeFromRecents="true"
-            android:taskAffinity=""
-            android:launchMode="singleInstance" />
 
         <!-- Alarm Broadcast Receiver -->
         <receiver

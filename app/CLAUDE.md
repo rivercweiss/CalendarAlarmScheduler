@@ -97,7 +97,8 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 
 4. **Alarm Scheduler**
    * Uses `AlarmManager.setExactAndAllowWhileIdle()` to set exact alarms.
-   * Creates alarm notification that works in all phone states.
+   * Creates unmissable notifications with alarm sound that bypass Do Not Disturb and silent mode.
+   * Simple notification-based system - no full-screen activities.
    * Tracks scheduled and user-dismissed alarms to avoid duplicates.
 
 5. **UI Layer**

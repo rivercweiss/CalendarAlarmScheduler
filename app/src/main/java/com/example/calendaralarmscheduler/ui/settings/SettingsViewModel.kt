@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.workers.WorkerManager
@@ -175,8 +175,17 @@ class SettingsViewModel @Inject constructor(
                 
                 Logger.i("SettingsViewModel", "Creating test alarm for: ${Date(testAlarmTime)}")
                 
-                // Use the enhanced test alarm scheduling method
-                val success = alarmScheduler.scheduleTestAlarm("Calendar Alarm Test", testAlarmTime)
+                // Create a simple test alarm
+                val testAlarm = ScheduledAlarm(
+                    eventId = "test_alarm",
+                    ruleId = "test_rule",
+                    eventTitle = "Calendar Alarm Test",
+                    eventStartTimeUtc = testAlarmTime + 60000, // 1 minute after alarm
+                    alarmTimeUtc = testAlarmTime,
+                    pendingIntentRequestCode = "test_alarm".hashCode(),
+                    lastEventModified = System.currentTimeMillis()
+                )
+                val success = alarmScheduler.scheduleAlarm(testAlarm)
                 
                 if (success) {
                     Logger.i("SettingsViewModel", "✅ Test alarm scheduled successfully!")
@@ -258,7 +267,6 @@ class SettingsViewModel @Inject constructor(
      */
     fun refreshAllSettings() {
         Logger.i("SettingsViewModel", "Performing defensive refresh of all settings")
-        settingsRepository.refreshAllStateFlows()
         updateWorkStatus()
         updateLastSyncDescription()
     }
@@ -268,7 +276,6 @@ class SettingsViewModel @Inject constructor(
      */
     fun refreshSettingsDisplays() {
         Logger.i("SettingsViewModel", "Performing defensive refresh of settings displays only")
-        settingsRepository.refreshAllStateFlows()
     }
     
     override fun onCleared() {

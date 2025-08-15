@@ -102,7 +102,6 @@ This index provides comprehensive documentation of all functions in the codebase
 - `queryEventsInternal(startTimeUtc: Long, endTimeUtc: Long, calendarIds: List<Long>? = null, lastModified: Long? = null): List<CalendarEvent>` - **suspend** **private** - Internal method for querying calendar events
 
 ### RuleRepository.kt
-- `setRuleAlarmManager(manager: RuleAlarmManager)` - Inject the RuleAlarmManager for operations that require alarm management
 - `getAllRules(): Flow<List<Rule>>` - Get all rules
 - `getEnabledRules(): Flow<List<Rule>>` - Get enabled rules
 - `getRuleById(id: String): Rule?` - **suspend** - Get rule by ID
@@ -116,9 +115,6 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getActiveRulesForCalendars(calendarIds: List<Long>): Flow<List<Rule>>` - Get active rules for calendars
 - `toggleRuleEnabled(id: String)` - **suspend** - Toggle rule enabled status
 - `getAllRulesSync(): List<Rule>` - **suspend** - Get all rules synchronously
-- `updateRuleEnabledWithAlarmManagement(rule: Rule, enabled: Boolean): RuleAlarmManager.RuleUpdateResult` - **suspend** - Update rule enabled status with proper alarm management
-- `updateRuleWithAlarmManagement(oldRule: Rule, newRule: Rule): RuleAlarmManager.RuleUpdateResult` - **suspend** - Update rule with proper alarm management
-- `deleteRuleWithAlarmCleanup(rule: Rule): RuleAlarmManager.RuleUpdateResult` - **suspend** - Delete rule with proper alarm cleanup
 - `createDefaultRules(): List<Rule>` - **suspend** - Create default rules
 
 ### SettingsRepository.kt
@@ -126,10 +122,8 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getRefreshIntervalMinutes(): Int` - Get refresh interval in minutes
 - `setRefreshIntervalMinutes(minutes: Int)` - Set refresh interval in minutes
 - `getAllDayDefaultHour(): Int` - Get all-day default hour
-- `setAllDayDefaultHour(hour: Int)` - Set all-day default hour
 - `getAllDayDefaultMinute(): Int` - Get all-day default minute
-- `setAllDayDefaultMinute(minute: Int)` - Set all-day default minute
-- `setAllDayDefaultTime(hour: Int, minute: Int)` - Set all-day default time atomically
+- `setAllDayDefaultTime(hour: Int, minute: Int)` - Set all-day default time
 - `isOnboardingCompleted(): Boolean` - Check if onboarding is completed
 - `setOnboardingCompleted(completed: Boolean)` - Set onboarding completed status
 - `isFirstLaunch(): Boolean` - Check if this is first launch
@@ -139,35 +133,11 @@ This index provides comprehensive documentation of all functions in the codebase
 - `updateLastSyncTime()` - Update last sync time to current time
 - `hasEverSynced(): Boolean` - Check if ever synced
 - `handleTimezoneChange()` - Handle timezone changes by resetting last sync time
+- `isBatteryOptimizationSetupCompleted(): Boolean` - Check if battery optimization setup has been completed
+- `setBatteryOptimizationSetupCompleted(completed: Boolean)` - Mark battery optimization setup as completed
 - `getAllDayDefaultTimeFormatted(): String` - Get formatted all-day default time
-- `getAllDayDefaultTimeFormatted24Hour(): String` - Get formatted all-day default time in 24-hour format
 - `getRefreshIntervalDescription(): String` - Get refresh interval description
 - `resetToDefaults()` - Reset all settings to defaults
-- `getAllSettings(): Map<String, Any>` - Get all settings as map
-- `dumpSettings()` - Dump settings to log
-- `handleSettingsMigration()` - **private** - Handle settings migration between versions
-- `migrateFromVersion0()` - **private** - Migration from version 0
-- `validateAndFixSettings(): Boolean` - Validate all current settings and fix any invalid values
-- `getSettingsVersion(): Int` - Get current settings version
-- `clearAllSettings()` - Clear all settings (for debugging/testing)
-- `refreshAllStateFlows()` - Force refresh all StateFlows from current SharedPreferences values
-- `refreshRefreshIntervalStateFlow()` - Force refresh only refresh interval StateFlow
-- `refreshAllDayTimeStateFlows()` - Force refresh only all-day time StateFlows
-- `isBatteryOptimizationSetupCompleted(): Boolean` - Check if battery optimization setup has been completed
-- `setBatteryOptimizationSetupCompleted(completed: Boolean, method: String? = null)` - Mark battery optimization setup as completed
-- `getBatteryOptimizationMethodUsed(): String?` - Get the method that was successfully used
-- `recordBatteryOptimizationAttempt(method: String)` - Record a battery optimization setup attempt
-- `getBatteryOptimizationAttempts(): Int` - Get the number of battery optimization setup attempts
-- `getLastBatteryOptimizationAttempt(): Long` - Get the timestamp of the last battery optimization attempt
-- `shouldShowBatteryOptimizationReminder(): Boolean` - Check if we should show a battery optimization reminder
-- `recordBatteryOptimizationReminderShown()` - Record that a battery optimization reminder was shown
-- `getBatteryOptimizationReminderCount(): Int` - Get the number of battery optimization reminders shown
-- `setUserSkippedBatteryOptimization(skipped: Boolean)` - Mark that user has skipped battery optimization setup
-- `getUserSkippedBatteryOptimization(): Boolean` - Check if user has skipped battery optimization setup
-- `setDeviceBatteryManagementType(type: String)` - Store the detected device battery management type
-- `getDeviceBatteryManagementType(): String?` - Get the stored device battery management type
-- `resetBatteryOptimizationTracking()` - Reset battery optimization tracking
-- `getBatteryOptimizationSummary(): Map<String, Any>` - Get battery optimization summary for debugging
 
 ### Database DAOs
 
@@ -222,6 +192,12 @@ This index provides comprehensive documentation of all functions in the codebase
 - `fromLongList(value: List<Long>): String` - **@TypeConverter** - Convert list to string
 - `toLongList(value: String): List<Long>` - **@TypeConverter** - Convert string to list
 
+#### ScheduledAlarm.kt
+- `isInPast(): Boolean` - Check if alarm time is in the past
+- `isActive(): Boolean` - Check if alarm is active (not dismissed and in future)
+- `getLocalAlarmTime(): ZonedDateTime` - Get local alarm time
+- `generateRequestCode(eventId: String, ruleId: String): Int` - **Companion** - Generate simple request code
+
 
 ## DI Modules
 
@@ -248,33 +224,16 @@ This index provides comprehensive documentation of all functions in the codebase
 ## Domain Layer
 
 ### AlarmScheduler.kt
-- `scheduleAlarm(alarm: ScheduledAlarm): ScheduleResult` - **suspend** - Schedule alarm with collision detection
-- `cancelAlarm(alarm: ScheduledAlarm): ScheduleResult` - **suspend** - Cancel alarm
-- `rescheduleAlarm(oldAlarm: ScheduledAlarm, newAlarm: ScheduledAlarm): ScheduleResult` - **suspend** - Reschedule alarm
-- `scheduleMultipleAlarms(alarms: List<ScheduledAlarm>): List<ScheduleResult>` - **suspend** - Schedule multiple alarms
-- `cancelMultipleAlarms(alarms: List<ScheduledAlarm>): List<ScheduleResult>` - **suspend** - Cancel multiple alarms
+- `scheduleAlarm(alarm: ScheduledAlarm): Boolean` - **suspend** - Schedule alarm with basic validation
+- `cancelAlarm(alarm: ScheduledAlarm): Boolean` - **suspend** - Cancel alarm
+- `rescheduleAlarm(oldAlarm: ScheduledAlarm, newAlarm: ScheduledAlarm): Boolean` - **suspend** - Reschedule alarm
 - `isAlarmScheduled(alarm: ScheduledAlarm): Boolean` - Check if alarm is scheduled
 - `canScheduleExactAlarms(): Boolean` - Check if can schedule exact alarms
 - `createAlarmIntent(alarm: ScheduledAlarm): Intent` - **private** - Create alarm intent
 - `createPendingIntent(alarm: ScheduledAlarm, intent: Intent): PendingIntent` - **private** - Create pending intent
-- `validateAndScheduleAlarms(alarms: List<ScheduledAlarm>, onValidationError: (ScheduledAlarm, String) -> Unit = { _, _ -> }): List<ScheduleResult>` - **suspend** - Validate and schedule alarms
-- `cleanupPastAlarms(alarms: List<ScheduledAlarm>): List<ScheduleResult>` - **suspend** - Clean up past alarms
-- `scheduleSnoozeAlarm(originalAlarmId: String, snoozeTimeUtc: Long): ScheduleResult` - **suspend** - Schedule snooze alarm
-- `generateSnoozeRequestCode(originalAlarmId: String): Int` - **private** - Generate snooze request code
-- `getNextAlarmTime(alarms: List<ScheduledAlarm>): Long?` - Get next alarm time
-- `isAlarmActiveInSystem(alarm: ScheduledAlarm): Boolean` - Check if alarm is actually scheduled in system
-- `detectDismissedAlarms(alarms: List<ScheduledAlarm>): List<ScheduledAlarm>` - **suspend** - Check multiple alarms and return which ones are missing from system
-- `monitorSystemState(databaseAlarms: List<ScheduledAlarm>): SystemStateResult` - **suspend** - Monitor system alarm state and detect user dismissals
-- `checkAndResolveRequestCodeCollision(alarm: ScheduledAlarm): CollisionCheckResult` - **suspend** **private** - Enhanced collision detection and resolution
-- `generateImprovedAlternativeRequestCode(originalRequestCode: Int, attempt: Int, alarmId: String): Int` - **private** - Improved alternative request code generation
-- `detectRequestCodeCollisions(alarms: List<ScheduledAlarm>): List<Pair<ScheduledAlarm, ScheduledAlarm>>` - **suspend** - Detect existing request code collisions
-- `scheduleAlarm(eventId: String, ruleId: String, eventTitle: String, alarmTimeUtc: Long, requestCode: Int): Boolean` - **suspend** - Schedule alarm with individual parameters
-- `validateSystemState(databaseAlarms: List<ScheduledAlarm>): SystemStateValidationResult` - **suspend** - System state validation and health check
-- `scheduleTestAlarm(testEventTitle: String, testAlarmTime: Long): Boolean` - **suspend** - Schedule a test alarm for manual testing
-- `scheduleAlarmInternal(alarm: ScheduledAlarm)` - **suspend** **private** - Internal method for scheduling alarms
 
 ### AlarmSchedulingService.kt
-- `processMatchesAndScheduleAlarms(matches: List<RuleMatcher.MatchResult>, logPrefix: String = "AlarmSchedulingService"): SchedulingResult` - **suspend** - Process rule matches and schedule/update alarms
+- `processMatchesAndScheduleAlarms(matches: List<RuleMatcher.MatchResult>, logPrefix: String = "AlarmSchedulingService"): SchedulingResult` - **suspend** - Process rule matches and schedule alarms with simplified result tracking
 
 ### RuleAlarmManager.kt
 - `updateRuleEnabled(rule: Rule, enabled: Boolean): RuleUpdateResult` - **suspend** - Update rule enabled status and handle all associated alarm operations
@@ -313,26 +272,6 @@ This index provides comprehensive documentation of all functions in the codebase
 - `toUtcString(): String` - **Extension** - Convert to UTC string
 - `toLocalString(): String` - **Extension** - Convert to local string
 
-#### ScheduledAlarm.kt (Domain Model)
-- `isInPast(): Boolean` - Check if alarm time is in the past
-- `isInFuture(): Boolean` - Check if alarm time is in the future
-- `isActive(): Boolean` - Check if alarm is active (not dismissed and in future)
-- `getAlarmTimeInTimezone(zoneId: ZoneId): ZonedDateTime` - Get alarm time in timezone
-- `getEventStartTimeInTimezone(zoneId: ZoneId): ZonedDateTime` - Get event start time in timezone
-- `getLocalAlarmTime(): ZonedDateTime` - Get local alarm time
-- `getLocalEventStartTime(): ZonedDateTime` - Get local event start time
-- `getTimeUntilAlarmMillis(): Long` - Get time until alarm in milliseconds
-- `getTimeUntilAlarmMinutes(): Long` - Get time until alarm in minutes
-- `getLeadTimeMinutes(): Long` - Get lead time in minutes
-- `formatTimeUntilAlarm(): String` - Format time until alarm
-- `shouldBeRescheduled(currentEventModified: Long): Boolean` - Check if should be rescheduled
-- `create(event: CalendarEvent, rule: Rule, alarmTimeUtc: Long): ScheduledAlarm` - **Companion** - Create scheduled alarm
-- `generateRequestCodeFromAlarmId(alarmId: String): Int` - **Companion** - Enhanced collision-resistant request code generation
-- `generateFallbackRequestCode(alarmId: String): Int` - **Companion** **private** - Fallback request code generation
-- `generateAlternativeRequestCode(originalRequestCode: Int, attempt: Int): Int` - **Companion** - Enhanced alternative request code generation
-- `fromEventAndRule(event: CalendarEvent, rule: Rule, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): ScheduledAlarm` - **Companion** - Create from event and rule
-- `markDismissed(): ScheduledAlarm` - **Extension** - Mark alarm as dismissed
-- `updateForEventChange(newEvent: CalendarEvent, rule: Rule, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): ScheduledAlarm` - **Extension** - Update for event change
 
 ## Receivers
 
@@ -358,8 +297,6 @@ This index provides comprehensive documentation of all functions in the codebase
 ### MainActivity.kt
 - Functions not detailed in provided content
 
-### AlarmActivity.kt
-- Functions not detailed in provided content
 
 ### Onboarding UI
 - **OnboardingPagerAdapter.kt** - ViewPager adapter functions
@@ -418,7 +355,6 @@ This index provides comprehensive documentation of all functions in the codebase
 - `hasCalendarPermission(context: Context): Boolean` - Check if we have calendar read permission
 - `hasExactAlarmPermission(context: Context): Boolean` - Check if we have exact alarm scheduling permission (Android 12+)
 - `hasNotificationPermission(context: Context): Boolean` - Check if we have notification permission (Android 13+)
-- `hasFullScreenIntentPermission(context: Context): Boolean` - Check if we have full-screen intent permission (Android 14+)
 - `isBatteryOptimizationWhitelisted(context: Context): Boolean` - Check if the app has background usage permissions
 - `getBackgroundUsageStatus(context: Context): BackgroundUsageDetector.BackgroundUsageStatus` - Get detailed background usage status
 - `getAllPermissionStatus(context: Context): PermissionStatus` - Check all critical permissions at once
@@ -427,7 +363,6 @@ This index provides comprehensive documentation of all functions in the codebase
 - `requestMultiplePermissions(launcher: ActivityResultLauncher<Array<String>>, permissions: Array<String>)` - Request multiple permissions
 - `getExactAlarmSettingsIntent(context: Context): Intent?` - Get intent to open exact alarm settings (Android 12+)
 - `getNotificationSettingsIntent(context: Context): Intent` - Get intent to open notification settings
-- `getFullScreenIntentSettingsIntent(context: Context): Intent?` - Get intent to open full-screen intent settings (Android 14+)
 - `getBestBatteryOptimizationIntent(context: Context): BatteryOptimizationResult` - Get the best battery optimization intent based on device capabilities
 - `getModernBackgroundUsageIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for modern background usage controls
 - `getGranularPermissionsIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for granular permissions
@@ -452,8 +387,12 @@ This index provides comprehensive documentation of all functions in the codebase
 - `hasAllCriticalPermissions(context: Context): Boolean` - Check if all critical permissions are granted
 - `getMissingPermissions(context: Context): List<String>` - Get the list of permissions that need to be requested
 
+### AlarmNotificationManager.kt
+- `showAlarmNotification(alarmId: String, eventTitle: String, eventStartTime: Long, ruleId: String?, isTestAlarm: Boolean)` - Show unmissable alarm notification with sound and vibration
+- `dismissAlarmNotification(alarmId: String)` - Dismiss specific alarm notification
+- `createNotificationChannel()` - **private** - Create high-priority notification channel that bypasses DND
+
 ### Other Utilities
-- **AlarmNotificationManager.kt** - Functions for creating and managing alarm notifications
 - **BackgroundUsageDetector.kt** - Functions for detecting background usage permissions
 - **BackgroundUsageTest.kt** - Functions for testing background usage permission status
 - **CrashHandler.kt** - Global exception handling functions
@@ -465,12 +404,7 @@ This index provides comprehensive documentation of all functions in the codebase
 ## Workers
 
 ### CalendarRefreshWorker.kt
-- `getCurrentMemoryUsagePercent(): Double` - **private** - Get current memory usage percentage
-- `logMemoryUsage(operation: String)` - **private** - Log memory usage
-- `performMemoryCleanupIfNeeded(): Boolean` - **suspend** **private** - Perform memory cleanup if needed
-- `doWork(): Result` - **override** **suspend** - Main worker execution
-- `performAlarmHealthCheck(alarmRepository: AlarmRepository, alarmScheduler: AlarmScheduler): AlarmHealthCheckResult` - **suspend** **private** - Proactive alarm health monitoring and repair
-- `processEventsInBatches(events: List<CalendarEvent>, enabledRules: List<Rule>, alarmRepository: AlarmRepository, ruleMatcher: RuleMatcher, alarmSchedulingService: AlarmSchedulingService, settingsRepository: SettingsRepository, errorNotificationManager: ErrorNotificationManager, startTime: Long): Result` - **suspend** **private** - Process large event collections in memory-efficient batches
+- `doWork(): Result` - **override** **suspend** - Simple calendar refresh and alarm scheduling
 
 ### WorkerManager.kt
 - `schedulePeriodicRefresh(intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES)` - Schedule periodic calendar refresh with specified interval

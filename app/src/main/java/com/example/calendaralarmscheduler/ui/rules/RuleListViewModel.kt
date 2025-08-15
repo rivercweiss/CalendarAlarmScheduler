@@ -60,10 +60,6 @@ class RuleListViewModel @Inject constructor(
             initialValue = UiState.Loading
         )
     
-    init {
-        // Set up RuleAlarmManager in the repository
-        repository.setRuleAlarmManager(ruleAlarmManager)
-    }
     
     fun updateRuleEnabled(rule: Rule, isEnabled: Boolean) {
         val operationKey = "${rule.id}_${isEnabled}_${System.currentTimeMillis() / operationDebounceMs}"
@@ -80,7 +76,7 @@ class RuleListViewModel @Inject constructor(
             
             try {
                 android.util.Log.d("RuleListViewModel", "Starting rule update: '${rule.name}' -> ${if (isEnabled) "enabled" else "disabled"}")
-                val result = repository.updateRuleEnabledWithAlarmManagement(rule, isEnabled)
+                val result = ruleAlarmManager.updateRuleEnabled(rule, isEnabled)
                 
                 if (result.success) {
                     _statusMessage.emit("✅ ${result.message}")
@@ -107,7 +103,7 @@ class RuleListViewModel @Inject constructor(
             _operationState.value = UiState.Loading
             
             try {
-                val result = repository.deleteRuleWithAlarmCleanup(rule)
+                val result = ruleAlarmManager.deleteRuleWithAlarmCleanup(rule)
                 
                 if (result.success) {
                     _statusMessage.emit("✅ ${result.message}")

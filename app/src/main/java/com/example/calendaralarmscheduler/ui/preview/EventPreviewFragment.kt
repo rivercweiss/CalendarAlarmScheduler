@@ -10,7 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.calendaralarmscheduler.databinding.FragmentEventPreviewBinding
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint

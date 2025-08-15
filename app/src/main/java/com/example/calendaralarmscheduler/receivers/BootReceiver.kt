@@ -52,53 +52,31 @@ class BootReceiver : BroadcastReceiver() {
             val alarmRepository = app.alarmRepository
             val alarmScheduler = app.alarmScheduler
             
-            // Get all active alarms from database
-            val currentTime = System.currentTimeMillis()
-            val futureAlarms = mutableListOf<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>()
+            // Get all active alarms from database  
+            val activeAlarms = alarmRepository.getActiveAlarmsSync()
             
-            // Get alarms directly without collect since we're in a one-time operation
-            val activeAlarms = alarmRepository.getActiveAlarms()
+            // Filter to only future, non-dismissed alarms
+            val futureAlarms = activeAlarms.filter { alarm ->
+                alarm.alarmTimeUtc > System.currentTimeMillis() && !alarm.userDismissed
+            }
+                
+            Logger.i("BootReceiver_rescheduleAlarms", "Found ${futureAlarms.size} alarms to reschedule")
             
-            // We need to collect once and process
-            activeAlarms.collect { alarms ->
-                // Filter to only future, non-dismissed alarms and convert to domain models
-                alarms.filter { dbAlarm ->
-                    dbAlarm.alarmTimeUtc > currentTime && !dbAlarm.userDismissed
-                }.forEach { dbAlarm ->
-                    // Convert database entity to domain model
-                    val domainAlarm = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
-                        id = dbAlarm.id,
-                        eventId = dbAlarm.eventId,
-                        ruleId = dbAlarm.ruleId,
-                        eventTitle = dbAlarm.eventTitle,
-                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
-                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
-                        scheduledAt = dbAlarm.scheduledAt,
-                        userDismissed = dbAlarm.userDismissed,
-                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
-                        lastEventModified = dbAlarm.lastEventModified
-                    )
-                    futureAlarms.add(domainAlarm)
-                }
+            if (futureAlarms.isNotEmpty()) {
+                var successCount = 0
+                var failureCount = 0
                 
-                Logger.i("BootReceiver_rescheduleAlarms", "Found ${futureAlarms.size} alarms to reschedule")
-                
-                if (futureAlarms.isNotEmpty()) {
-                    val results = alarmScheduler.scheduleMultipleAlarms(futureAlarms)
-                    val successCount = results.count { it.success }
-                    val failureCount = results.count { !it.success }
-                    
-                    Logger.i("BootReceiver_rescheduleAlarms", 
-                        "Rescheduled $successCount alarms successfully, $failureCount failed")
-                    
-                    // Log any failures
-                    results.filter { !it.success }.forEach { result ->
-                        Logger.w("BootReceiver_rescheduleAlarms", 
-                            "Failed to reschedule alarm: ${result.message}")
+                for (alarm in futureAlarms) {
+                    if (alarmScheduler.scheduleAlarm(alarm)) {
+                        successCount++
+                    } else {
+                        failureCount++
+                        Logger.w("BootReceiver_rescheduleAlarms", "Failed to reschedule alarm: ${alarm.eventTitle}")
                     }
                 }
                 
-                return@collect // Exit the collect block after processing
+                Logger.i("BootReceiver_rescheduleAlarms", 
+                    "Rescheduled $successCount alarms successfully, $failureCount failed")
             }
             
         } catch (e: Exception) {

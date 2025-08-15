@@ -4,7 +4,7 @@ import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.data.database.entities.Rule
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.flow.first
 
@@ -127,8 +127,12 @@ class RuleAlarmManager(
                 }
                 
                 // Cancel alarms from system AlarmManager
-                val cancelResults = alarmScheduler.cancelMultipleAlarms(domainAlarms)
-                val successfulCancels = cancelResults.count { it.success }
+                var successfulCancels = 0
+                for (alarm in domainAlarms) {
+                    if (alarmScheduler.cancelAlarm(alarm)) {
+                        successfulCancels++
+                    }
+                }
                 Logger.d(logPrefix, "Successfully cancelled $successfulCancels out of ${domainAlarms.size} system alarms")
                 
                 // Remove alarms from database
@@ -226,11 +230,11 @@ class RuleAlarmManager(
             Logger.i(logPrefix, "Successfully enabled rule '${rule.name}' and scheduled $totalAlarmsAffected alarm(s)")
             
             return RuleUpdateResult(
-                success = schedulingResult.success,
-                message = if (schedulingResult.success) {
+                success = schedulingResult.failedCount == 0,
+                message = if (schedulingResult.failedCount == 0) {
                     "Rule enabled and ${totalAlarmsAffected} alarm(s) scheduled"
                 } else {
-                    "Rule enabled but some alarms failed: ${schedulingResult.message}"
+                    "Rule enabled but ${schedulingResult.failedCount} alarm(s) failed"
                 },
                 alarmsAffected = totalAlarmsAffected,
                 alarmsScheduled = schedulingResult.scheduledCount

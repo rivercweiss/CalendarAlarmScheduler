@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.coroutines.FlowPreview::class)
+
 package com.example.calendaralarmscheduler.ui.preview
 
 import android.app.AlarmManager
@@ -17,7 +19,7 @@ import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.receivers.AlarmReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -573,21 +575,7 @@ class EventPreviewViewModel @Inject constructor(
             }
             
             // Get existing alarms to filter out duplicates and dismissed alarms
-            val existingAlarmsDb = alarmRepository.getAllAlarms().first()
-            val existingAlarms = existingAlarmsDb.map { dbAlarm ->
-                com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
-                    id = dbAlarm.id,
-                    eventId = dbAlarm.eventId,
-                    ruleId = dbAlarm.ruleId,
-                    eventTitle = dbAlarm.eventTitle,
-                    eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
-                    alarmTimeUtc = dbAlarm.alarmTimeUtc,
-                    scheduledAt = dbAlarm.scheduledAt,
-                    userDismissed = dbAlarm.userDismissed,
-                    pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
-                    lastEventModified = dbAlarm.lastEventModified
-                )
-            }
+            val existingAlarms = alarmRepository.getAllAlarms().first()
             
             // Filter out user-dismissed alarms (unless event was modified)
             val filteredMatches = ruleMatcher.filterOutDismissedAlarms(matchResults, existingAlarms)
@@ -605,23 +593,19 @@ class EventPreviewViewModel @Inject constructor(
             )
             
             // Show user feedback about scheduling results
-            if (result.success) {
-                if (result.scheduledCount > 0 || result.updatedCount > 0) {
-                    val message = buildString {
-                        if (result.scheduledCount > 0) {
-                            append("${result.scheduledCount} alarm(s) scheduled")
-                        }
-                        if (result.updatedCount > 0) {
-                            if (result.scheduledCount > 0) append(", ")
-                            append("${result.updatedCount} alarm(s) updated")
-                        }
+            if (result.scheduledCount > 0 || result.updatedCount > 0) {
+                val message = buildString {
+                    if (result.scheduledCount > 0) {
+                        append("${result.scheduledCount} alarm(s) scheduled")
                     }
-                    _errorMessage.emit("✅ $message")
-                } else if (result.skippedCount > 0) {
-                    android.util.Log.d("EventPreviewViewModel", "All ${result.skippedCount} matching alarms already exist")
+                    if (result.updatedCount > 0) {
+                        if (result.scheduledCount > 0) append(", ")
+                        append("${result.updatedCount} alarm(s) updated")
+                    }
                 }
-            } else {
-                _errorMessage.emit("⚠️ ${result.message}")
+                _errorMessage.emit("✅ $message")
+            } else if (result.skippedCount > 0) {
+                android.util.Log.d("EventPreviewViewModel", "All ${result.skippedCount} matching alarms already exist")
             }
             
         } catch (e: Exception) {
@@ -796,10 +780,19 @@ class EventPreviewViewModel @Inject constructor(
                 val testAlarmTime = System.currentTimeMillis() + (5 * 60 * 1000) // 5 minutes from now
                 val testEventTitle = "Test Alarm - ${System.currentTimeMillis()}"
                 
-                val success = alarmScheduler.scheduleTestAlarm(
-                    testEventTitle = testEventTitle,
-                    testAlarmTime = testAlarmTime
+                // Create a test alarm
+                val testAlarm = ScheduledAlarm(
+                    id = "test-${System.currentTimeMillis()}",
+                    eventId = "test-event-${System.currentTimeMillis()}",
+                    ruleId = "test-rule",
+                    eventTitle = testEventTitle,
+                    eventStartTimeUtc = testAlarmTime,
+                    alarmTimeUtc = testAlarmTime,
+                    pendingIntentRequestCode = ScheduledAlarm.generateRequestCode("test-event", "test-rule"),
+                    lastEventModified = System.currentTimeMillis()
                 )
+                
+                val success = alarmScheduler.scheduleAlarm(testAlarm)
                 
                 if (success) {
                     _errorMessage.emit("Test alarm scheduled for 5 minutes from now")
@@ -836,13 +829,7 @@ class EventPreviewViewModel @Inject constructor(
                     // Try to find the alarm in the database and reschedule it
                     val alarm = alarmRepository.getAlarmById(failure.alarmId)
                     if (alarm != null && !alarm.userDismissed && alarm.alarmTimeUtc > System.currentTimeMillis()) {
-                        val success = alarmScheduler.scheduleAlarm(
-                            eventId = alarm.eventId,
-                            ruleId = alarm.ruleId,
-                            eventTitle = alarm.eventTitle,
-                            alarmTimeUtc = alarm.alarmTimeUtc,
-                            requestCode = alarm.pendingIntentRequestCode
-                        )
+                        val success = alarmScheduler.scheduleAlarm(alarm)
                         
                         if (!success) {
                             retriedFailures.add(failure.copy(retryCount = failure.retryCount + 1))
@@ -885,26 +872,7 @@ class EventPreviewViewModel @Inject constructor(
                 
                 val alarms = alarmRepository.getActiveAlarmsSync()
                 
-                // First, detect any request code collisions in the database
-                val domainAlarms = alarms.map { dbAlarm ->
-                    ScheduledAlarm(
-                        id = dbAlarm.id,
-                        eventId = dbAlarm.eventId,
-                        ruleId = dbAlarm.ruleId,
-                        eventTitle = dbAlarm.eventTitle,
-                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
-                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
-                        scheduledAt = dbAlarm.scheduledAt,
-                        userDismissed = dbAlarm.userDismissed,
-                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
-                        lastEventModified = dbAlarm.lastEventModified
-                    )
-                }
-                
-                val collisions = alarmScheduler.detectRequestCodeCollisions(domainAlarms)
-                if (collisions.isNotEmpty()) {
-                    android.util.Log.w("EventPreviewViewModel", "⚠️ Detected ${collisions.size} request code collisions during recovery")
-                }
+                // Process alarms for rescheduling
                 
                 var rescheduledCount = 0
                 var skippedCount = 0
@@ -929,51 +897,10 @@ class EventPreviewViewModel @Inject constructor(
                                 
                                 android.util.Log.d("EventPreviewViewModel", "Attempting recovery for ${alarm.eventTitle} (attempt $currentAttempts/${MAX_RECOVERY_ATTEMPTS})")
                                 
-                                // Convert database alarm to domain model
-                                val domainAlarm = ScheduledAlarm(
-                                    id = alarm.id,
-                                    eventId = alarm.eventId,
-                                    ruleId = alarm.ruleId,
-                                    eventTitle = alarm.eventTitle,
-                                    eventStartTimeUtc = alarm.eventStartTimeUtc,
-                                    alarmTimeUtc = alarm.alarmTimeUtc,
-                                    scheduledAt = alarm.scheduledAt,
-                                    userDismissed = alarm.userDismissed,
-                                    pendingIntentRequestCode = alarm.pendingIntentRequestCode,
-                                    lastEventModified = alarm.lastEventModified
-                                )
-                                
-                                val result = alarmScheduler.scheduleAlarm(domainAlarm)
-                                if (result.success) {
+                                val success = alarmScheduler.scheduleAlarm(alarm)
+                                if (success) {
                                     rescheduledCount++
-                                    
-                                    // If request code was changed during collision resolution, update database
-                                    if (result.alarm != null && result.alarm.pendingIntentRequestCode != alarm.pendingIntentRequestCode) {
-                                        try {
-                                            alarmRepository.updateAlarmRequestCode(alarm.id, result.alarm.pendingIntentRequestCode)
-                                            collisionResolvedCount++
-                                            android.util.Log.i("EventPreviewViewModel", 
-                                                "✓ Updated database with resolved request code for ${alarm.eventTitle}: ${alarm.pendingIntentRequestCode} -> ${result.alarm.pendingIntentRequestCode}")
-                                        } catch (e: Exception) {
-                                            android.util.Log.e("EventPreviewViewModel", "Failed to update request code in database for ${alarm.eventTitle}", e)
-                                        }
-                                    }
-                                    
-                                    // Successful recovery - clear attempt tracking
-                                    recoveryAttempts.remove(alarm.id)
-                                    lastRecoveryTimes.remove(alarm.id)
-                                    recentlyRecovered.add(alarm.id)
                                     android.util.Log.d("EventPreviewViewModel", "✅ Successfully rescheduled missing alarm: ${alarm.eventTitle}")
-                                } else {
-                                    failures.add(
-                                        AlarmSchedulingFailure(
-                                            alarmId = alarm.id,
-                                            eventTitle = alarm.eventTitle,
-                                            failureReason = "Auto-reschedule failed: ${result.message}",
-                                            failureTime = System.currentTimeMillis(),
-                                            retryCount = 0
-                                        )
-                                    )
                                 }
                             } catch (e: Exception) {
                                 failures.add(

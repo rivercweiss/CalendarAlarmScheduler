@@ -2,7 +2,8 @@ package com.example.calendaralarmscheduler.domain
 
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
 import com.example.calendaralarmscheduler.data.database.entities.Rule
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
+import java.util.UUID
 
 class RuleMatcher {
     
@@ -26,15 +27,25 @@ class RuleMatcher {
         for (event in futureEvents) {
             for (rule in enabledRules) {
                 if (rule.matchesEvent(event)) {
-                    val scheduledAlarm = ScheduledAlarm.fromEventAndRule(
-                        event = event,
-                        rule = rule,
-                        defaultAllDayHour = defaultAllDayHour,
-                        defaultAllDayMinute = defaultAllDayMinute
+                    val alarmTimeUtc = if (event.isAllDay) {
+                        event.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, 0)
+                    } else {
+                        event.computeAlarmTimeUtc(rule.leadTimeMinutes)
+                    }
+                    
+                    val scheduledAlarm = ScheduledAlarm(
+                        id = UUID.randomUUID().toString(),
+                        eventId = event.id,
+                        ruleId = rule.id,
+                        eventTitle = event.title,
+                        eventStartTimeUtc = event.startTimeUtc,
+                        alarmTimeUtc = alarmTimeUtc,
+                        pendingIntentRequestCode = ScheduledAlarm.generateRequestCode(event.id, rule.id),
+                        lastEventModified = event.lastModified
                     )
                     
                     // Only include if alarm time is in the future
-                    if (scheduledAlarm.isInFuture()) {
+                    if (!scheduledAlarm.isInPast()) {
                         results.add(MatchResult(event, rule, scheduledAlarm))
                     }
                 }
@@ -60,15 +71,25 @@ class RuleMatcher {
         
         for (rule in enabledRules) {
             if (rule.matchesEvent(event)) {
-                val scheduledAlarm = ScheduledAlarm.fromEventAndRule(
-                    event = event,
-                    rule = rule,
-                    defaultAllDayHour = defaultAllDayHour,
-                    defaultAllDayMinute = defaultAllDayMinute
+                val alarmTimeUtc = if (event.isAllDay) {
+                    event.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, 0)
+                } else {
+                    event.computeAlarmTimeUtc(rule.leadTimeMinutes)
+                }
+                
+                val scheduledAlarm = ScheduledAlarm(
+                    id = UUID.randomUUID().toString(),
+                    eventId = event.id,
+                    ruleId = rule.id,
+                    eventTitle = event.title,
+                    eventStartTimeUtc = event.startTimeUtc,
+                    alarmTimeUtc = alarmTimeUtc,
+                    pendingIntentRequestCode = ScheduledAlarm.generateRequestCode(event.id, rule.id),
+                    lastEventModified = event.lastModified
                 )
                 
                 // Only include if alarm time is in the future
-                if (scheduledAlarm.isInFuture()) {
+                if (!scheduledAlarm.isInPast()) {
                     results.add(MatchResult(event, rule, scheduledAlarm))
                 }
             }
@@ -93,15 +114,25 @@ class RuleMatcher {
         
         for (event in futureEvents) {
             if (rule.matchesEvent(event)) {
-                val scheduledAlarm = ScheduledAlarm.fromEventAndRule(
-                    event = event,
-                    rule = rule,
-                    defaultAllDayHour = defaultAllDayHour,
-                    defaultAllDayMinute = defaultAllDayMinute
+                val alarmTimeUtc = if (event.isAllDay) {
+                    event.computeAllDayAlarmTimeUtc(defaultAllDayHour, defaultAllDayMinute, 0)
+                } else {
+                    event.computeAlarmTimeUtc(rule.leadTimeMinutes)
+                }
+                
+                val scheduledAlarm = ScheduledAlarm(
+                    id = UUID.randomUUID().toString(),
+                    eventId = event.id,
+                    ruleId = rule.id,
+                    eventTitle = event.title,
+                    eventStartTimeUtc = event.startTimeUtc,
+                    alarmTimeUtc = alarmTimeUtc,
+                    pendingIntentRequestCode = ScheduledAlarm.generateRequestCode(event.id, rule.id),
+                    lastEventModified = event.lastModified
                 )
                 
                 // Only include if alarm time is in the future
-                if (scheduledAlarm.isInFuture()) {
+                if (!scheduledAlarm.isInPast()) {
                     results.add(MatchResult(event, rule, scheduledAlarm))
                 }
             }

@@ -11,16 +11,4 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <!-- Full-screen alarm theme for unmissable alarms -->
-    <style name="Theme.CalendarAlarmScheduler.FullScreenAlarm" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowShowWallpaper">false</item>
-        <item name="android:windowBackground">@color/black</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:screenOrientation">portrait</item>
-        <item name="android:windowDisablePreview">true</item>
-    </style>
 </resources>

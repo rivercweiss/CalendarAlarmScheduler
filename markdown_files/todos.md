@@ -294,3 +294,42 @@ Lets not read any files for now, we will read them later. For now, all I want yo
 
 Lets become an expert in this topic. Dig in, deep research Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible. Ultrathink
 
+Please deeply inspect the code and architecture and perform the following steps:
+
+1) Update the blank file \@general_index.md to contain a list of all the files in the codebase along with a simple description of what each file does. The goal of this file to to get you (Claude) up to speed about the codebase super quickly.
+2) Update the blank file \@detailed_index.md to contain the names of all the functions in each file along with an explanation/docstring for each function. The goal of this file is to allow you (Claude) to have a more in depth understanding of what each file and function in each file does without having to read all the code.
+3) Update CLAUDE.md with access to this information. Make a note that these index files may or may not be up to date, and when making changes that affect them to update the relevant index files.
+
+Think hard.
+
+We are trying to clean up our code as much as possible.
+
+We want our codebase to be as simple, elegant, and modular as possible, and easy to read and understand.
+
+Can you look through \@general_index.md and \@detailed_index.md ad determine what cleanup we can do? Make a cleanup plan that prioritizes simplicity and modularity. Think hard.
+
+Lets execute Priority 4: Fix Circular Dependencies and update the index files to reflect reality.
+
+Lets execute Priority 6: Simplify Over-Engineering and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+
+When the app is freshly installed it fetches calendar events properly, but the refresh button does not actually refresh or fetch new calendar events. Please fix this issue in a memory safe way, trying to delete as much code as possible in the process. Try to do this as simply, modularly and robustly as possible. Think hard.
+
+We are getting these warnings:
+
+> Task :app:compileDebugKotlin
+w: file:///Users/riverweiss/AndroidStudioProjects/CalendarAlarmScheduler/app/src/main/java/com/example/calendaralarmscheduler/ui/preview/EventPreviewViewModel.kt:122:10 This declaration is in a preview state and can be changed in a backwards-incompatible manner with a best-effort migration. Its usage should be marked with '@kotlinx.coroutines.FlowPreview' or '@OptIn(kotlinx.coroutines.FlowPreview::class)' if you accept the drawback of relying on preview API
+w: file:///Users/riverweiss/AndroidStudioProjects/CalendarAlarmScheduler/app/src/main/java/com/example/calendaralarmscheduler/ui/preview/EventPreviewViewModel.kt:162:18 This declaration is in a preview state and can be changed in a backwards-incompatible manner with a best-effort migration. Its usage should be marked with '@kotlinx.coroutines.FlowPreview' or '@OptIn(kotlinx.coroutines.FlowPreview::class)' if you accept the drawback of relying on preview API
+
+> Task :app:compileDebugJavaWithJavac
+warning: The following options were not recognized by any processor: '[dagger.hilt.internal.useAggregatingRootProcessor, dagger.fastInit, dagger.hilt.android.internal.disableAndroidSuperclassValidation, dagger.hilt.android.internal.projectType]'
+1 warning
+
+Please fix this issue. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible. Think hard.
+
+
+
+We removed the full screen part of the notification entirely, and just have an unmissable notification that rings an alarm independent of phone state (silent, dnd, battery saver) that we can dismiss in standard ways.
+
+We need to update the settings UI and underlying code with this change, and not require full screen permissions.
+
+Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 

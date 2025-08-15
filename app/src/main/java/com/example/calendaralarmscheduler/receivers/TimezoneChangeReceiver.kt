@@ -91,57 +91,33 @@ class TimezoneChangeReceiver : BroadcastReceiver() {
             val alarmScheduler = app.alarmScheduler
             
             // Get all active alarms from database
-            val currentTime = System.currentTimeMillis()
-            val futureAlarms = mutableListOf<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>()
-            
-            // Get active alarms and convert to domain models
             val activeAlarms = alarmRepository.getActiveAlarms()
             
             activeAlarms.collect { alarms ->
                 // Filter to only future, non-dismissed alarms
-                alarms.filter { dbAlarm ->
-                    dbAlarm.alarmTimeUtc > currentTime && !dbAlarm.userDismissed
-                }.forEach { dbAlarm ->
-                    // Convert database entity to domain model
-                    val domainAlarm = com.example.calendaralarmscheduler.domain.models.ScheduledAlarm(
-                        id = dbAlarm.id,
-                        eventId = dbAlarm.eventId,
-                        ruleId = dbAlarm.ruleId,
-                        eventTitle = dbAlarm.eventTitle,
-                        eventStartTimeUtc = dbAlarm.eventStartTimeUtc,
-                        alarmTimeUtc = dbAlarm.alarmTimeUtc,
-                        scheduledAt = dbAlarm.scheduledAt,
-                        userDismissed = dbAlarm.userDismissed,
-                        pendingIntentRequestCode = dbAlarm.pendingIntentRequestCode,
-                        lastEventModified = dbAlarm.lastEventModified
-                    )
-                    futureAlarms.add(domainAlarm)
-                }
+                val futureAlarms = alarms.filter { !it.userDismissed && it.alarmTimeUtc > System.currentTimeMillis() }
                 
                 Logger.i("TimezoneChangeReceiver", "Found ${futureAlarms.size} alarms to reschedule after timezone/time change")
                 
-                if (futureAlarms.isNotEmpty()) {
-                    // Cancel all existing alarms first
-                    futureAlarms.forEach { alarm ->
-                        alarmScheduler.cancelAlarm(alarm)
+                var successCount = 0
+                var failureCount = 0
+                
+                // Cancel and reschedule each alarm
+                futureAlarms.forEach { alarm ->
+                    // Cancel existing alarm
+                    alarmScheduler.cancelAlarm(alarm)
+                    
+                    // Reschedule alarm
+                    val success = alarmScheduler.scheduleAlarm(alarm)
+                    if (success) {
+                        successCount++
+                    } else {
+                        failureCount++
                     }
-                    
-                    // Reschedule all alarms with updated timezone
-                    val results = alarmScheduler.scheduleMultipleAlarms(futureAlarms)
-                    val successCount = results.count { it.success }
-                    val failureCount = results.count { !it.success }
-                    
-                    Logger.i("TimezoneChangeReceiver", 
-                        "Rescheduled $successCount alarms successfully, $failureCount failed after timezone change")
-                    
-                    // Log any failures
-                    results.filter { !it.success }.forEach { result ->
-                        Logger.w("TimezoneChangeReceiver", 
-                            "Failed to reschedule alarm after timezone change: ${result.message}")
-                    }
-                } else {
-                    Logger.d("TimezoneChangeReceiver", "No future alarms to reschedule")
                 }
+                
+                Logger.i("TimezoneChangeReceiver", 
+                    "Rescheduled $successCount alarms successfully, $failureCount failed after timezone change")
                 
                 return@collect // Exit the collect block after processing
             }

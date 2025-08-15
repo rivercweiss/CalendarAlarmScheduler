@@ -117,8 +117,6 @@ class CalendarAlarmApplication : Application() {
                 workerManager.schedulePeriodicRefresh(refreshInterval)
                 Logger.i("Application", "Background calendar refresh worker scheduled successfully with ${refreshInterval}-minute interval")
                 
-                // Log current settings
-                settingsRepository.dumpSettings()
             } catch (e: Exception) {
                 Logger.e("Application", "Failed to schedule background worker", e)
                 // Don't throw - app can still function without background refresh

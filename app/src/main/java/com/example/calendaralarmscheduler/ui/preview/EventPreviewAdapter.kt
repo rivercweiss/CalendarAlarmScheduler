@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.databinding.ItemEventPreviewBinding
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
-import com.example.calendaralarmscheduler.domain.models.ScheduledAlarm
+import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
