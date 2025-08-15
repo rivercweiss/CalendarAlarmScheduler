@@ -4,6 +4,10 @@ import androidx.room.*
 import com.example.calendaralarmscheduler.data.database.entities.Rule
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Data Access Object for alarm rules with basic CRUD operations.
+ * Simplified to include only essential rule management queries.
+ */
 @Dao
 interface RuleDao {
     @Query("SELECT * FROM rules ORDER BY createdAt DESC")
@@ -18,9 +22,6 @@ interface RuleDao {
     @Query("SELECT * FROM rules WHERE id = :id")
     suspend fun getRuleById(id: String): Rule?
     
-    @Query("SELECT * FROM rules WHERE calendarIds LIKE '%' || :calendarId || '%'")
-    fun getRulesByCalendarId(calendarId: Long): Flow<List<Rule>>
-    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRule(rule: Rule)
     
@@ -33,12 +34,4 @@ interface RuleDao {
     @Delete
     suspend fun deleteRule(rule: Rule)
     
-    @Query("DELETE FROM rules WHERE id = :id")
-    suspend fun deleteRuleById(id: String)
-    
-    @Query("DELETE FROM rules")
-    suspend fun deleteAllRules()
-    
-    @Query("UPDATE rules SET enabled = :enabled WHERE id = :id")
-    suspend fun setRuleEnabled(id: String, enabled: Boolean)
 }

@@ -63,33 +63,19 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getActiveAlarms(): Flow<List<ScheduledAlarm>>` - Get active alarms with caching
 - `getCurrentTimeThreshold(): Long` - **private** - Get cached time threshold
 - `getActiveAlarmsSync(): List<ScheduledAlarm>` - **suspend** - Get active alarms synchronously
-- `getAlarmsByEventId(eventId: String): Flow<List<ScheduledAlarm>>` - Get alarms by event ID
 - `getAlarmsByRuleId(ruleId: String): Flow<List<ScheduledAlarm>>` - Get alarms by rule ID
 - `getAlarmByEventAndRule(eventId: String, ruleId: String): ScheduledAlarm?` - **suspend** - Get alarm by event and rule
 - `getAlarmById(id: String): ScheduledAlarm?` - **suspend** - Get alarm by ID
-- `getAlarmsInTimeRange(startTime: Long, endTime: Long): Flow<List<ScheduledAlarm>>` - Get alarms in time range
 - `insertAlarm(alarm: ScheduledAlarm)` - **suspend** - Insert alarm
-- `insertAlarms(alarms: List<ScheduledAlarm>)` - **suspend** - Insert multiple alarms
-- `updateAlarm(alarm: ScheduledAlarm)` - **suspend** - Update alarm
-- `deleteAlarm(alarm: ScheduledAlarm)` - **suspend** - Delete alarm
-- `deleteAlarmById(id: String)` - **suspend** - Delete alarm by ID
-- `deleteAlarmsByEventId(eventId: String)` - **suspend** - Delete alarms by event ID
+- `updateAlarm(alarm: ScheduledAlarm)` - **suspend** **private** - Update alarm
 - `deleteAlarmsByRuleId(ruleId: String)` - **suspend** - Delete alarms by rule ID
 - `setAlarmDismissed(id: String, dismissed: Boolean = true)` - **suspend** - Set alarm dismissed status
-- `updateAlarmRequestCode(id: String, newRequestCode: Int)` - **suspend** - Update alarm request code
-- `deleteExpiredAlarms(cutoffTime: Long = System.currentTimeMillis() - (24 * 60 * 60 * 1000))` - **suspend** - Delete expired alarms
-- `getUpcomingAlarms(hoursAhead: Int = 24): Flow<List<ScheduledAlarm>>` - Get upcoming alarms
+- `deleteExpiredAlarms(cutoffTime: Long = System.currentTimeMillis() - (24 * 60 * 60 * 1000))` - **suspend** **private** - Delete expired alarms
 - `scheduleAlarmForEvent(eventId: String, ruleId: String, eventTitle: String, eventStartTimeUtc: Long, leadTimeMinutes: Int, lastEventModified: Long): ScheduledAlarm` - **suspend** - Schedule alarm for event
 - `updateAlarmForChangedEvent(eventId: String, ruleId: String, eventTitle: String, eventStartTimeUtc: Long, leadTimeMinutes: Int, lastEventModified: Long): ScheduledAlarm?` - **suspend** - Update alarm for changed event
-- `dismissAlarm(alarmId: String)` - **suspend** - Dismiss alarm
 - `undismissAlarm(alarmId: String)` - **suspend** - Undismiss alarm
-- `reactivateAlarm(alarmId: String): Boolean` - **suspend** - Reactivate alarm
 - `cleanupOldAlarms()` - **suspend** - Clean up old alarms
 - `markAlarmDismissed(alarmId: String)` - **suspend** - Mark alarm as dismissed
-- `shouldRescheduleAlarm(eventId: String, ruleId: String, newLastModified: Long): Boolean` - **suspend** - Check if alarm should be rescheduled
-- `markMultipleAlarmsDismissed(alarmIds: List<String>)` - **suspend** - Mark multiple alarms as dismissed
-- `checkSystemStateAndUpdateDismissals(onAlarmDismissed: (String, String) -> Unit = { _, _ -> }): List<String>` - **suspend** - Check system state and update dismissals
-- `handleDismissedAlarms(dismissedAlarms: List<com.example.calendaralarmscheduler.domain.models.ScheduledAlarm>)` - **suspend** - Handle dismissed alarms
 
 ### CalendarRepository.kt
 - `getUpcomingEvents(calendarIds: List<Long>? = null, lastSyncTime: Long? = null): List<CalendarEvent>` - **suspend** - Query calendar events within the 2-day lookahead window
@@ -98,24 +84,16 @@ This index provides comprehensive documentation of all functions in the codebase
 - `parseEventsCursor(cursor: Cursor): List<CalendarEvent>` - **private** - Parse cursor from CalendarContract.Events query
 - `getEventsInLookAheadWindow(): List<CalendarEvent>` - **suspend** - Get events in the lookahead window
 - `getCalendarsWithNames(): Map<Long, String>` - **suspend** - Get calendars as a map of ID to display name
-- `hasCalendarPermission(): Boolean` - Check if we have calendar read permission
-- `queryEventsInternal(startTimeUtc: Long, endTimeUtc: Long, calendarIds: List<Long>? = null, lastModified: Long? = null): List<CalendarEvent>` - **suspend** **private** - Internal method for querying calendar events
 
 ### RuleRepository.kt
 - `getAllRules(): Flow<List<Rule>>` - Get all rules
 - `getEnabledRules(): Flow<List<Rule>>` - Get enabled rules
 - `getRuleById(id: String): Rule?` - **suspend** - Get rule by ID
-- `getRulesByCalendarId(calendarId: Long): Flow<List<Rule>>` - Get rules by calendar ID
 - `insertRule(rule: Rule)` - **suspend** - Insert rule
-- `insertRules(rules: List<Rule>)` - **suspend** - Insert multiple rules
+- `insertRules(rules: List<Rule>)` - **suspend** **private** - Insert multiple rules
 - `updateRule(rule: Rule)` - **suspend** - Update rule
 - `deleteRule(rule: Rule)` - **suspend** - Delete rule
-- `deleteRuleById(id: String)` - **suspend** - Delete rule by ID
-- `setRuleEnabled(id: String, enabled: Boolean)` - **suspend** - Set rule enabled status
-- `getActiveRulesForCalendars(calendarIds: List<Long>): Flow<List<Rule>>` - Get active rules for calendars
-- `toggleRuleEnabled(id: String)` - **suspend** - Toggle rule enabled status
 - `getAllRulesSync(): List<Rule>` - **suspend** - Get all rules synchronously
-- `createDefaultRules(): List<Rule>` - **suspend** - Create default rules
 
 ### SettingsRepository.kt
 - `setOnRefreshIntervalChanged(callback: (Int) -> Unit)` - Set the callback for refresh interval changes
@@ -143,24 +121,18 @@ This index provides comprehensive documentation of all functions in the codebase
 
 #### AlarmDao.kt
 - `getAllAlarms(): Flow<List<ScheduledAlarm>>` - **@Query** - Get all alarms ordered by alarm time
-- `getAllAlarmsSync(): List<ScheduledAlarm>` - **@Query** **suspend** - Get all alarms synchronously
 - `getActiveAlarmsAll(): Flow<List<ScheduledAlarm>>` - **@Query** - Get all active (non-dismissed) alarms
 - `getActiveAlarmsSync(currentTimeUtc: Long): List<ScheduledAlarm>` - **@Query** **suspend** - Get active alarms synchronously
-- `getAlarmsByEventId(eventId: String): Flow<List<ScheduledAlarm>>` - **@Query** - Get alarms by event ID
 - `getAlarmsByRuleId(ruleId: String): Flow<List<ScheduledAlarm>>` - **@Query** - Get alarms by rule ID
 - `getAlarmByEventAndRule(eventId: String, ruleId: String): ScheduledAlarm?` - **@Query** **suspend** - Get alarm by event and rule
 - `getAlarmById(id: String): ScheduledAlarm?` - **@Query** **suspend** - Get alarm by ID
-- `getAlarmsInTimeRange(startTime: Long, endTime: Long): Flow<List<ScheduledAlarm>>` - **@Query** - Get alarms in time range
 - `insertAlarm(alarm: ScheduledAlarm)` - **@Insert** **suspend** - Insert alarm
-- `insertAlarms(alarms: List<ScheduledAlarm>)` - **@Insert** **suspend** - Insert multiple alarms
 - `updateAlarm(alarm: ScheduledAlarm)` - **@Update** **suspend** - Update alarm
-- `deleteAlarm(alarm: ScheduledAlarm)` - **@Delete** **suspend** - Delete alarm
-- `deleteAlarmById(id: String)` - **@Query** **suspend** - Delete alarm by ID
-- `deleteAlarmsByEventId(eventId: String)` - **@Query** **suspend** - Delete alarms by event ID
 - `deleteAlarmsByRuleId(ruleId: String)` - **@Query** **suspend** - Delete alarms by rule ID
 - `setAlarmDismissed(id: String, dismissed: Boolean)` - **@Query** **suspend** - Set alarm dismissed status
 - `updateAlarmRequestCode(id: String, newRequestCode: Int)` - **@Query** **suspend** - Update alarm request code
 - `deleteExpiredAlarms(cutoffTime: Long)` - **@Query** **suspend** - Delete expired alarms
+- `setAlarmDismissed(id: String, dismissed: Boolean)` - **@Query** **suspend** - Set alarm dismissed status
 - `deleteAllAlarms()` - **@Query** **suspend** - Delete all alarms
 
 #### AppDatabase.kt
@@ -174,14 +146,10 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getAllRulesSync(): List<Rule>` - **@Query** **suspend** - Get all rules synchronously
 - `getEnabledRules(): Flow<List<Rule>>` - **@Query** - Get enabled rules
 - `getRuleById(id: String): Rule?` - **@Query** **suspend** - Get rule by ID
-- `getRulesByCalendarId(calendarId: Long): Flow<List<Rule>>` - **@Query** - Get rules by calendar ID
 - `insertRule(rule: Rule)` - **@Insert** **suspend** - Insert rule
 - `insertRules(rules: List<Rule>)` - **@Insert** **suspend** - Insert multiple rules
 - `updateRule(rule: Rule)` - **@Update** **suspend** - Update rule
 - `deleteRule(rule: Rule)` - **@Delete** **suspend** - Delete rule
-- `deleteRuleById(id: String)` - **@Query** **suspend** - Delete rule by ID
-- `deleteAllRules()` - **@Query** **suspend** - Delete all rules
-- `setRuleEnabled(id: String, enabled: Boolean)` - **@Query** **suspend** - Set rule enabled status
 
 ### Database Entities
 
@@ -204,8 +172,7 @@ This index provides comprehensive documentation of all functions in the codebase
 ### AlarmModule.kt
 - `provideAlarmManager(@ApplicationContext context: Context): AlarmManager` - **@Provides** - Provide AlarmManager
 - `provideAlarmScheduler(@ApplicationContext context: Context, alarmManager: AlarmManager): AlarmScheduler` - **@Provides** **@Singleton** - Provide AlarmScheduler
-- `provideAlarmSchedulingService(alarmRepository: AlarmRepository, alarmScheduler: AlarmScheduler): AlarmSchedulingService` - **@Provides** **@Singleton** - Provide AlarmSchedulingService
-- `provideRuleAlarmManager(ruleRepository: RuleRepository, alarmRepository: AlarmRepository, alarmScheduler: AlarmScheduler, calendarRepository: CalendarRepository, alarmSchedulingService: AlarmSchedulingService): RuleAlarmManager` - **@Provides** **@Singleton** - Provide RuleAlarmManager
+- `provideRuleAlarmManager(ruleRepository: RuleRepository, alarmRepository: AlarmRepository, alarmScheduler: AlarmScheduler, calendarRepository: CalendarRepository): RuleAlarmManager` - **@Provides** **@Singleton** - Provide RuleAlarmManager
 
 ### DatabaseModule.kt
 - `provideAppDatabase(@ApplicationContext context: Context): AppDatabase` - **@Provides** **@Singleton** - Provide App Database
@@ -232,16 +199,13 @@ This index provides comprehensive documentation of all functions in the codebase
 - `createAlarmIntent(alarm: ScheduledAlarm): Intent` - **private** - Create alarm intent
 - `createPendingIntent(alarm: ScheduledAlarm, intent: Intent): PendingIntent` - **private** - Create pending intent
 
-### AlarmSchedulingService.kt
-- `processMatchesAndScheduleAlarms(matches: List<RuleMatcher.MatchResult>, logPrefix: String = "AlarmSchedulingService"): SchedulingResult` - **suspend** - Process rule matches and schedule alarms with simplified result tracking
-
 ### RuleAlarmManager.kt
 - `updateRuleEnabled(rule: Rule, enabled: Boolean): RuleUpdateResult` - **suspend** - Update rule enabled status and handle all associated alarm operations
-- `cleanupExpiredOperations()` - **private** - Clean up expired operations
 - `cancelAlarmsForRule(rule: Rule): RuleUpdateResult` - **suspend** **private** - Disable rule and cancel all associated alarms
 - `rescheduleAlarmsForRule(rule: Rule): RuleUpdateResult` - **suspend** **private** - Enable rule and schedule alarms for matching events
 - `updateRuleWithAlarmManagement(oldRule: Rule, newRule: Rule): RuleUpdateResult` - **suspend** - Update rule and handle all associated alarm operations
 - `deleteRuleWithAlarmCleanup(rule: Rule): RuleUpdateResult` - **suspend** - Delete rule and cancel all associated alarms
+- `processMatchesAndScheduleAlarms(matches: List<RuleMatcher.MatchResult>, logPrefix: String = "RuleAlarmManager"): SchedulingResult` - **suspend** - Process rule matches and schedule alarms with integrated result tracking
 
 ### RuleMatcher.kt
 - `findMatchingRules(events: List<CalendarEvent>, rules: List<Rule>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching rules for events
@@ -327,59 +291,33 @@ This index provides comprehensive documentation of all functions in the codebase
 ## Utilities
 
 ### Logger.kt
-- `initialize(context: Context, isDebug: Boolean)` - Initialize logger
-- `v(tag: String, message: String, throwable: Throwable? = null)` - Log verbose
-- `d(tag: String, message: String, throwable: Throwable? = null)` - Log debug
-- `i(tag: String, message: String, throwable: Throwable? = null)` - Log info
-- `w(tag: String, message: String, throwable: Throwable? = null)` - Log warning
-- `e(tag: String, message: String, throwable: Throwable? = null)` - Log error
-- `crash(tag: String, message: String, throwable: Throwable? = null)` - Log crash
+- `initialize()` - Initialize logger (simplified - no file logging)
+- `v(tag: String, message: String, throwable: Throwable? = null)` - Log verbose to Android logcat
+- `d(tag: String, message: String, throwable: Throwable? = null)` - Log debug to Android logcat
+- `i(tag: String, message: String, throwable: Throwable? = null)` - Log info to Android logcat
+- `w(tag: String, message: String, throwable: Throwable? = null)` - Log warning to Android logcat
+- `e(tag: String, message: String, throwable: Throwable? = null)` - Log error to Android logcat
+- `crash(tag: String, message: String, throwable: Throwable? = null)` - Log crash to Android logcat
 - `logPerformance(tag: String, operation: String, timeMs: Long)` - Log performance metrics
 - `logUserAction(action: String, details: String = "")` - Log user actions
 - `logLifecycle(component: String, state: String, details: String = "")` - Log lifecycle events
 - `logNavigation(from: String, to: String, action: String = "")` - Log navigation
 - `logDatabase(operation: String, table: String, details: String = "", timeMs: Long? = null)` - Log database operations
 - `logPermission(permission: String, granted: Boolean, rationale: String = "")` - Log permission events
-- `dumpContext(tag: String, context: Any?)` - Dump context information
-- `dumpSystemInfo(tag: String)` - Dump system information
-- `log(level: Level, tag: String, message: String, throwable: Throwable?)` - **private** - Internal log function
-- `writeToFile(level: Level, tag: String, message: String, throwable: Throwable?)` - **private** - Write to file
-- `getCurrentLogFile(context: Context): File` - **private** - Get current log file
-- `cleanOldLogFiles()` - **private** - Clean old log files
-- `getAvailableMemory(): Long` - **private** - Get available memory
-- `getFreeStorage(): Long` - **private** - Get free storage
-- `getLogFiles(): List<File>` - Get log files
-- `exportLogs(): String?` - Export logs
+- `log(level: Int, tag: String, message: String, throwable: Throwable?)` - **private** - Internal log function
 
 ### PermissionUtils.kt
 - `hasCalendarPermission(context: Context): Boolean` - Check if we have calendar read permission
 - `hasExactAlarmPermission(context: Context): Boolean` - Check if we have exact alarm scheduling permission (Android 12+)
 - `hasNotificationPermission(context: Context): Boolean` - Check if we have notification permission (Android 13+)
 - `isBatteryOptimizationWhitelisted(context: Context): Boolean` - Check if the app has background usage permissions
-- `getBackgroundUsageStatus(context: Context): BackgroundUsageDetector.BackgroundUsageStatus` - Get detailed background usage status
 - `getAllPermissionStatus(context: Context): PermissionStatus` - Check all critical permissions at once
 - `requestCalendarPermission(launcher: ActivityResultLauncher<String>)` - Request calendar permission
 - `requestNotificationPermission(launcher: ActivityResultLauncher<String>)` - Request notification permission (Android 13+)
 - `requestMultiplePermissions(launcher: ActivityResultLauncher<Array<String>>, permissions: Array<String>)` - Request multiple permissions
 - `getExactAlarmSettingsIntent(context: Context): Intent?` - Get intent to open exact alarm settings (Android 12+)
 - `getNotificationSettingsIntent(context: Context): Intent` - Get intent to open notification settings
-- `getBestBatteryOptimizationIntent(context: Context): BatteryOptimizationResult` - Get the best battery optimization intent based on device capabilities
-- `getModernBackgroundUsageIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for modern background usage controls
-- `getGranularPermissionsIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for granular permissions
-- `getAdaptiveBatteryIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for Adaptive Battery
-- `getOEMCustomIntent(context: Context, deviceInfo: DozeCompatibilityUtils.DeviceInfo): BatteryOptimizationResult` - **private** - Get intent for OEM custom battery management
-- `getLegacyOptimizationIntent(context: Context): BatteryOptimizationResult` - **private** - Get intent for legacy battery optimization
-- `getUnknownDeviceIntent(context: Context): BatteryOptimizationResult` - **private** - Get intent for unknown devices
-- `isDirectWhitelistReliable(context: Context): Boolean` - **private** - Check if direct whitelist intent is reliable
-- `canResolveIntent(context: Context, intent: Intent): Boolean` - **private** - Check if an intent can be resolved
-- `getBatteryOptimizationInstructions(context: Context): List<String>` - Get detailed instructions for manual battery optimization whitelist
-- `getSamsungBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get Samsung-specific battery intent
-- `getXiaomiBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get Xiaomi-specific battery intent
-- `getHuaweiBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get Huawei-specific battery intent
-- `getOnePlusBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get OnePlus-specific battery intent
-- `getAppName(context: Context): String` - **private** - Get app name for display
-- `getOppoBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get Oppo-specific battery intent
-- `getVivoBatteryIntent(context: Context): BatteryOptimizationResult?` - **private** - Get Vivo-specific battery intent
+- `getBestBatteryOptimizationIntent(context: Context): BatteryOptimizationResult` - Get simple battery optimization intent with fallback strategy
 - `getAppSettingsIntent(context: Context): Intent` - Get intent to open general app settings
 - `shouldShowCalendarPermissionRationale(activity: androidx.fragment.app.FragmentActivity): Boolean` - Check if we should show permission rationale
 - `shouldShowNotificationPermissionRationale(activity: androidx.fragment.app.FragmentActivity): Boolean` - Check if we should show notification permission rationale (Android 13+)
@@ -393,13 +331,9 @@ This index provides comprehensive documentation of all functions in the codebase
 - `createNotificationChannel()` - **private** - Create high-priority notification channel that bypasses DND
 
 ### Other Utilities
-- **BackgroundUsageDetector.kt** - Functions for detecting background usage permissions
-- **BackgroundUsageTest.kt** - Functions for testing background usage permission status
-- **CrashHandler.kt** - Global exception handling functions
-- **DozeCompatibilityUtils.kt** - Functions for Doze mode detection and compatibility
-- **ErrorNotificationManager.kt** - Functions for user error notifications
-- **RetryManager.kt** - Functions for exponential backoff retry logic
-- **TimezoneUtils.kt** - Functions for timezone handling and conversion
+- **CrashHandler.kt** - Simplified global exception handling with basic crash logging
+- **ErrorNotificationManager.kt** - Generic error notification system with consolidated error handling
+- **TimezoneUtils.kt** - Essential timezone functions: DST detection, display names, change listeners
 
 ## Workers
 
@@ -413,10 +347,9 @@ This index provides comprehensive documentation of all functions in the codebase
 - `enqueueImmediateRefresh()` - Enqueue immediate one-time calendar refresh
 - `getWorkStatus(): WorkStatus` - Get current work status information
 - `createWorkConstraints(): Constraints` - **private** - Create work constraints optimized for calendar refresh
-- `checkBatteryOptimizationStatus()` - **private** - Check comprehensive background usage status
+- `checkBatteryOptimizationStatus()` - **private** - Check battery optimization status and log information
 - `isDeviceInDozeMode(): Boolean` - Check if the device is in Doze mode (API 23+)
-- `isBatteryOptimizationIgnored(): Boolean` - Get comprehensive background usage status
-- `getBackgroundUsageStatus(): BackgroundUsageDetector.BackgroundUsageStatus` - Get detailed background usage status for debugging
+- `isBatteryOptimizationIgnored(): Boolean` - Check if battery optimization is ignored (app is whitelisted)
 - `validateInterval(intervalMinutes: Int): Boolean` - Validate interval value
 - `getIntervalDescription(intervalMinutes: Int): String` - Get human-readable interval description
-- `checkDozeCompatibility()` - **private** - Check Doze mode compatibility and log warnings
+- `checkDozeCompatibility()` - **private** - Check Doze mode and log warnings if not whitelisted

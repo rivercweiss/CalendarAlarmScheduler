@@ -3,7 +3,6 @@ package com.example.calendaralarmscheduler
 import android.app.Application
 import android.content.BroadcastReceiver
 import com.example.calendaralarmscheduler.data.SettingsRepository
-import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
@@ -96,15 +95,11 @@ class CalendarAlarmApplication : Application() {
             super.onCreate()
             
             // Initialize logging first
-            val isDebug = true // Always enable debug logging for now
-            Logger.initialize(this, isDebug)
-            Logger.i("Application", "Starting CalendarAlarmApplication initialization - Debug: $isDebug")
+            Logger.initialize()
+            Logger.i("Application", "Starting CalendarAlarmApplication initialization")
             
             // Initialize crash handling
-            CrashHandler.initialize(this)
-            
-            // Log system information
-            Logger.dumpSystemInfo("Application")
+            CrashHandler.initialize()
             
             // Set up SettingsRepository callback for refresh interval changes
             settingsRepository.setOnRefreshIntervalChanged { newIntervalMinutes ->
@@ -125,15 +120,6 @@ class CalendarAlarmApplication : Application() {
             // Set up timezone change handling
             setupTimezoneChangeHandling()
             
-            // Initialize background usage cache asynchronously to prevent main thread blocking
-            applicationScope.launch {
-                try {
-                    BackgroundUsageDetector.initializeBackgroundUsageCache(this@CalendarAlarmApplication)
-                    Logger.i("Application", "Background usage detection cache initialized successfully")
-                } catch (e: Exception) {
-                    Logger.w("Application", "Failed to initialize background usage cache (will use fallback)", e)
-                }
-            }
             
             // Clean up expired alarms on app start to prevent database bloat
             applicationScope.launch {
@@ -155,7 +141,6 @@ class CalendarAlarmApplication : Application() {
             // If something goes wrong during initialization, log it and re-throw
             try {
                 Logger.crash("Application", "FATAL: Application initialization failed", e)
-                CrashHandler(this).logCurrentAppState("Application")
             } catch (loggingException: Exception) {
                 // Last resort - use system logging
                 android.util.Log.wtf("CalendarAlarmApplication", "Application init failed and logging failed", e)

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
-import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
+import com.example.calendaralarmscheduler.domain.RuleAlarmManager
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.flow.first
@@ -29,7 +29,7 @@ class CalendarRefreshWorker(
             val alarmRepository = app.alarmRepository
             val alarmScheduler = app.alarmScheduler
             val settingsRepository = app.settingsRepository
-            val alarmSchedulingService = AlarmSchedulingService(alarmRepository, alarmScheduler)
+            val ruleAlarmManager = RuleAlarmManager(ruleRepository, alarmRepository, alarmScheduler, calendarRepository)
             
             // Get enabled rules
             val enabledRules = ruleRepository.getEnabledRules().first()
@@ -55,7 +55,7 @@ class CalendarRefreshWorker(
             val ruleMatcher = RuleMatcher()
             val matches = ruleMatcher.findMatchingRules(events, enabledRules)
             
-            val result = alarmSchedulingService.processMatchesAndScheduleAlarms(matches, TAG)
+            val result = ruleAlarmManager.processMatchesAndScheduleAlarms(matches, TAG)
             
             settingsRepository.updateLastSyncTime()
             

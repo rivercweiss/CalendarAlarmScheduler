@@ -70,41 +70,10 @@
   - Use @Binds instead of @Provides where possible
   - Implement proper testing doubles
 
-Lets work on this step:
-
-
-We need to fix a bug/incorrect behavior that is still broken.
-
-When the user toggles from "show only matching rules" to "show all”, or the opposite, the UI does not autoscroll to the top.
-
-We need you to understand the logs, understand the code to determine where these issues come from, and make a comprehensive fix for the issues.
-
-Please figure out how to get to the root cause. Dig in, read relevant files, read the logs, and prepare to discuss the ins and out of how it works. Make a good step by step plan to implement these fixes. think hard
-
-
-We are concerned about bugs in our code hidden in the logs.
-
-We need you to understand the logs, understand the code to determine where these issues come from, and make a comprehensive fix for the issues.
-
-Please figure out how to get to the root cause of the app crash. Dig in, read relevant files, read the logs, and prepare to discuss the ins and out of how it works. Make a good step by step plan to implement these fixes. Ultrathink
-
 
 ---
 
 We want to update the app to have a one time, 2.00 in app purchase to unlock the ability to have the alarms display the event name rather than just a generic “Alarm” display.
-
----
-
-Can you build the project and check and fix all warnings? Please check along the way to see everything still builds and works.
-
-We don’t want to suppress any lint warnings, we want to fix them. Check for any supressed lint warnings and fix the root cause. For example, @Suppress("NewApi")
-
-Run the build, check warnings and then come up with a plan. Think hard
-
----
-
-- Background app refresh should not be a soft requirement, it must be a hard requirement for the app to function. Please make it mandatory for the app to function, along with all the other permissions. Update the CLAUDE.md as needed.
-- There should be no skip option in the permissions onboard.
 
 ---
 
@@ -115,16 +84,6 @@ Add toggle for “Only alarm for first event of the day."
 Dismissing full screen alarm does not dismiss notification.
 
 ---
-
-We are planning and researching the best way to implement:
-
-A comprehensive end to end test which tests the app in the exact same interactive way as the user.
-
-We want to research the current best practices for how to implement this.
-
-Don’t look for any existing test setups, we want to make a completely new one based on best practices.
-
-Dig in, research online, read the relevant documentation, and prepare to discuss the ins and out of how it works. Think hard.
 
   Phase 5: UI/UX Enhancements
 
@@ -228,61 +187,6 @@ Lets make a plan. Dig in, read the relevant files, research Espresso and UI Auto
 
 ---
 
-Renumber all the e2e test cases. Don’t changes anything else.
-
----
-
-Something in the e2e test is causing the emulator to go black. Please dig deep into the logs to find a root cause. Look up how to fix any issues you find in the logs. ultrathink
-
----
-
-We have an automated E2E test, but it is very slow. It needs to be as fast as possible, while still being very robust and capable of running on many devices/emulated devices with no flakiness. Your job is to make the test as fast as possible, WHILE MAINTAINING ALL TEST FUNCTIONALITY AND CURRENT COVERAGE, and making sure the test is bulletproof.
-
-Lets make a plan. Dig in, read the relevant files, research Espresso and UI Automator best practices and syntax and ultrathink. This plan MUST include running the full e2e test after every new speed improvement to check the new speed improvement works as expected. Ultrathink
-
-
-We have an automated calendar event loader setup_test_calendar.sh, but it is very slow. It needs to be as fast as possible, while still being very robust. Your job is to make the loader as fast as possible, WHILE MAINTAINING ALL FUNCTIONALITY AND CURRENT LOADED EVENTS.
-
-I want you to become an expert in Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible.
-
-The key outcome of this app we need to test:
-- Alarms ALWAYS fire correctly, with noise and a notification
-We need to be able to robustly test this behavior, along with all the other app behaviors.
-
-Lets become an expert in this topic. Dig in, deep research Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible. Ultrathink
-
-We need the run_e2e_test.sh to correctly uninstall and reinstall the application, and ensure all app files are deleted. Become an expert in any required topics to complete this exceptionally. Ultrathink.
-
-
-// NOTE: Infrastructure setup (APK install, permissions, calendar data) 
-// is handled by run_e2e_test.sh - no duplication here
-
-We are working on making a single end to end test case that tests the standard user flow using UI Automator.
-
-The flow:
-
-- Opens the app to the permissions onboarding
-- Steps through the permission onboarding, enabling permissions with UI Automator, as a user would
-- Go to settings and trigger the test alarm
-- Close the app
-- Verify the test alarm fires by waiting for the alarm to notify, then successfully dismissing the alarm
-
-There is one big issue with this test:
-
-- We are not correctly detecting the alarm notification.
-
-After each addition, run the E2E test to verify functionality. Remember, this is an end to end test, so we want to make sure we are properly testing functionality, NOT just getting the test to pass.
-
-Ultrathink, research and become an expert in notification detection. We NEED this alarm detection to be reusable between different alarm events we will be testing.
-
-Please start by becoming an expert, then examining the full logs (we just ran a test), and determine root cause.
-
-
-warning: The following options were not recognized by an
-    y processor: '[dagger.hilt.internal.useAggregatingRootPr
-    ocessor, dagger.fastInit, dagger.hilt.android.internal.d
-
-
 I want you to become an expert in Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible.
 
 The key outcome of this app we need to test:
@@ -293,6 +197,8 @@ We need to be able to robustly test this behavior, along with all the other app 
 Lets not read any files for now, we will read them later. For now, all I want you to do is web searches to become an expert.
 
 Lets become an expert in this topic. Dig in, deep research Espresso and UI Automator best practices and syntax for testing full end to end apps as efficiently as possible. Ultrathink
+
+---
 
 Please deeply inspect the code and architecture and perform the following steps:
 
@@ -306,23 +212,26 @@ We are trying to clean up our code as much as possible.
 
 We want our codebase to be as simple, elegant, and modular as possible, and easy to read and understand.
 
-Can you look through \@general_index.md and \@detailed_index.md ad determine what cleanup we can do? Make a cleanup plan that prioritizes simplicity and modularity. Think hard.
+Can you look through \@general_index.md and \@detailed_index.md ad determine what cleanup we can do? Dive deep into any relevant files. 
 
-Lets execute Priority 4: Fix Circular Dependencies and update the index files to reflect reality.
+Make a cleanup plan that prioritizes simplicity and modularity, and removes as much code as possible while maintaining core functionality. Think hard.
 
-Lets execute Priority 6: Simplify Over-Engineering and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+---
 
-The app is not fetching calendar events properly. 
+Lets execute Simplify Domain Services and update the index files to reflect reality. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
 
-For example, there is currently a Calendar event called Test 2 that the Preview is not showing, and alarms are not being scheduled when a matching rule is created for this event.
+---
 
-Please fix this issue in a memory safe way. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+Consolidate onboarding onto one page, making it super robust and easy for the user to grant all permissions. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard 
 
+---
 
-We removed the full screen part of the notification entirely, and just have an unmissable notification that rings an alarm independent of phone state (silent, dnd, battery saver) that we can dismiss in standard ways.
+Build the code and fix any issues. Remember, try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
 
-We need to update the settings UI and underlying code with this change, and not require full screen permissions.
+---
 
-Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Think hard 
+Fix battery whitelist to correctly check if battery optimization is a setting available on the version of android and display correctly.
 
-Yay! Can you add how you accessed calendar events manually to the CLAUDE.md in the correct location?
+---
+
+Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality. 

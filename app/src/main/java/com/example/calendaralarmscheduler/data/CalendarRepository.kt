@@ -10,6 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
+/**
+ * Repository for accessing Google Calendar events via CalendarContract.
+ * Provides calendar data access with 2-day lookahead window and basic filtering.
+ */
 class CalendarRepository(private val context: Context) {
 
     private val contentResolver: ContentResolver = context.contentResolver
@@ -228,25 +232,6 @@ class CalendarRepository(private val context: Context) {
         }
     }
 
-    /**
-     * Check if we have calendar read permission
-     */
-    fun hasCalendarPermission(): Boolean {
-        return try {
-            // Try a minimal query to test permission
-            contentResolver.query(
-                CalendarContract.Calendars.CONTENT_URI,
-                arrayOf(CalendarContract.Calendars._ID),
-                null,
-                null,
-                null
-            )?.use { 
-                true 
-            } ?: false
-        } catch (e: SecurityException) {
-            false
-        }
-    }
     
 
     data class CalendarInfo(

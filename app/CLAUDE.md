@@ -86,10 +86,10 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 **Main Components:**
 
 1. **Permissions Layer**
-   * Runtime permissions for `READ_CALENDAR`, `SCHEDULE_EXACT_ALARM` (Android 12+), `USE_EXACT_ALARM`, `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and background operation permissions.
+   * Runtime permissions for `READ_CALENDAR`, `SCHEDULE_EXACT_ALARM` (Android 12+), `USE_EXACT_ALARM`, `POST_NOTIFICATIONS`, and background operation permissions.
    * The app also requires notification permissions.
    * **Critical**: App cannot function without these permissions - block all functionality until granted.
-   * Advanced battery optimization tracking and OEM-specific battery management detection.
+   * Simplified battery optimization detection and basic OEM recommendations.
 
 2. **Google Calendar Integration**
    * Uses `CalendarContract` content provider to query local Google Calendar events.
@@ -118,22 +118,21 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Updates alarms without requiring the app to be open.
    * Handles timezone changes reactively via dedicated TimezoneChangeReceiver.
 
-7. **Advanced Battery Management**
-   * **DozeCompatibilityUtils**: Comprehensive Doze mode detection and compatibility testing.
-   * **BackgroundUsageDetector**: Multi-method background usage permission detection across Android versions.
-   * **OEM-Specific Detection**: Automatic detection and recommendations for Samsung, Xiaomi, Huawei, OnePlus, Oppo, Vivo, and other manufacturers.
-   * Battery optimization setup tracking with attempt counting and method used.
+7. **Battery Management**
+   * Basic Doze mode detection and compatibility testing.
+   * Simple background usage permission detection.
+   * Generic OEM guidance for common manufacturers.
+   * Battery optimization setup tracking.
 
 8. **Error Handling & Reliability**
-   * **RetryManager**: Exponential backoff retry logic for critical operations.
-   * **ErrorNotificationManager**: User notification system for persistent errors with actionable intents.
-   * **CrashHandler**: Global exception handling with comprehensive logging and recovery.
+   * **ErrorNotificationManager**: Simple generic error notification system.
+   * **CrashHandler**: Basic uncaught exception handling with Android logcat logging.
+   * **Logger**: Centralized logging with performance metrics.
 
-9. **Reactive Settings System**
-   * StateFlow-based settings with atomic updates.
-   * Settings migration system with versioning.
+9. **Settings System**
+   * Simple SharedPreferences-based settings storage.
+   * Settings for refresh interval, all-day event default time, and onboarding status.
    * Battery optimization completion tracking.
-   * Defensive refresh mechanisms for UI consistency.
 
 ---
 
@@ -143,7 +142,7 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 3. **Exact Alarm Permission** - Take user to system settings for SCHEDULE_EXACT_ALARM
 4. **Battery Optimization** - Guide user to whitelist app with clear benefits explanation
 5. **Permission Status Dashboard** - Always visible indicator of permission health
-
+Could be one screen.
 ---
 
 ## 7. Core Features & Edge Cases
@@ -179,6 +178,9 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 * `BootReceiver` queries active alarms from database
 * Re-registers all non-dismissed, future alarms with `AlarmManager`
 
+### Calendar Preview
+* The ability for users to preview calendar events to check that alarms are scheduled correctly.
+
 ---
 
 ## 10. Background Refresh Configuration
@@ -205,17 +207,17 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" &
 #### Logging Infrastructure
 
 #### Log Tags & Levels
-All app logs MUST use prefix `CalendarAlarmScheduler_` with categories:
+All app logs use prefix `CalendarAlarmScheduler_` with categories:
 - `*_Logger`: General app information
-- `*_CrashHandler`: Uncaught exceptions
+- `*_CrashHandler`: Uncaught exceptions (basic logging only)
 - `*_Performance_*`: Timing metrics for operations
 - `*_Lifecycle_*`: Activity/Fragment state changes
 - `*_Database_*`: Room operations with timing
 - `*_Permission_*`: Permission state changes
 - `*_DozeCompatibility`: Battery optimization detection
-- `*_BackgroundUsageDetector`: Background usage permission checks
-- `*_RetryManager`: Retry attempts for failed operations
-- `*_ErrorNotificationManager`: Error notification events
+- `*_ErrorNotificationManager`: Generic error notification events
+
+**Note**: All logging goes to Android logcat only (no file logging for simplicity).
 
 #### Debugging & Log Collection
 For efficient debugging and log collection during development:

@@ -35,8 +35,7 @@ This index provides a quick overview of all source files in the codebase to help
 
 #### Core Services
 - **AlarmScheduler.kt** - Simple alarm scheduling using AlarmManager with essential methods only
-- **AlarmSchedulingService.kt** - Simple alarm scheduling service for processing rule matches
-- **RuleAlarmManager.kt** - Manages relationship between rules and alarms with lifecycle management
+- **RuleAlarmManager.kt** - Manages relationship between rules and alarms with integrated scheduling logic
 - **RuleMatcher.kt** - Rule matching engine that finds events matching alarm rules with validation
 
 #### Models (`domain/models/`)
@@ -89,15 +88,11 @@ This index provides a quick overview of all source files in the codebase to help
 
 ### Utilities (`utils/`)
 - **AlarmNotificationManager.kt** - Creates unmissable alarm notifications that bypass DND and silent mode
-- **BackgroundUsageDetector.kt** - Detects background usage permissions across Android versions
-- **BackgroundUsageTest.kt** - Tests background usage permission status
-- **CrashHandler.kt** - Global exception handling with logging and recovery
-- **DozeCompatibilityUtils.kt** - Doze mode detection and compatibility testing
-- **ErrorNotificationManager.kt** - User notifications for persistent errors
-- **Logger.kt** - Centralized logging with performance metrics
-- **PermissionUtils.kt** - Runtime permission handling utilities
-- **RetryManager.kt** - Exponential backoff retry logic for operations
-- **TimezoneUtils.kt** - Timezone handling and conversion utilities
+- **CrashHandler.kt** - Simplified global exception handling with basic crash logging
+- **ErrorNotificationManager.kt** - Generic error notification system with consolidated error handling
+- **Logger.kt** - Simple Android logcat logging with structured message formatting
+- **PermissionUtils.kt** - Simplified permission handling for calendar, notifications, exact alarms, and battery optimization
+- **TimezoneUtils.kt** - Essential timezone display and change detection utilities
 
 ### Background Workers (`workers/`)
 - **CalendarRefreshWorker.kt** - Simple background worker for calendar scanning and alarm scheduling

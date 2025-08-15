@@ -9,8 +9,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
-import com.example.calendaralarmscheduler.utils.DozeCompatibilityUtils
+import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -171,50 +170,20 @@ class WorkerManager(private val context: Context) {
     }
     
     /**
-     * Check comprehensive background usage status and log detailed information
+     * Check battery optimization status and log information
      */
     private fun checkBatteryOptimizationStatus() {
         try {
-            val backgroundStatus = BackgroundUsageDetector.getDetailedBackgroundUsageStatus(context)
+            val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
             
-            when {
-                backgroundStatus.isBackgroundUsageAllowed -> {
-                    Logger.i("WorkerManager", 
-                        "✅ Background usage allowed via ${backgroundStatus.detectionMethod} - " +
-                        "background work should run reliably"
-                    )
-                }
-                else -> {
-                    val methodDescription = when (backgroundStatus.detectionMethod) {
-                        BackgroundUsageDetector.DetectionMethod.LEGACY_BATTERY_OPTIMIZATION -> 
-                            "traditional battery optimization"
-                        BackgroundUsageDetector.DetectionMethod.MODERN_BACKGROUND_USAGE -> 
-                            "modern background app refresh settings"
-                        BackgroundUsageDetector.DetectionMethod.APP_STANDBY_BUCKET -> 
-                            "app standby bucket (${backgroundStatus.details["bucketName"]})"
-                        BackgroundUsageDetector.DetectionMethod.BACKGROUND_RESTRICTION -> 
-                            "background app restrictions"
-                        BackgroundUsageDetector.DetectionMethod.APP_OPS_BACKGROUND_CHECK -> 
-                            "AppOps background permissions"
-                        BackgroundUsageDetector.DetectionMethod.OEM_SPECIFIC -> 
-                            "${backgroundStatus.details["oem"]} OEM power management"
-                        else -> "unknown method"
-                    }
-                    
-                    Logger.w("WorkerManager", 
-                        "⚠️ Background usage restricted via $methodDescription. " +
-                        "Background calendar refresh may be delayed or skipped. " +
-                        "Consider guiding users to allow background usage for reliable alarm scheduling."
-                    )
-                    
-                    // Log additional details for debugging
-                    if (backgroundStatus.details.isNotEmpty()) {
-                        Logger.d("WorkerManager", "Background restriction details: ${backgroundStatus.details}")
-                    }
-                }
+            if (isWhitelisted) {
+                Logger.i("WorkerManager", "✅ App is whitelisted from battery optimization - background work should run reliably")
+            } else {
+                Logger.w("WorkerManager", "⚠️ App is NOT whitelisted from battery optimization - background work may be delayed")
             }
+            
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Error checking background usage status", e)
+            Logger.e("WorkerManager", "Failed to check battery optimization status", e)
         }
     }
     
@@ -230,25 +199,14 @@ class WorkerManager(private val context: Context) {
     }
     
     /**
-     * Get comprehensive background usage status (replaces legacy battery optimization check)
+     * Check if battery optimization is ignored (app is whitelisted)
      */
     fun isBatteryOptimizationIgnored(): Boolean {
-        // Use the new comprehensive background usage detector
-        val backgroundStatus = BackgroundUsageDetector.getDetailedBackgroundUsageStatus(context)
+        val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
         
-        Logger.d("WorkerManager", "Background usage check:")
-        Logger.d("WorkerManager", "  Allowed: ${backgroundStatus.isBackgroundUsageAllowed}")
-        Logger.d("WorkerManager", "  Method: ${backgroundStatus.detectionMethod}")
-        Logger.d("WorkerManager", "  API Level: ${backgroundStatus.apiLevel}")
+        Logger.d("WorkerManager", "Battery optimization check: ${if (isWhitelisted) "Whitelisted" else "Not whitelisted"}")
         
-        return backgroundStatus.isBackgroundUsageAllowed
-    }
-    
-    /**
-     * Get detailed background usage status for debugging
-     */
-    fun getBackgroundUsageStatus(): BackgroundUsageDetector.BackgroundUsageStatus {
-        return BackgroundUsageDetector.getDetailedBackgroundUsageStatus(context)
+        return isWhitelisted
     }
     
     /**
@@ -276,34 +234,24 @@ class WorkerManager(private val context: Context) {
      */
     private fun checkDozeCompatibility() {
         try {
-            val testResult = DozeCompatibilityUtils.testDozeCompatibility(context)
-            
-            when (testResult.severity) {
-                DozeCompatibilityUtils.DozeTestResult.Severity.NONE -> {
-                    Logger.i("WorkerManager", "Doze mode compatibility: ${testResult.message}")
-                }
-                DozeCompatibilityUtils.DozeTestResult.Severity.MEDIUM -> {
-                    Logger.w("WorkerManager", "Doze mode warning: ${testResult.message}")
-                    testResult.recommendations.forEach { recommendation ->
-                        Logger.w("WorkerManager", "Recommendation: $recommendation")
-                    }
-                }
-                DozeCompatibilityUtils.DozeTestResult.Severity.HIGH -> {
-                    Logger.e("WorkerManager", "Doze mode critical issue: ${testResult.message}")
-                    testResult.issues.forEach { issue ->
-                        Logger.e("WorkerManager", "Issue: $issue")
-                    }
-                    testResult.recommendations.forEach { recommendation ->
-                        Logger.e("WorkerManager", "Critical recommendation: $recommendation")
-                    }
-                }
+            val isDozeMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                powerManager.isDeviceIdleMode
+            } else {
+                false
             }
             
-            // Log detailed status in debug mode
-            DozeCompatibilityUtils.logDozeStatus(context)
+            val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
+            
+            if (isDozeMode && !isWhitelisted) {
+                Logger.w("WorkerManager", "⚠️ Device is in Doze mode and app is not whitelisted - background work may be restricted")
+            } else if (isWhitelisted) {
+                Logger.i("WorkerManager", "✅ App is whitelisted - should work reliably even in Doze mode")
+            } else {
+                Logger.d("WorkerManager", "Device not in Doze mode - background work should proceed normally")
+            }
             
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Error checking Doze mode compatibility", e)
+            Logger.e("WorkerManager", "Failed to check Doze mode", e)
         }
     }
     

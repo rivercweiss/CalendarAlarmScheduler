@@ -17,8 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.databinding.FragmentSettingsBinding
-import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
-import com.example.calendaralarmscheduler.utils.DozeCompatibilityUtils
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
@@ -71,8 +69,6 @@ class SettingsFragment : BaseFragment() {
         Logger.d("SettingsFragment", "Returned from system settings")
         Logger.d("SettingsFragment", "Time spent in settings: ${timeSpentInSettings}ms")
         
-        // Clear background usage cache since user may have changed settings
-        BackgroundUsageDetector.clearCache()
         
         // Update permission status immediately
         updatePermissionStatus()
@@ -83,34 +79,19 @@ class SettingsFragment : BaseFragment() {
             kotlinx.coroutines.delay(500)
             
             val status = PermissionUtils.getAllPermissionStatus(requireContext())
-            val backgroundStatus = PermissionUtils.getBackgroundUsageStatus(requireContext())
             
-            Logger.d("SettingsFragment", "Background usage status after return:")
-            Logger.d("SettingsFragment", "  Allowed: ${backgroundStatus.isBackgroundUsageAllowed}")
-            Logger.d("SettingsFragment", "  Method: ${backgroundStatus.detectionMethod}")
-            Logger.d("SettingsFragment", "  Legacy check: ${status.isBatteryOptimizationWhitelisted}")
+            Logger.d("SettingsFragment", "Battery optimization status after return: ${status.isBatteryOptimizationWhitelisted}")
             
-            // Use the comprehensive background usage status for feedback
-            if (backgroundStatus.isBackgroundUsageAllowed) {
+            // Provide feedback if battery optimization was successfully disabled
+            if (status.isBatteryOptimizationWhitelisted) {
                 Logger.i("SettingsFragment", "✅ Battery optimization disabled successfully!")
                 
                 // Record successful completion
-                val methodUsed = lastBatteryOptimizationResult?.type?.name ?: "unknown"
                 if (::settingsRepository.isInitialized) {
                     settingsRepository.setBatteryOptimizationSetupCompleted(true)
                 }
                 
-                val successMessage = when (backgroundStatus.detectionMethod) {
-                    BackgroundUsageDetector.DetectionMethod.APP_STANDBY_BUCKET -> 
-                        "✅ App is in active standby bucket! Background usage allowed."
-                    BackgroundUsageDetector.DetectionMethod.MODERN_BACKGROUND_USAGE -> 
-                        "✅ Background app refresh enabled! Alarms will work reliably."
-                    BackgroundUsageDetector.DetectionMethod.LEGACY_BATTERY_OPTIMIZATION -> 
-                        "✅ Battery optimization disabled successfully! Alarms will now work reliably."
-                    BackgroundUsageDetector.DetectionMethod.BACKGROUND_RESTRICTION -> 
-                        "✅ Background restrictions removed! App can run in background."
-                    else -> "✅ Background usage permissions configured! Alarms should work reliably."
-                }
+                val successMessage = "✅ Battery optimization disabled! Alarms will now work reliably."
                 
                 Toast.makeText(
                     requireContext(), 
@@ -118,19 +99,8 @@ class SettingsFragment : BaseFragment() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
-                // Check for quick return (likely failed intent)
-                val isQuickReturn = timeSpentInSettings < 5000 // Less than 5 seconds
-                Logger.w("SettingsFragment", "Battery optimization still active. Quick return: $isQuickReturn")
-                
-                if (isQuickReturn && canTryAlternativeMethod()) {
-                    // Automatically try fallback for quick returns
-                    Logger.i("SettingsFragment", "Quick return detected, trying auto-fallback")
-                    handleQuickReturnFallback()
-                } else {
-                    // Show manual guidance or additional options
-                    Logger.i("SettingsFragment", "Showing battery optimization help")
-                    showBatteryOptimizationHelp()
-                }
+                Logger.w("SettingsFragment", "Battery optimization still active")
+                showBatteryOptimizationHelp()
             }
             
             // Refresh status again to be sure
@@ -390,32 +360,10 @@ class SettingsFragment : BaseFragment() {
         val result = PermissionUtils.getBestBatteryOptimizationIntent(context)
         lastBatteryOptimizationResult = result
         
-        when (result.type) {
-            PermissionUtils.IntentType.DIRECT_WHITELIST -> {
-                Logger.d("SettingsFragment", "Using direct whitelist intent")
-                showBatteryOptimizationGuidance(result) {
-                    batteryOptimizationLaunchTime = System.currentTimeMillis()
-                    systemSettingsLauncher.launch(result.intent)
-                }
-            }
-            PermissionUtils.IntentType.SETTINGS_LIST -> {
-                Logger.d("SettingsFragment", "Using battery optimization settings list")
-                showBatteryOptimizationGuidance(result) {
-                    batteryOptimizationLaunchTime = System.currentTimeMillis()
-                    systemSettingsLauncher.launch(result.intent)
-                }
-            }
-            PermissionUtils.IntentType.APP_DETAILS -> {
-                Logger.d("SettingsFragment", "Using app details fallback")
-                showBatteryOptimizationGuidance(result) {
-                    batteryOptimizationLaunchTime = System.currentTimeMillis()
-                    systemSettingsLauncher.launch(result.intent)
-                }
-            }
-            PermissionUtils.IntentType.MANUAL_GUIDANCE -> {
-                Logger.d("SettingsFragment", "Showing manual guidance only")
-                showManualBatteryOptimizationInstructions()
-            }
+        Logger.d("SettingsFragment", "Opening battery optimization settings")
+        showBatteryOptimizationGuidance(result) {
+            batteryOptimizationLaunchTime = System.currentTimeMillis()
+            systemSettingsLauncher.launch(result.intent)
         }
     }
     
@@ -430,61 +378,14 @@ class SettingsFragment : BaseFragment() {
         val context = requireContext()
         Logger.i("SettingsFragment", "Handling quick return fallback")
         
-        // Get the next best option based on what we haven't tried yet
-        val fallbackResult = when (lastBatteryOptimizationResult?.type) {
-            PermissionUtils.IntentType.DIRECT_WHITELIST -> {
-                // Try settings list as fallback
-                val settingsListIntent = android.content.Intent().apply {
-                    action = android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-                }
-                if (context.packageManager.queryIntentActivities(settingsListIntent, 0).isNotEmpty()) {
-                    PermissionUtils.BatteryOptimizationResult(
-                        intent = settingsListIntent,
-                        type = PermissionUtils.IntentType.SETTINGS_LIST,
-                        userGuidance = "The direct whitelist didn't work. Find 'Calendar Alarm Scheduler' in this list and tap it, then select 'Don't optimize'."
-                    )
-                } else {
-                    // Fall back to app details
-                    PermissionUtils.BatteryOptimizationResult(
-                        intent = PermissionUtils.getAppSettingsIntent(context),
-                        type = PermissionUtils.IntentType.APP_DETAILS,
-                        userGuidance = "The direct whitelist didn't work. Go to Battery → Battery Optimization, find this app, and set it to 'Not optimized'."
-                    )
-                }
-            }
-            PermissionUtils.IntentType.SETTINGS_LIST -> {
-                // Try direct whitelist as fallback
-                val directIntent = android.content.Intent().apply {
-                    action = android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                    data = android.net.Uri.parse("package:${context.packageName}")
-                }
-                if (context.packageManager.queryIntentActivities(directIntent, 0).isNotEmpty()) {
-                    PermissionUtils.BatteryOptimizationResult(
-                        intent = directIntent,
-                        type = PermissionUtils.IntentType.DIRECT_WHITELIST,
-                        userGuidance = "The settings list didn't work. A system dialog should appear - tap 'Allow' to whitelist this app.",
-                        expectedDialog = true
-                    )
-                } else {
-                    // Fall back to app details
-                    PermissionUtils.BatteryOptimizationResult(
-                        intent = PermissionUtils.getAppSettingsIntent(context),
-                        type = PermissionUtils.IntentType.APP_DETAILS,
-                        userGuidance = "Settings list didn't work. Go to app info and find battery settings."
-                    )
-                }
-            }
-            else -> {
-                // Try a fresh approach - get the best intent again
-                PermissionUtils.getBestBatteryOptimizationIntent(context)
-            }
-        }
+        // Get a fresh battery optimization intent (simplified approach)
+        val fallbackResult = PermissionUtils.getBestBatteryOptimizationIntent(context)
         
-        Logger.i("SettingsFragment", "Auto-trying fallback: ${fallbackResult.type}")
+        Logger.i("SettingsFragment", "Auto-trying fallback approach")
         
         AlertDialog.Builder(requireContext())
             .setTitle("Auto-Retry with Different Method")
-            .setMessage("The previous method didn't work. Let's try a different approach:\n\n${fallbackResult.userGuidance}")
+            .setMessage("The previous method didn't work. Let's try a different approach:\n\n${fallbackResult.guidance}")
             .setPositiveButton("Try Now") { _, _ ->
                 lastBatteryOptimizationResult = fallbackResult
                 batteryOptimizationLaunchTime = System.currentTimeMillis()
@@ -500,78 +401,54 @@ class SettingsFragment : BaseFragment() {
     }
     
     private fun showBatteryOptimizationGuidance(result: PermissionUtils.BatteryOptimizationResult, onProceed: () -> Unit) {
-        val title = when (result.type) {
-            PermissionUtils.IntentType.DIRECT_WHITELIST -> "Whitelist from Battery Optimization"
-            PermissionUtils.IntentType.SETTINGS_LIST -> "Battery Optimization Settings"
-            PermissionUtils.IntentType.APP_DETAILS -> "App Battery Settings"
-            PermissionUtils.IntentType.MANUAL_GUIDANCE -> "Manual Setup Required"
-        }
-        
         AlertDialog.Builder(requireContext())
-            .setTitle(title)
-            .setMessage(result.userGuidance)
+            .setTitle("Battery Optimization Settings")
+            .setMessage(result.guidance)
             .setPositiveButton("Open Settings") { _, _ ->
                 onProceed()
             }
-            .setNeutralButton("Show Manual Steps") { _, _ ->
-                showManualBatteryOptimizationInstructions()
+            .setNeutralButton("Show Help") { _, _ ->
+                showBatteryOptimizationHelp()
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
-    
+
     private fun showManualBatteryOptimizationInstructions() {
-        val context = requireContext()
-        val instructions = PermissionUtils.getBatteryOptimizationInstructions(context)
-        val instructionText = instructions.joinToString("\n")
+        val instructions = """
+            Manual Battery Optimization Steps:
+            
+            1. Open your device's Settings app
+            2. Navigate to Battery or Power Management  
+            3. Find "Battery Optimization" or "App Battery Usage"
+            4. Look for "Calendar Alarm Scheduler" in the list
+            5. Tap it and select "Don't optimize" or "No restrictions"
+            
+            This ensures alarms work reliably even when your phone is in battery saving mode.
+        """.trimIndent()
         
-        AlertDialog.Builder(context)
-            .setTitle("How to Whitelist App from Battery Optimization")
-            .setMessage(instructionText)
-            .setPositiveButton("Open Settings") { _, _ ->
-                val appDetailsIntent = PermissionUtils.getAppSettingsIntent(context)
-                systemSettingsLauncher.launch(appDetailsIntent)
+        AlertDialog.Builder(requireContext())
+            .setTitle("Manual Instructions")
+            .setMessage(instructions)
+            .setPositiveButton("Got it", null)
+            .setNeutralButton("Open Settings") { _, _ ->
+                openBatteryOptimizationSettings()
             }
-            .setNegativeButton("Close", null)
             .show()
     }
     
+    
     private fun showBatteryOptimizationHelp() {
         val context = requireContext()
-        val deviceInfo = DozeCompatibilityUtils.getDeviceInfo()
-        val backgroundStatus = PermissionUtils.getBackgroundUsageStatus(context)
-        val recommendations = DozeCompatibilityUtils.getBatteryManagementRecommendations(context)
-        
-        val detectionInfo = when (backgroundStatus.detectionMethod) {
-            BackgroundUsageDetector.DetectionMethod.APP_STANDBY_BUCKET -> {
-                val bucketName = backgroundStatus.details["bucketName"] as? String ?: "Unknown"
-                "App is in '$bucketName' standby bucket. For reliable background usage, the app needs to be in 'ACTIVE' or 'WORKING_SET' bucket."
-            }
-            BackgroundUsageDetector.DetectionMethod.MODERN_BACKGROUND_USAGE -> {
-                "This device uses modern 'Allow background usage' controls. Look for background app refresh settings instead of traditional battery optimization."
-            }
-            BackgroundUsageDetector.DetectionMethod.BACKGROUND_RESTRICTION -> {
-                "Background restrictions are active. The app needs unrestricted background access for reliable alarms."
-            }
-            BackgroundUsageDetector.DetectionMethod.OEM_SPECIFIC -> {
-                val oem = backgroundStatus.details["oem"] as? String ?: "Unknown"
-                "${oem.uppercase()} device with custom power management detected. Check manufacturer-specific battery settings."
-            }
-            else -> "Traditional battery optimization detected."
-        }
         
         val message = buildString {
-            append("Background usage is currently restricted. Here's what we detected:\n\n")
-            append("ℹ️ $detectionInfo\n\n")
-            append("Device-specific recommendations:\n\n")
-            recommendations.forEach { recommendation ->
-                append("• $recommendation\n")
-            }
-            append("\nDevice: ${deviceInfo.manufacturer} ${deviceInfo.model}")
-            if (deviceInfo.customUIVersion != null) {
-                append("\nUI: ${deviceInfo.customUIVersion}")
-            }
-            append("\nDetection method: ${backgroundStatus.detectionMethod}")
+            append("For reliable alarm delivery, this app needs to be whitelisted from battery optimization.\n\n")
+            append("Steps to whitelist:\n\n")
+            append("1. Tap 'Open Settings' below\n")
+            append("2. Look for 'Battery' or 'Battery Optimization' settings\n")
+            append("3. Find 'Calendar Alarm Scheduler' in the list\n")
+            append("4. Set it to 'Don't optimize' or 'Not optimized'\n\n")
+            append("This ensures your alarms will work reliably even when your phone is in battery saving mode.")
         }
         
         AlertDialog.Builder(requireContext())
@@ -730,8 +607,6 @@ class SettingsFragment : BaseFragment() {
         // Clear binding reference to prevent memory leaks
         _binding = null
         
-        // Clear background usage cache when view is destroyed to force fresh detection
-        BackgroundUsageDetector.clearCache()
     }
     
 }

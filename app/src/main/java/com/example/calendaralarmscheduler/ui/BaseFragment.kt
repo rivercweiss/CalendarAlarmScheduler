@@ -20,7 +20,6 @@ abstract class BaseFragment : Fragment() {
     
     override fun onAttach(context: Context) {
         Logger.logLifecycle(fragmentName, "onAttach", "Fragment attaching to context")
-        Logger.dumpContext(fragmentName, context)
         try {
             super.onAttach(context)
             Logger.d(fragmentName, "onAttach completed successfully")

@@ -12,13 +12,12 @@ import com.example.calendaralarmscheduler.ui.onboarding.PermissionOnboardingActi
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.CrashHandler
-import com.example.calendaralarmscheduler.utils.BackgroundUsageDetector
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val crashHandler by lazy { CrashHandler(this) }
+    private val crashHandler by lazy { CrashHandler() }
     
     // Flag to prevent multiple onboarding launches
     private var isOnboardingLaunched = false
@@ -75,8 +74,6 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             Logger.d("MainActivity", "Content view set successfully")
             
-            Logger.dumpContext("MainActivity", this)
-            
             // Setup navigation with error handling
             Logger.d("MainActivity", "Setting up navigation")
             setupNavigation()
@@ -93,7 +90,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             val createTime = System.currentTimeMillis() - startTime
             Logger.crash("MainActivity", "FATAL: onCreate() failed after ${createTime}ms", e)
-            crashHandler.logCurrentAppState("MainActivity")
             crashHandler.logNonFatalException("MainActivity", "onCreate failed", e)
             throw e
         }
@@ -225,9 +221,6 @@ class MainActivity : AppCompatActivity() {
         Logger.logLifecycle("MainActivity", "onPause", "Activity pausing")
         super.onPause()
         
-        // Invalidate background usage cache when app goes to background
-        // This ensures fresh detection when user returns to app
-        BackgroundUsageDetector.invalidateSessionCache()
     }
 
     override fun onStop() {

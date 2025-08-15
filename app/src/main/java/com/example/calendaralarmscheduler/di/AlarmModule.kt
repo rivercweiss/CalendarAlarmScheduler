@@ -6,7 +6,6 @@ import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
-import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
 import com.example.calendaralarmscheduler.domain.RuleAlarmManager
 import dagger.Module
 import dagger.Provides
@@ -35,28 +34,17 @@ object AlarmModule {
 
     @Provides
     @Singleton
-    fun provideAlarmSchedulingService(
-        alarmRepository: AlarmRepository,
-        alarmScheduler: AlarmScheduler
-    ): AlarmSchedulingService {
-        return AlarmSchedulingService(alarmRepository, alarmScheduler)
-    }
-
-    @Provides
-    @Singleton
     fun provideRuleAlarmManager(
         ruleRepository: RuleRepository,
         alarmRepository: AlarmRepository,
         alarmScheduler: AlarmScheduler,
-        calendarRepository: CalendarRepository,
-        alarmSchedulingService: AlarmSchedulingService
+        calendarRepository: CalendarRepository
     ): RuleAlarmManager {
         return RuleAlarmManager(
             ruleRepository,
             alarmRepository,
             alarmScheduler,
-            calendarRepository,
-            alarmSchedulingService
+            calendarRepository
         )
     }
 }

@@ -16,11 +16,6 @@ class ErrorNotificationManager(private val context: Context) {
         private const val CHANNEL_NAME = "Calendar Alarm Errors"
         private const val CHANNEL_DESCRIPTION = "Notifications for Calendar Alarm Scheduler errors"
         private const val ERROR_NOTIFICATION_ID = 2001
-        
-        // Error types
-        const val ERROR_CALENDAR_PROVIDER = "calendar_provider"
-        const val ERROR_ALARM_SCHEDULING = "alarm_scheduling"
-        const val ERROR_PERMISSION_LOST = "permission_lost"
     }
     
     init {
@@ -43,13 +38,7 @@ class ErrorNotificationManager(private val context: Context) {
         }
     }
     
-    fun showPersistentError(
-        errorType: String,
-        title: String,
-        message: String,
-        actionText: String? = null,
-        actionIntent: Intent? = null
-    ) {
+    fun showError(title: String, message: String, openSettings: Boolean = true) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle(title)
@@ -58,18 +47,23 @@ class ErrorNotificationManager(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
         
-        // Add action if provided
-        if (actionText != null && actionIntent != null) {
+        if (openSettings) {
+            val settingsIntent = Intent().apply {
+                setClassName(context, "com.example.calendaralarmscheduler.ui.MainActivity")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("open_fragment", "settings")
+            }
+            
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 0,
-                actionIntent,
+                settingsIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             
             builder.addAction(
                 android.R.drawable.ic_menu_preferences,
-                actionText,
+                "Open Settings",
                 pendingIntent
             )
         }
@@ -78,52 +72,10 @@ class ErrorNotificationManager(private val context: Context) {
             with(NotificationManagerCompat.from(context)) {
                 notify(ERROR_NOTIFICATION_ID, builder.build())
             }
-            
-            Logger.i("ErrorNotificationManager", "Showed persistent error notification: $errorType - $title")
+            Logger.i("ErrorNotificationManager", "Showed error notification: $title")
         } catch (e: SecurityException) {
             Logger.w("ErrorNotificationManager", "Cannot show notification - permission denied", e)
         }
-    }
-    
-    fun showCalendarProviderError() {
-        showPersistentError(
-            errorType = ERROR_CALENDAR_PROVIDER,
-            title = "Calendar Access Error",
-            message = "Failed to read calendar events after multiple attempts. Check calendar permissions and try refreshing.",
-            actionText = "Open Settings",
-            actionIntent = Intent().apply {
-                setClassName(context, "com.example.calendaralarmscheduler.ui.MainActivity")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("open_fragment", "settings")
-            }
-        )
-    }
-    
-    fun showAlarmSchedulingError(eventTitle: String) {
-        showPersistentError(
-            errorType = ERROR_ALARM_SCHEDULING,
-            title = "Alarm Scheduling Failed",
-            message = "Could not schedule alarm for '$eventTitle' after multiple attempts. Check alarm permissions and battery optimization settings.",
-            actionText = "Open Settings",
-            actionIntent = Intent().apply {
-                setClassName(context, "com.example.calendaralarmscheduler.ui.MainActivity")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("open_fragment", "settings")
-            }
-        )
-    }
-    
-    fun showPermissionLostError() {
-        showPersistentError(
-            errorType = ERROR_PERMISSION_LOST,
-            title = "Required Permission Lost",
-            message = "Calendar or alarm permission was revoked. The app cannot function properly without these permissions.",
-            actionText = "Grant Permissions",
-            actionIntent = Intent().apply {
-                setClassName(context, "com.example.calendaralarmscheduler.ui.onboarding.PermissionOnboardingActivity")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-        )
     }
     
     fun clearErrorNotifications() {

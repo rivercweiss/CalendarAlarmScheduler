@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.first
 
 /**
  * Service that manages the relationship between rules and their associated alarms.
+ * Integrates alarm scheduling logic with rule management operations.
  * Ensures that when rules are modified, the corresponding alarms are properly 
  * updated, cancelled, or rescheduled as needed.
  */
@@ -17,14 +18,8 @@ class RuleAlarmManager(
     private val ruleRepository: RuleRepository,
     private val alarmRepository: AlarmRepository,
     private val alarmScheduler: AlarmScheduler,
-    private val calendarRepository: CalendarRepository,
-    private val alarmSchedulingService: AlarmSchedulingService
+    private val calendarRepository: CalendarRepository
 ) {
-    
-    // Prevent duplicate operations on the same rule
-    private val activeOperations = mutableSetOf<String>()
-    private val operationTimeouts = mutableMapOf<String, Long>()
-    private val OPERATION_TIMEOUT_MS = 2000L // 2 second timeout for operations
     
     data class RuleUpdateResult(
         val success: Boolean,
@@ -34,6 +29,13 @@ class RuleAlarmManager(
         val alarmsScheduled: Int = 0
     )
     
+    data class SchedulingResult(
+        val scheduledCount: Int = 0,
+        val updatedCount: Int = 0,
+        val skippedCount: Int = 0,
+        val failedCount: Int = 0
+    )
+    
     /**
      * Updates a rule's enabled status and handles all associated alarm operations.
      * When disabling: cancels all system alarms and removes database entries.
@@ -41,28 +43,9 @@ class RuleAlarmManager(
      */
     suspend fun updateRuleEnabled(rule: Rule, enabled: Boolean): RuleUpdateResult {
         val logPrefix = "RuleAlarmManager_updateRuleEnabled"
-        val operationKey = "${rule.id}_${enabled}"
-        val currentTime = System.currentTimeMillis()
-        
-        // Clean up expired operations
-        cleanupExpiredOperations()
-        
-        // Check for duplicate operations
-        if (activeOperations.contains(operationKey)) {
-            Logger.w(logPrefix, "Ignoring duplicate rule update operation for '${rule.name}' (${if (enabled) "enable" else "disable"})")
-            return RuleUpdateResult(
-                success = true,
-                message = "Operation already in progress, ignoring duplicate request",
-                alarmsAffected = 0
-            )
-        }
-        
         Logger.i(logPrefix, "Updating rule '${rule.name}' enabled status: $enabled")
         
         return try {
-            activeOperations.add(operationKey)
-            operationTimeouts[operationKey] = currentTime + OPERATION_TIMEOUT_MS
-            
             if (!enabled) {
                 // Disabling rule - cancel all associated alarms
                 cancelAlarmsForRule(rule)
@@ -76,26 +59,9 @@ class RuleAlarmManager(
                 success = false,
                 message = "Failed to update rule: ${e.message}"
             )
-        } finally {
-            activeOperations.remove(operationKey)
-            operationTimeouts.remove(operationKey)
         }
     }
     
-    /**
-     * Clean up expired operations to prevent memory leaks
-     */
-    private fun cleanupExpiredOperations() {
-        val currentTime = System.currentTimeMillis()
-        val expiredKeys = operationTimeouts.filter { (_, timeout) -> 
-            currentTime > timeout 
-        }.keys
-        
-        expiredKeys.forEach { key ->
-            activeOperations.remove(key)
-            operationTimeouts.remove(key)
-        }
-    }
     
     /**
      * Disables a rule and cancels all its associated alarms.
@@ -220,8 +186,8 @@ class RuleAlarmManager(
             val filteredMatches = ruleMatcher.filterOutDismissedAlarms(matchResults, existingAlarms)
             Logger.d(logPrefix, "After filtering dismissed alarms: ${filteredMatches.size} matches to process")
             
-            // Use the shared scheduling service to schedule alarms
-            val schedulingResult = alarmSchedulingService.processMatchesAndScheduleAlarms(
+            // Process matches and schedule alarms
+            val schedulingResult = processMatchesAndScheduleAlarms(
                 filteredMatches,
                 logPrefix = logPrefix
             )
@@ -335,6 +301,117 @@ class RuleAlarmManager(
             return RuleUpdateResult(
                 success = false,
                 message = "Failed to delete rule: ${e.message}"
+            )
+        }
+    }
+    
+    /**
+     * Process rule matches and schedule alarms with simplified result tracking.
+     */
+    suspend fun processMatchesAndScheduleAlarms(
+        matches: List<RuleMatcher.MatchResult>,
+        logPrefix: String = "RuleAlarmManager"
+    ): SchedulingResult {
+        var scheduledCount = 0
+        var updatedCount = 0
+        var skippedCount = 0
+        var failedCount = 0
+        
+        Logger.d(logPrefix, "Processing ${matches.size} matches for alarm scheduling")
+        
+        try {
+            for (match in matches) {
+                val event = match.event
+                val rule = match.rule
+                val newAlarm = match.scheduledAlarm
+                
+                // Check if alarm already exists for this event/rule combination
+                val existingAlarm = alarmRepository.getAlarmByEventAndRule(event.id, rule.id)
+                
+                if (existingAlarm != null) {
+                    // Check if event was modified - this resets dismissal status
+                    val eventWasModified = event.lastModified > existingAlarm.lastEventModified
+                    
+                    if (eventWasModified) {
+                        // Cancel old alarm and schedule new one
+                        val cancelSuccess = alarmScheduler.cancelAlarm(existingAlarm)
+                        if (cancelSuccess) {
+                            val scheduleSuccess = alarmScheduler.scheduleAlarm(newAlarm)
+                            if (scheduleSuccess) {
+                                // Update in database
+                                alarmRepository.updateAlarmForChangedEvent(
+                                    eventId = event.id,
+                                    ruleId = rule.id,
+                                    eventTitle = event.title,
+                                    eventStartTimeUtc = event.startTimeUtc,
+                                    leadTimeMinutes = rule.leadTimeMinutes,
+                                    lastEventModified = event.lastModified
+                                )
+                                
+                                // Reset dismissal status for modified events
+                                if (existingAlarm.userDismissed) {
+                                    alarmRepository.undismissAlarm(existingAlarm.id)
+                                    Logger.i(logPrefix, "Reset dismissal status for modified event: ${event.title}")
+                                }
+                                
+                                updatedCount++
+                                Logger.d(logPrefix, "Updated alarm for modified event: ${event.title}")
+                            } else {
+                                Logger.w(logPrefix, "Failed to reschedule alarm for ${event.title}")
+                                failedCount++
+                            }
+                        } else {
+                            Logger.w(logPrefix, "Failed to cancel old alarm for ${event.title}")
+                            failedCount++
+                        }
+                    } else if (existingAlarm.userDismissed) {
+                        skippedCount++
+                        Logger.d(logPrefix, "Skipped dismissed alarm for unmodified event: ${event.title}")
+                    } else {
+                        skippedCount++
+                        Logger.d(logPrefix, "Skipped existing alarm for unmodified event: ${event.title}")
+                    }
+                } else {
+                    // New alarm - schedule it
+                    val scheduleSuccess = alarmScheduler.scheduleAlarm(newAlarm)
+                    if (scheduleSuccess) {
+                        // Save to database
+                        alarmRepository.scheduleAlarmForEvent(
+                            eventId = event.id,
+                            ruleId = rule.id,
+                            eventTitle = event.title,
+                            eventStartTimeUtc = event.startTimeUtc,
+                            leadTimeMinutes = rule.leadTimeMinutes,
+                            lastEventModified = event.lastModified
+                        )
+                        scheduledCount++
+                        Logger.d(logPrefix, "Scheduled new alarm for event: ${event.title}")
+                    } else {
+                        Logger.w(logPrefix, "Failed to schedule alarm for ${event.title}")
+                        failedCount++
+                    }
+                }
+            }
+            
+            // Clean up old/expired alarms
+            alarmRepository.cleanupOldAlarms()
+            
+            val totalProcessed = scheduledCount + updatedCount + skippedCount + failedCount
+            Logger.i(logPrefix, 
+                "Alarm scheduling completed. " +
+                "Scheduled: $scheduledCount, Updated: $updatedCount, Skipped: $skippedCount, Failed: $failedCount (Total: $totalProcessed)")
+            
+            return SchedulingResult(
+                scheduledCount = scheduledCount,
+                updatedCount = updatedCount,
+                skippedCount = skippedCount,
+                failedCount = failedCount
+            )
+            
+        } catch (e: Exception) {
+            Logger.e(logPrefix, "Critical error during alarm scheduling", e)
+            return SchedulingResult(
+                failedCount = matches.size
             )
         }
     }

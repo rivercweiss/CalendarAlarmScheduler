@@ -6,6 +6,10 @@ import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+/**
+ * Repository for managing alarm rules with basic CRUD operations.
+ * Handles rule persistence and provides data access for rule management.
+ */
 class RuleRepository(
     private val ruleDao: RuleDao
 ) {
@@ -20,8 +24,6 @@ class RuleRepository(
     
     suspend fun getRuleById(id: String): Rule? = ruleDao.getRuleById(id)
     
-    fun getRulesByCalendarId(calendarId: Long): Flow<List<Rule>> = 
-        ruleDao.getRulesByCalendarId(calendarId)
     
     suspend fun insertRule(rule: Rule) {
         try {
@@ -37,7 +39,7 @@ class RuleRepository(
         }
     }
     
-    suspend fun insertRules(rules: List<Rule>) {
+    private suspend fun insertRules(rules: List<Rule>) {
         try {
             val startTime = System.currentTimeMillis()
             Logger.d("RuleRepository", "Inserting ${rules.size} rules")
@@ -55,58 +57,8 @@ class RuleRepository(
     
     suspend fun deleteRule(rule: Rule) = ruleDao.deleteRule(rule)
     
-    suspend fun deleteRuleById(id: String) = ruleDao.deleteRuleById(id)
-    
-    suspend fun setRuleEnabled(id: String, enabled: Boolean) = 
-        ruleDao.setRuleEnabled(id, enabled)
-    
-    // Business logic methods
-    fun getActiveRulesForCalendars(calendarIds: List<Long>): Flow<List<Rule>> {
-        return getEnabledRules().map { rules ->
-            rules.filter { rule ->
-                rule.calendarIds.any { calendarId -> calendarId in calendarIds }
-            }
-        }
-    }
-    
-    suspend fun toggleRuleEnabled(id: String) {
-        val rule = getRuleById(id)
-        rule?.let { 
-            setRuleEnabled(id, !it.enabled)
-        }
-    }
+    // Core business logic methods for rule management
     
     suspend fun getAllRulesSync(): List<Rule> = ruleDao.getAllRulesSync()
     
-    
-    
-    
-    suspend fun createDefaultRules(): List<Rule> {
-        try {
-            Logger.i("RuleRepository", "Creating default rules")
-            val defaultRules = listOf(
-                Rule(
-                    name = "Meetings",
-                    keywordPattern = "meeting",
-                    isRegex = false,
-                    calendarIds = emptyList(), // All calendars
-                    leadTimeMinutes = 15
-                ),
-                Rule(
-                    name = "Appointments", 
-                    keywordPattern = "appointment",
-                    isRegex = false,
-                    calendarIds = emptyList(), // All calendars
-                    leadTimeMinutes = 30
-                )
-            )
-            insertRules(defaultRules)
-            Logger.i("RuleRepository", "Default rules created successfully")
-            return defaultRules
-        } catch (e: Exception) {
-            Logger.e("RuleRepository", "Failed to create default rules", e)
-            crashHandler.logNonFatalException("RuleRepository", "Create default rules failed", e)
-            throw e
-        }
-    }
 }

@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.concurrent.atomic.AtomicLong
+/**
+ * Repository for managing scheduled alarms with essential CRUD operations.
+ * Provides data access layer between domain logic and Room database.
+ */
 class AlarmRepository(
     private val alarmDao: AlarmDao
 ) {
@@ -38,9 +42,6 @@ class AlarmRepository(
     suspend fun getActiveAlarmsSync(): List<ScheduledAlarm> = 
         alarmDao.getActiveAlarmsSync(System.currentTimeMillis())
     
-    fun getAlarmsByEventId(eventId: String): Flow<List<ScheduledAlarm>> = 
-        alarmDao.getAlarmsByEventId(eventId)
-    
     fun getAlarmsByRuleId(ruleId: String): Flow<List<ScheduledAlarm>> = 
         alarmDao.getAlarmsByRuleId(ruleId)
     
@@ -49,38 +50,19 @@ class AlarmRepository(
     
     suspend fun getAlarmById(id: String): ScheduledAlarm? = alarmDao.getAlarmById(id)
     
-    fun getAlarmsInTimeRange(startTime: Long, endTime: Long): Flow<List<ScheduledAlarm>> = 
-        alarmDao.getAlarmsInTimeRange(startTime, endTime)
-    
     suspend fun insertAlarm(alarm: ScheduledAlarm) = alarmDao.insertAlarm(alarm)
     
-    suspend fun insertAlarms(alarms: List<ScheduledAlarm>) = alarmDao.insertAlarms(alarms)
-    
-    suspend fun updateAlarm(alarm: ScheduledAlarm) = alarmDao.updateAlarm(alarm)
-    
-    suspend fun deleteAlarm(alarm: ScheduledAlarm) = alarmDao.deleteAlarm(alarm)
-    
-    suspend fun deleteAlarmById(id: String) = alarmDao.deleteAlarmById(id)
-    
-    suspend fun deleteAlarmsByEventId(eventId: String) = alarmDao.deleteAlarmsByEventId(eventId)
+    private suspend fun updateAlarm(alarm: ScheduledAlarm) = alarmDao.updateAlarm(alarm)
     
     suspend fun deleteAlarmsByRuleId(ruleId: String) = alarmDao.deleteAlarmsByRuleId(ruleId)
     
     suspend fun setAlarmDismissed(id: String, dismissed: Boolean = true) = 
         alarmDao.setAlarmDismissed(id, dismissed)
     
-    suspend fun updateAlarmRequestCode(id: String, newRequestCode: Int) = 
-        alarmDao.updateAlarmRequestCode(id, newRequestCode)
-    
-    suspend fun deleteExpiredAlarms(cutoffTime: Long = System.currentTimeMillis() - (24 * 60 * 60 * 1000)) = 
+    private suspend fun deleteExpiredAlarms(cutoffTime: Long = System.currentTimeMillis() - (24 * 60 * 60 * 1000)) = 
         alarmDao.deleteExpiredAlarms(cutoffTime)
     
-    // Business logic methods
-    fun getUpcomingAlarms(hoursAhead: Int = 24): Flow<List<ScheduledAlarm>> {
-        val now = System.currentTimeMillis()
-        val endTime = now + (hoursAhead * 60 * 60 * 1000)
-        return getAlarmsInTimeRange(now, endTime)
-    }
+    // Core business logic methods for alarm scheduling and management
     
     suspend fun scheduleAlarmForEvent(
         eventId: String,
@@ -133,21 +115,8 @@ class AlarmRepository(
         } else null
     }
     
-    suspend fun dismissAlarm(alarmId: String) {
-        setAlarmDismissed(alarmId, true)
-    }
-    
     suspend fun undismissAlarm(alarmId: String) {
         setAlarmDismissed(alarmId, false)
-    }
-    
-    suspend fun reactivateAlarm(alarmId: String): Boolean {
-        return try {
-            setAlarmDismissed(alarmId, false)
-            true
-        } catch (e: Exception) {
-            false
-        }
     }
     
     suspend fun cleanupOldAlarms() {
@@ -158,31 +127,4 @@ class AlarmRepository(
         setAlarmDismissed(alarmId, true)
     }
     
-    // Check if alarm should be rescheduled based on event changes
-    suspend fun shouldRescheduleAlarm(eventId: String, ruleId: String, newLastModified: Long): Boolean {
-        val existingAlarm = getAlarmByEventAndRule(eventId, ruleId)
-        return existingAlarm?.let { alarm ->
-            !alarm.userDismissed && newLastModified > alarm.lastEventModified
-        } ?: true
-    }
-    
-    suspend fun markMultipleAlarmsDismissed(alarmIds: List<String>) {
-        for (alarmId in alarmIds) {
-            setAlarmDismissed(alarmId, true)
-        }
-    }
-    
-    suspend fun checkSystemStateAndUpdateDismissals(
-        onAlarmDismissed: (alarmId: String, eventTitle: String) -> Unit = { _, _ -> }
-    ): List<String> {
-        // This method would typically be called with AlarmScheduler dependency
-        // For now, it returns an empty list as the logic is handled in the worker
-        return emptyList()
-    }
-    
-    suspend fun handleDismissedAlarms(dismissedAlarms: List<ScheduledAlarm>) {
-        for (alarm in dismissedAlarms) {
-            setAlarmDismissed(alarm.id, true)
-        }
-    }
 }

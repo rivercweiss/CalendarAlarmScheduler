@@ -10,6 +10,10 @@ import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Core alarm scheduling service using Android AlarmManager.
+ * Handles scheduling, canceling, and rescheduling of exact alarms.
+ */
 class AlarmScheduler(
     private val context: Context,
     private val alarmManager: AlarmManager

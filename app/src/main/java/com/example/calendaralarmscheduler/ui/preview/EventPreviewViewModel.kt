@@ -16,7 +16,7 @@ import com.example.calendaralarmscheduler.data.CalendarRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.data.database.entities.Rule
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
-import com.example.calendaralarmscheduler.domain.AlarmSchedulingService
+import com.example.calendaralarmscheduler.domain.RuleAlarmManager
 import com.example.calendaralarmscheduler.domain.RuleMatcher
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
 import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
@@ -85,7 +85,7 @@ class EventPreviewViewModel @Inject constructor(
     private val alarmRepository: AlarmRepository,
     private val alarmScheduler: AlarmScheduler,
     private val alarmManager: AlarmManager,
-    private val alarmSchedulingService: AlarmSchedulingService,
+    private val ruleAlarmManager: RuleAlarmManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     
@@ -333,8 +333,8 @@ class EventPreviewViewModel @Inject constructor(
                 return
             }
             
-            // Use the shared scheduling service to process matches
-            val result = alarmSchedulingService.processMatchesAndScheduleAlarms(
+            // Use the rule alarm manager to process matches
+            val result = ruleAlarmManager.processMatchesAndScheduleAlarms(
                 filteredMatches,
                 logPrefix = "EventPreviewViewModel"
             )
