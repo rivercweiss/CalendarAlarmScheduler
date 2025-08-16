@@ -230,7 +230,7 @@ We want to make this super robust. Try to do this as simply, modularly and robus
 
 ---
 
-We are getting an issue where there is a popup which says Calendar Alarms Scheduler isn’t responding. 
+It still seems like it has the same auto-hide issue.
 
 Can you take a look at the logs and give some ideas what the issue is? Think hard.
 
@@ -251,3 +251,20 @@ Build the code and fix any issues. Remember, try to do this as simply, modularly
 ---
 
 Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality and any key context.
+
+---
+
+Currently, the alarm notification disappears from view after a small amount of time, but continues to make a noise. Then once the notifications are dragged down from the top, the alarm stops.
+
+We want to make 2 changes to this behavior. We want the notification to continue to persist in view until dismissed, and we also want the alarm noise to only stop when the alarm is dismissed. The alarm should also be at the top of the notification stack with a high priority looking UI.
+
+We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.
+
+---
+
+Currently, the alarm notification disappears from view after a small amount of time.
+
+We want the notification to continue to persist in view until dismissed. We want you to determine if this is possible.
+
+Please research the ideal implementation of the unmissable alarm notification feature. Think hard.
+
