@@ -114,8 +114,8 @@ class AlarmNotificationManager(
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setAutoCancel(true)
-                .setOngoing(false)
+                .setAutoCancel(false)
+                .setOngoing(true)
                 
                 // Tapping notification dismisses it
                 .setContentIntent(dismissPendingIntent)
@@ -127,10 +127,6 @@ class AlarmNotificationManager(
                     dismissPendingIntent
                 )
                 
-                // Ensure sound and vibration work regardless of phone state
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-                .setVibrate(longArrayOf(0, 500, 200, 500, 200, 500))
-                .setDefaults(NotificationCompat.DEFAULT_LIGHTS)
                 
                 .build()
             
