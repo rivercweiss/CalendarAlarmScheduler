@@ -10,9 +10,21 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.utils.Logger
 
-class AlarmNotificationManager(private val context: Context) {
+/**
+ * Creates unmissable alarm notifications that bypass DND and silent mode.
+ * 
+ * Premium Feature Gating:
+ * - Free users: Show "Calendar Event" with upgrade message
+ * - Premium users: Show actual event titles and descriptions
+ * - Test alarms: Always show full details for testing
+ */
+class AlarmNotificationManager(
+    private val context: Context,
+    private val settingsRepository: SettingsRepository
+) {
     
     companion object {
         private const val ALARM_CHANNEL_ID = "calendar_alarms"
@@ -70,6 +82,11 @@ class AlarmNotificationManager(private val context: Context) {
         try {
             Logger.i("AlarmNotificationManager", "Showing unmissable alarm notification for: $eventTitle")
             
+            // Premium Feature: Gate event details behind purchase
+            // Free users see generic "Calendar Event", premium users see actual event title
+            val isPremium = settingsRepository.isPremiumPurchased()
+            val displayTitle = if (isPremium || isTestAlarm) eventTitle else "Calendar Event"
+            
             // Create dismiss action
             val dismissIntent = Intent("com.example.calendaralarmscheduler.DISMISS_ALARM").apply {
                 setPackage(context.packageName)
@@ -87,13 +104,13 @@ class AlarmNotificationManager(private val context: Context) {
             val notification = NotificationCompat.Builder(context, ALARM_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
                 .setContentTitle(if (isTestAlarm) "📅 Test Alarm" else "📅 Calendar Alarm")
-                .setContentText(eventTitle)
+                .setContentText(displayTitle)
                 .setStyle(NotificationCompat.BigTextStyle()
-                    .bigText(if (isTestAlarm) 
-                        "Test alarm for: $eventTitle" 
-                    else 
-                        "Calendar event: $eventTitle"
-                    ))
+                    .bigText(when {
+                        isTestAlarm -> "Test alarm for: $eventTitle"
+                        isPremium -> "Calendar event: $eventTitle"
+                        else -> "Calendar event alarm. Upgrade to see event details."
+                    }))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

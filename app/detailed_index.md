@@ -113,9 +113,11 @@ This index provides comprehensive documentation of all functions in the codebase
 - `handleTimezoneChange()` - Handle timezone changes by resetting last sync time
 - `isBatteryOptimizationSetupCompleted(): Boolean` - Check if battery optimization setup has been completed
 - `setBatteryOptimizationSetupCompleted(completed: Boolean)` - Mark battery optimization setup as completed
+- `isPremiumPurchased(): Boolean` - Check if premium features are purchased
+- `setPremiumPurchased(purchased: Boolean)` - Set premium purchase status with reactive updates
 - `getAllDayDefaultTimeFormatted(): String` - Get formatted all-day default time
 - `getRefreshIntervalDescription(): String` - Get refresh interval description
-- `resetToDefaults()` - Reset all settings to defaults
+- `resetToDefaults()` - Reset all settings to defaults including premium status
 
 ### DayTrackingRepository.kt
 - `markRuleTriggeredToday(ruleId: String)` - Mark a rule as having triggered an alarm today
@@ -195,6 +197,7 @@ This index provides comprehensive documentation of all functions in the codebase
 - `provideAlarmRepository(alarmDao: AlarmDao): AlarmRepository` - **@Provides** **@Singleton** - Provide Alarm Repository
 - `provideCalendarRepository(@ApplicationContext context: Context): CalendarRepository` - **@Provides** **@Singleton** - Provide Calendar Repository
 - `provideSettingsRepository(@ApplicationContext context: Context): SettingsRepository` - **@Provides** **@Singleton** - Provide Settings Repository
+- `provideBillingManager(@ApplicationContext context: Context, settingsRepository: SettingsRepository): BillingManager` - **@Provides** **@Singleton** - Provide Google Play Billing Manager
 
 ### WorkerModule.kt
 - `provideWorkerManager(@ApplicationContext context: Context): WorkerManager` - **@Provides** **@Singleton** - Provide Worker Manager
@@ -297,7 +300,12 @@ This index provides comprehensive documentation of all functions in the codebase
 - **RuleListViewModel.kt** - ViewModel functions for rule list
 
 ### Settings UI
-- **SettingsFragment.kt** - Fragment functions for settings
+- **SettingsFragment.kt** - Fragment functions for settings with premium UI management:
+  - `setupBillingCallbacks()` - **private** - Set up billing manager callbacks for purchase flow
+  - `updatePremiumUI(isPremium: Boolean)` - **private** - Update premium section UI based on purchase state
+  - `togglePremiumForTesting()` - **private** - Debug toggle for testing premium states (debug builds only)
+  - `launchPremiumPurchase()` - **private** - Launch Google Play purchase flow with error handling
+  - `showPurchaseError(message: String)` - **private** - Display purchase error messages to user
 - **SettingsViewModel.kt** - ViewModel functions for settings
 
 ## Utilities
@@ -338,9 +346,22 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getMissingPermissions(context: Context): List<String>` - Get the list of permissions that need to be requested
 
 ### AlarmNotificationManager.kt
-- `showAlarmNotification(alarmId: String, eventTitle: String, eventStartTime: Long, ruleId: String?, isTestAlarm: Boolean)` - Show unmissable alarm notification with sound and vibration
+- `showAlarmNotification(alarmId: String, eventTitle: String, eventStartTime: Long, ruleId: String?, isTestAlarm: Boolean)` - Show unmissable alarm notification with sound and vibration, gated by premium status
 - `dismissAlarmNotification(alarmId: String)` - Dismiss specific alarm notification
 - `createNotificationChannel()` - **private** - Create high-priority notification channel that bypasses DND
+
+### BillingManager.kt
+- `init` - Initialize billing client and connect to Google Play Billing service
+- `setCallbacks(onStateChanged: (Boolean) -> Unit, onError: (String) -> Unit)` - Set callbacks for purchase state changes and errors
+- `setupBillingClient()` - **private** - Set up billing client with purchase listener
+- `connectToBillingService()` - **private** - Connect to Google Play Billing service with retry logic
+- `isPremiumPurchased(): Boolean` - Check if premium features are purchased (cached state)
+- `queryPurchases()` - **private** - Query existing purchases and update cached state
+- `launchPurchaseFlow(activity: Activity)` - Launch purchase flow for premium upgrade with error handling
+- `onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?)` - **override** - Handle purchase updates from Google Play
+- `handlePurchase(purchase: Purchase)` - **private** - Process successful purchase with validation and acknowledgment
+- `restorePurchases()` - Restore previous purchases for account recovery
+- `disconnect()` - Disconnect billing client to prevent memory leaks
 
 ### Other Utilities
 - **CrashHandler.kt** - Simplified global exception handling with basic crash logging

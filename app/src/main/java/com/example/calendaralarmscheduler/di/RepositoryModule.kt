@@ -9,6 +9,7 @@ import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.data.database.AlarmDao
 import com.example.calendaralarmscheduler.data.database.RuleDao
 import com.example.calendaralarmscheduler.services.DayResetService
+import com.example.calendaralarmscheduler.utils.BillingManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,5 +61,14 @@ object RepositoryModule {
         dayTrackingRepository: DayTrackingRepository
     ): DayResetService {
         return DayResetService(context, dayTrackingRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBillingManager(
+        @ApplicationContext context: Context,
+        settingsRepository: SettingsRepository
+    ): BillingManager {
+        return BillingManager(context, settingsRepository)
     }
 }

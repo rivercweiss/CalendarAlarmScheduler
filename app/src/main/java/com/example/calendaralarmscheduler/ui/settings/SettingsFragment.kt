@@ -14,9 +14,11 @@ import androidx.core.content.ContextCompat
 import com.example.calendaralarmscheduler.ui.BaseFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.calendaralarmscheduler.BuildConfig
 import com.example.calendaralarmscheduler.R
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.databinding.FragmentSettingsBinding
+import com.example.calendaralarmscheduler.utils.BillingManager
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
@@ -40,6 +42,9 @@ class SettingsFragment : BaseFragment() {
     
     @Inject
     lateinit var settingsRepository: SettingsRepository
+    
+    @Inject
+    lateinit var billingManager: BillingManager
     
     // Track battery optimization attempts  
     private var batteryOptimizationLaunchTime = 0L
@@ -119,10 +124,23 @@ class SettingsFragment : BaseFragment() {
     }
 
     override fun setupView(view: View, savedInstanceState: Bundle?) {
+        setupBillingCallbacks()
         setupObservers()
         setupClickListeners()
         updatePermissionStatus()
         updateSystemInfo()
+    }
+    
+    private fun setupBillingCallbacks() {
+        billingManager.setCallbacks(
+            onStateChanged = { isPremium ->
+                // This will be handled by the StateFlow observer
+                Logger.d("SettingsFragment", "Premium state changed: $isPremium")
+            },
+            onError = { errorMessage ->
+                showPurchaseError(errorMessage)
+            }
+        )
     }
     
     override fun onFragmentResumed() {
@@ -170,6 +188,13 @@ class SettingsFragment : BaseFragment() {
                 binding.textLastSync.text = description
             }
         }
+        
+        // Observe premium status changes
+        viewLifecycleOwner.lifecycleScope.launch {
+            settingsRepository.premiumPurchased.collect { isPremium ->
+                updatePremiumUI(isPremium)
+            }
+        }
     }
     
     private fun setupClickListeners() {
@@ -208,6 +233,18 @@ class SettingsFragment : BaseFragment() {
         
         binding.btnTestAlarm.setOnClickListener {
             testAlarm()
+        }
+        
+        // Premium features
+        binding.btnPremiumPurchase.setOnClickListener {
+            launchPremiumPurchase()
+        }
+        
+        // Debug toggle for testing (only in debug builds)
+        if (BuildConfig.SHOW_DEBUG_FEATURES) {
+            binding.btnDebugTogglePremium.setOnClickListener {
+                togglePremiumForTesting()
+            }
         }
     }
     
@@ -625,11 +662,99 @@ class SettingsFragment : BaseFragment() {
             }
         }
     }
+    
+    /**
+     * Updates premium section UI based on purchase state.
+     * 
+     * Premium users get exciting "PREMIUM ACTIVE" styling with green colors.
+     * Free users get clear upgrade CTA with $2 pricing.
+     * Debug toggle shown only in debug builds for testing.
+     */
+    private fun updatePremiumUI(isPremium: Boolean) {
+        if (isPremium) {
+            // Premium Active State - Exciting UI with celebration styling
+            binding.iconPremiumStatus.setImageResource(R.drawable.ic_check_circle)
+            binding.iconPremiumStatus.setColorFilter(ContextCompat.getColor(requireContext(), R.color.success_green))
+            binding.textPremiumTitle.text = "✨ PREMIUM ACTIVE"
+            binding.textPremiumTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.success_green))
+            binding.textPremiumStatus.text = "Event details are now shown in all alarm notifications!"
+            binding.btnPremiumPurchase.visibility = View.GONE
+            
+            // Add premium styling to the card
+            val primaryColor = ContextCompat.getColor(requireContext(), R.color.success_green)
+            binding.cardPremium.apply {
+                strokeColor = primaryColor
+                strokeWidth = 6
+            }
+        } else {
+            // Free User State - Clear Upgrade CTA
+            binding.iconPremiumStatus.setImageResource(R.drawable.ic_star)
+            binding.iconPremiumStatus.setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary))
+            binding.textPremiumTitle.text = "Event Details in Notifications"
+            // Use default text color - no need to set explicitly
+            binding.textPremiumStatus.text = "See actual event titles in alarm notifications instead of generic 'Calendar Event' - \$2.00"
+            binding.btnPremiumPurchase.visibility = View.VISIBLE
+            
+            // Reset card styling
+            val primaryColor = ContextCompat.getColor(requireContext(), R.color.primary)
+            binding.cardPremium.apply {
+                strokeColor = primaryColor
+                strokeWidth = 2
+            }
+        }
+        
+        // Show/hide debug toggle based on build configuration
+        binding.btnDebugTogglePremium.visibility = if (BuildConfig.SHOW_DEBUG_FEATURES) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        Logger.d("SettingsFragment", "Premium UI updated: isPremium=$isPremium")
+    }
+    
+    /**
+     * Debug-only function to toggle premium state for testing.
+     * Only available in debug builds - completely hidden in release builds.
+     * Allows testing premium UI states without Google Play Console setup.
+     */
+    private fun togglePremiumForTesting() {
+        val currentState = settingsRepository.isPremiumPurchased()
+        val newState = !currentState
+        
+        Logger.i("SettingsFragment", "Debug: Toggling premium from $currentState to $newState")
+        settingsRepository.setPremiumPurchased(newState)
+        
+        Toast.makeText(
+            requireContext(), 
+            "Debug: Premium ${if (newState) "enabled" else "disabled"}", 
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+    
+    private fun launchPremiumPurchase() {
+        try {
+            Logger.i("SettingsFragment", "Launching premium purchase flow")
+            billingManager.launchPurchaseFlow(requireActivity())
+        } catch (e: Exception) {
+            Logger.e("SettingsFragment", "Error launching purchase flow", e)
+            Toast.makeText(requireContext(), "Unable to launch purchase. Please try again.", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun showPurchaseError(message: String) {
+        Toast.makeText(requireContext(), "Purchase Error: $message", Toast.LENGTH_LONG).show()
+        Logger.e("SettingsFragment", "Purchase error shown to user: $message")
+    }
 
     override fun cleanupView() {
+        // Disconnect billing client to prevent memory leaks
+        if (::billingManager.isInitialized) {
+            billingManager.disconnect()
+        }
+        
         // Clear binding reference to prevent memory leaks
         _binding = null
-        
     }
     
 }

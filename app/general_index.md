@@ -21,7 +21,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **CalendarRepository.kt** - Fetches and manages Google Calendar events with change detection and filtering
 - **DayTrackingRepository.kt** - Tracks which rules have triggered today for "first event of day only" functionality
 - **RuleRepository.kt** - Manages alarm rules persistence with calendar filters and pattern validation
-- **SettingsRepository.kt** - Simple app settings management with reactive StateFlows
+- **SettingsRepository.kt** - Simple app settings management with reactive StateFlows and premium purchase state
 
 #### Database (`data/database/`)
 - **AppDatabase.kt** - Room database configuration with migrations and type converters
@@ -45,14 +45,14 @@ This index provides a quick overview of all source files in the codebase to help
 ### Dependency Injection (`di/`)
 - **AlarmModule.kt** - Hilt module providing alarm-related dependencies
 - **DatabaseModule.kt** - Hilt module providing Room database dependencies
-- **RepositoryModule.kt** - Hilt module providing repository dependencies
+- **RepositoryModule.kt** - Hilt module providing repository and billing manager dependencies
 - **WorkerModule.kt** - Hilt module providing worker-related dependencies
 
 ### Services (`services/`)
 - **DayResetService.kt** - Manages midnight reset alarms for day tracking boundaries
 
 ### Broadcast Receivers (`receivers/`)
-- **AlarmReceiver.kt** - Handles fired alarms and triggers notification system
+- **AlarmReceiver.kt** - Handles fired alarms and triggers notification system with premium content gating
 - **AlarmDismissReceiver.kt** - Handles alarm dismissal actions from notifications
 - **BootReceiver.kt** - Reschedules alarms after device boot or app update
 - **DayResetReceiver.kt** - Handles midnight reset broadcasts for day tracking
@@ -88,11 +88,12 @@ This index provides a quick overview of all source files in the codebase to help
 - **RuleListViewModel.kt** - ViewModel managing rule list state
 
 #### Settings (`ui/settings/`)
-- **SettingsFragment.kt** - App settings and configuration UI
+- **SettingsFragment.kt** - App settings and configuration UI with premium upgrade section and debug toggle
 - **SettingsViewModel.kt** - ViewModel managing settings state
 
 ### Utilities (`utils/`)
-- **AlarmNotificationManager.kt** - Creates unmissable alarm notifications that bypass DND and silent mode
+- **AlarmNotificationManager.kt** - Creates unmissable alarm notifications that bypass DND and silent mode with premium content gating
+- **BillingManager.kt** - Handles Google Play Billing for premium features with robust error handling and state management
 - **CrashHandler.kt** - Simplified global exception handling with basic crash logging
 - **ErrorNotificationManager.kt** - Generic error notification system with consolidated error handling
 - **Logger.kt** - Simple Android logcat logging with structured message formatting
@@ -111,3 +112,11 @@ This index provides a quick overview of all source files in the codebase to help
 4. **Clean Architecture** - Clear separation between data, domain, and UI layers
 5. **Reactive Programming** - StateFlow and Flow for reactive updates
 6. **Background Processing** - WorkManager for reliable background tasks
+7. **Premium Features** - Google Play Billing integration with content gating and debug support
+
+## Recent Additions (Premium Features)
+
+- **BillingManager.kt** - NEW: Google Play Billing integration for $2 premium upgrade
+- **Premium UI** - Enhanced settings screen with upgrade section and debug toggle
+- **Content Gating** - Notifications show event details only for premium users
+- **Build Configuration** - Debug/release build types with premium debug controls

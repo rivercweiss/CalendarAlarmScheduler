@@ -107,11 +107,12 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Creates unmissable notifications with alarm sound that bypass Do Not Disturb and silent mode.
    * Simple notification-based system - no full-screen activities.
    * Tracks scheduled and user-dismissed alarms to avoid duplicates.
+   * **Premium Feature**: Event details in notifications are gated behind $2 in-app purchase.
 
 5. **UI Layer**
    * **Rule Management Screen** – Add/edit/delete keyword-based rules with calendar filters.
    * **Calendar Event Preview** – Shows future events for the next 2 days with a single toggle to filter between "all upcoming events" and "events matching rules only". Displays scheduled alarms with timezone info.
-   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. All settings must display currently selected values in real-time.
+   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. **Premium section at top** with upgrade/purchase flow and debug toggle (debug builds only).
    * **Permission Onboarding** – Step-by-step permission granting with explanations.
 
 6. **Background Worker**
@@ -140,6 +141,14 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Simple SharedPreferences-based settings storage.
    * Settings for refresh interval, all-day event default time, and onboarding status.
    * Battery optimization completion tracking.
+   * Premium purchase state tracking.
+
+11. **Premium Features & Billing**
+   * **Google Play Billing**: $2 one-time in-app purchase for event details in notifications.
+   * **BillingManager**: Handles purchase flow, state management, and error handling.
+   * **Notification Gating**: Free users see "Calendar Event", premium users see actual event titles.
+   * **Debug Support**: Debug toggle for testing premium states (debug builds only).
+   * **State Management**: Premium status cached in SharedPreferences with reactive UI updates.
 
 ---
 
@@ -188,6 +197,12 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 ### Calendar Preview
 * The ability for users to preview calendar events to check that alarms are scheduled correctly.
 
+### Premium Features
+* **Notification Content Gating**: Free users see generic "Calendar Event" in alarm notifications, premium users see actual event titles and descriptions.
+* **Purchase Flow**: $2 one-time purchase through Google Play Billing for event details in notifications.
+* **Development Testing**: Debug toggle available in debug builds for testing premium states without Google Play Console setup.
+* **State Persistence**: Premium status cached locally with immediate UI updates across app.
+
 ---
 
 ## 10. Background Refresh Configuration
@@ -205,9 +220,28 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 4. Update `lastSyncTime`
 
 ---
-### Compile
 
+## Build Commands
+
+### Quick Compile (Kotlin only)
+```bash
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" && ./gradlew compileDebugKotlin
+```
+
+### Full Debug Build
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" && ./gradlew assembleDebug
+```
+
+### Clean Build (when dependencies change)
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" && ./gradlew clean assembleDebug
+```
+
+**Notes:**
+- Build output: `app/build/outputs/apk/debug/app-debug.apk`
+- Build time: ~13s for clean build, ~1s for incremental
+- Premium features require Google Play Billing dependency (already included)
 
 ---
 
@@ -223,6 +257,8 @@ All app logs use prefix `CalendarAlarmScheduler_` with categories:
 - `*_Permission_*`: Permission state changes
 - `*_BatteryOptimization`: Battery optimization detection and management
 - `*_ErrorNotificationManager`: Generic error notification events
+- `*_BillingManager`: Premium purchase flow and state changes
+- `*_SettingsFragment`: Premium UI updates and debug toggles
 
 **Note**: All logging goes to Android logcat only (no file logging for simplicity).
 
@@ -232,10 +268,13 @@ For efficient debugging and log collection during development:
 **Basic Log Monitoring:**
 ```bash
 # Monitor specific components in real-time
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat | grep -E "CalendarAlarmScheduler|CalendarRepository"
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat | grep -E "CalendarAlarmScheduler|CalendarRepository|BillingManager"
 
 # Check recent logs from device buffer (faster than real-time)
 /Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep "CalendarRepository" | tail -20
+
+# Monitor premium/billing activity specifically
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep -E "BillingManager|SettingsFragment.*Premium" | tail -10
 ```
 
 **UI Navigation Debugging:**

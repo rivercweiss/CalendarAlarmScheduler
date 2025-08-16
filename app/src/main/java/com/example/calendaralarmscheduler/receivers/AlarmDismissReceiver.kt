@@ -6,13 +6,20 @@ import android.content.Intent
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
+import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.utils.AlarmNotificationManager
 import com.example.calendaralarmscheduler.utils.Logger
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AlarmDismissReceiver : BroadcastReceiver() {
+    
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
     
     companion object {
         const val ACTION_DISMISS_ALARM = "com.example.calendaralarmscheduler.DISMISS_ALARM"
@@ -59,7 +66,7 @@ class AlarmDismissReceiver : BroadcastReceiver() {
                     
                     // Dismiss the notification
                     Logger.d("AlarmDismissReceiver_onReceive", "Dismissing alarm notification")
-                    val alarmNotificationManager = AlarmNotificationManager(context)
+                    val alarmNotificationManager = AlarmNotificationManager(context, settingsRepository)
                     alarmNotificationManager.dismissAlarmNotification(alarmId)
                     Logger.i("AlarmDismissReceiver_onReceive", "✅ Alarm notification dismissed")
                     

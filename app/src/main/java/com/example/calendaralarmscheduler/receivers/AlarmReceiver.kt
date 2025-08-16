@@ -3,11 +3,18 @@ package com.example.calendaralarmscheduler.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.utils.AlarmNotificationManager
 import com.example.calendaralarmscheduler.utils.Logger
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AlarmReceiver : BroadcastReceiver() {
+    
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
     
     companion object {
         const val EXTRA_ALARM_ID = AlarmScheduler.EXTRA_ALARM_ID
@@ -34,7 +41,7 @@ class AlarmReceiver : BroadcastReceiver() {
             }
             
             // Show unmissable notification
-            val alarmNotificationManager = AlarmNotificationManager(context)
+            val alarmNotificationManager = AlarmNotificationManager(context, settingsRepository)
             alarmNotificationManager.showAlarmNotification(
                 alarmId = alarmId,
                 eventTitle = eventTitle,

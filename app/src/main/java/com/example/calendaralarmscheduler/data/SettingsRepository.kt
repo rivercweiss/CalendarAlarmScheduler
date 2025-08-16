@@ -3,6 +3,7 @@ package com.example.calendaralarmscheduler.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.format.DateFormat
+import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +46,7 @@ class SettingsRepository(
         private const val KEY_FIRST_LAUNCH = "first_launch"
         private const val KEY_LAST_SYNC_TIME = "last_sync_time"
         private const val KEY_BATTERY_OPTIMIZATION_COMPLETED = "battery_optimization_completed"
+        private const val KEY_PREMIUM_PURCHASED = "premium_purchased"
         
         // Default values
         const val DEFAULT_REFRESH_INTERVAL_MINUTES = 30
@@ -63,6 +65,9 @@ class SettingsRepository(
     
     private val _batteryOptimizationCompleted = MutableStateFlow(isBatteryOptimizationSetupCompleted())
     val batteryOptimizationCompleted: StateFlow<Boolean> = _batteryOptimizationCompleted.asStateFlow()
+    
+    private val _premiumPurchased = MutableStateFlow(isPremiumPurchased())
+    val premiumPurchased: StateFlow<Boolean> = _premiumPurchased.asStateFlow()
     
     // Callback for refresh interval changes
     fun setOnRefreshIntervalChanged(callback: (Int) -> Unit) {
@@ -127,6 +132,15 @@ class SettingsRepository(
         _batteryOptimizationCompleted.value = completed
     }
     
+    // Premium purchase state - gates event details in notifications
+    fun isPremiumPurchased(): Boolean = prefs.getBoolean(KEY_PREMIUM_PURCHASED, false)
+    
+    fun setPremiumPurchased(purchased: Boolean) {
+        prefs.edit().putBoolean(KEY_PREMIUM_PURCHASED, purchased).apply()
+        _premiumPurchased.value = purchased
+        Logger.d("SettingsRepository", "Premium status updated: $purchased")
+    }
+    
     // Utility methods
     fun getAllDayDefaultTimeFormatted(): String = _allDayTime.value.formatTime(context)
     
@@ -145,10 +159,12 @@ class SettingsRepository(
             .putInt(KEY_ALL_DAY_DEFAULT_HOUR, DEFAULT_ALL_DAY_HOUR)
             .putInt(KEY_ALL_DAY_DEFAULT_MINUTE, DEFAULT_ALL_DAY_MINUTE)
             .putBoolean(KEY_BATTERY_OPTIMIZATION_COMPLETED, false)
+            .putBoolean(KEY_PREMIUM_PURCHASED, false)
             .apply()
         
         _refreshIntervalMinutes.value = DEFAULT_REFRESH_INTERVAL_MINUTES
         _allDayTime.value = AllDayTime(DEFAULT_ALL_DAY_HOUR, DEFAULT_ALL_DAY_MINUTE)
         _batteryOptimizationCompleted.value = false
+        _premiumPurchased.value = false
     }
 }

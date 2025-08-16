@@ -24,11 +24,16 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+        buildConfig = true
     }
     
     buildTypes {
+        debug {
+            buildConfigField("boolean", "SHOW_DEBUG_FEATURES", "true")
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("boolean", "SHOW_DEBUG_FEATURES", "false")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -95,6 +100,9 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.work)
+    
+    // Google Play Billing for in-app purchases
+    implementation("com.android.billingclient:billing-ktx:7.0.0")
     
     // Testing
     testImplementation(libs.junit)
