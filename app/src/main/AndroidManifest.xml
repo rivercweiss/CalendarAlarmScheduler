@@ -108,11 +108,16 @@
             </intent-filter>
         </receiver>
 
-        <!-- Calendar Refresh Worker -->
-        <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge" />
+        <!-- Background Refresh Receiver for calendar refresh alarms -->
+        <receiver
+            android:name=".receivers.BackgroundRefreshReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.calendaralarmscheduler.PERIODIC_REFRESH" />
+                <action android:name="com.example.calendaralarmscheduler.IMMEDIATE_REFRESH" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

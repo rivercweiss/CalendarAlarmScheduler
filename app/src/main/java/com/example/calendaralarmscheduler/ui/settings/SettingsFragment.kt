@@ -22,7 +22,7 @@ import com.example.calendaralarmscheduler.utils.BillingManager
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
-import com.example.calendaralarmscheduler.workers.WorkerManager
+import com.example.calendaralarmscheduler.workers.BackgroundRefreshManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -336,7 +336,7 @@ class SettingsFragment : BaseFragment() {
         }
     }
     
-    private fun updateWorkStatus(status: WorkerManager.WorkStatus) {
+    private fun updateWorkStatus(status: BackgroundRefreshManager.WorkStatus) {
         val context = requireContext()
         
         when {
@@ -559,9 +559,9 @@ class SettingsFragment : BaseFragment() {
     }
     
     private fun showRefreshIntervalPicker() {
-        val intervals = WorkerManager.AVAILABLE_INTERVALS
+        val intervals = BackgroundRefreshManager.AVAILABLE_INTERVALS
         val intervalNames = intervals.map { 
-            WorkerManager(requireContext()).getIntervalDescription(it)
+            BackgroundRefreshManager(requireContext()).getIntervalDescription(it)
         }.toTypedArray()
         
         val currentInterval = viewModel.getCurrentRefreshInterval()

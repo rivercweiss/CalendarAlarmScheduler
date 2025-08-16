@@ -6,7 +6,7 @@ import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.utils.CrashHandler
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.TimezoneUtils
-import com.example.calendaralarmscheduler.workers.WorkerManager
+import com.example.calendaralarmscheduler.workers.BackgroundRefreshManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,9 +25,9 @@ class CalendarAlarmApplication : Application() {
     lateinit var settingsRepository: SettingsRepository
     
     @Inject
-    lateinit var workerManager: WorkerManager
+    lateinit var backgroundRefreshManager: BackgroundRefreshManager
     
-    // Additional injected dependencies for legacy components (BootReceiver, CalendarRefreshWorker)
+    // Additional injected dependencies for legacy components (BootReceiver, BackgroundRefreshReceiver)
     @Inject
     lateinit var alarmRepository: com.example.calendaralarmscheduler.data.AlarmRepository
     
@@ -50,14 +50,14 @@ class CalendarAlarmApplication : Application() {
     private var timezoneChangeReceiver: BroadcastReceiver? = null
     
     /**
-     * Handle settings changes that require worker rescheduling
+     * Handle settings changes that require background refresh rescheduling
      */
     fun onRefreshIntervalChanged(newIntervalMinutes: Int) {
         try {
-            Logger.i("Application", "Refresh interval changed to $newIntervalMinutes minutes - rescheduling worker")
-            workerManager.reschedulePeriodicRefresh(newIntervalMinutes)
+            Logger.i("Application", "Refresh interval changed to $newIntervalMinutes minutes - rescheduling background refresh")
+            backgroundRefreshManager.reschedulePeriodicRefresh(newIntervalMinutes)
         } catch (e: Exception) {
-            Logger.e("Application", "Failed to reschedule worker after settings change", e)
+            Logger.e("Application", "Failed to reschedule background refresh after settings change", e)
         }
     }
     
@@ -86,7 +86,7 @@ class CalendarAlarmApplication : Application() {
             settingsRepository.handleTimezoneChange()
             
             // Trigger immediate calendar refresh to reschedule all alarms
-            workerManager.enqueueImmediateRefresh()
+            backgroundRefreshManager.enqueueImmediateRefresh()
             
             Logger.i("Application", "Timezone change handled successfully - forced calendar refresh")
         } catch (e: Exception) {
@@ -112,14 +112,14 @@ class CalendarAlarmApplication : Application() {
                 onRefreshIntervalChanged(newIntervalMinutes)
             }
             
-            // Schedule background calendar refresh worker with user-configured interval
+            // Schedule background calendar refresh with user-configured interval
             try {
                 val refreshInterval = settingsRepository.getRefreshIntervalMinutes()
-                workerManager.schedulePeriodicRefresh(refreshInterval)
-                Logger.i("Application", "Background calendar refresh worker scheduled successfully with ${refreshInterval}-minute interval")
+                backgroundRefreshManager.schedulePeriodicRefresh(refreshInterval)
+                Logger.i("Application", "Background calendar refresh scheduled successfully with ${refreshInterval}-minute interval")
                 
             } catch (e: Exception) {
-                Logger.e("Application", "Failed to schedule background worker", e)
+                Logger.e("Application", "Failed to schedule background refresh", e)
                 // Don't throw - app can still function without background refresh
             }
             

@@ -8,7 +8,7 @@ import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
 import com.example.calendaralarmscheduler.utils.Logger
 import com.example.calendaralarmscheduler.utils.PermissionUtils
-import com.example.calendaralarmscheduler.workers.WorkerManager
+import com.example.calendaralarmscheduler.workers.BackgroundRefreshManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val workerManager: WorkerManager,
+    private val backgroundRefreshManager: BackgroundRefreshManager,
     private val alarmScheduler: AlarmScheduler,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -36,8 +36,8 @@ class SettingsViewModel @Inject constructor(
     private val _allDayTimeDescription = MutableStateFlow("")
     val allDayTimeDescription: StateFlow<String> = _allDayTimeDescription.asStateFlow()
     
-    private val _workStatus = MutableStateFlow(WorkerManager.WorkStatus(isScheduled = false, state = "UNKNOWN"))
-    val workStatus: StateFlow<WorkerManager.WorkStatus> = _workStatus.asStateFlow()
+    private val _workStatus = MutableStateFlow(BackgroundRefreshManager.WorkStatus(isScheduled = false, state = "UNKNOWN"))
+    val workStatus: StateFlow<BackgroundRefreshManager.WorkStatus> = _workStatus.asStateFlow()
     
     private val _lastSyncDescription = MutableStateFlow("")
     val lastSyncDescription: StateFlow<String> = _lastSyncDescription.asStateFlow()
@@ -86,7 +86,7 @@ class SettingsViewModel @Inject constructor(
         // Reschedule the background worker with new interval
         viewModelScope.launch {
             try {
-                workerManager.reschedulePeriodicRefresh(minutes)
+                backgroundRefreshManager.reschedulePeriodicRefresh(minutes)
                 updateWorkStatus()
                 Logger.i("SettingsViewModel", "Background worker rescheduled with interval: $minutes minutes")
             } catch (e: Exception) {
@@ -116,7 +116,7 @@ class SettingsViewModel @Inject constructor(
         // Reschedule background worker with default interval
         viewModelScope.launch {
             try {
-                workerManager.reschedulePeriodicRefresh(WorkerManager.DEFAULT_INTERVAL_MINUTES)
+                backgroundRefreshManager.reschedulePeriodicRefresh(BackgroundRefreshManager.DEFAULT_INTERVAL_MINUTES)
                 updateWorkStatus()
                 Logger.i("SettingsViewModel", "Background worker rescheduled with default interval")
             } catch (e: Exception) {
@@ -208,12 +208,12 @@ class SettingsViewModel @Inject constructor(
     private fun updateWorkStatus() {
         viewModelScope.launch {
             try {
-                val status = workerManager.getWorkStatus()
+                val status = backgroundRefreshManager.getWorkStatus()
                 _workStatus.value = status
                 Logger.d("SettingsViewModel", "Work status updated: ${status.state}, scheduled: ${status.isScheduled}")
             } catch (e: Exception) {
                 Logger.e("SettingsViewModel", "Error getting work status", e)
-                _workStatus.value = WorkerManager.WorkStatus(
+                _workStatus.value = BackgroundRefreshManager.WorkStatus(
                     isScheduled = false, 
                     state = "ERROR", 
                     errorMessage = e.message

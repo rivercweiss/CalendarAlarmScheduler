@@ -230,9 +230,13 @@ We want to make this super robust. Try to do this as simply, modularly and robus
 
 ---
 
-It still seems like it has the same auto-hide issue.
+There seems to be an issue with the background refresh happening and setting alarms if the app is not reopened. The background worker does not seem to either be running, or if it is running, setting alarms properly. 
 
-Can you take a look at the logs and give some ideas what the issue is? Think hard.
+Can you figure out some way to reproduce this issue in the emulator and look at the logs? We will need to accelerate time to wait for the background worker to run. There are existing calendar events we can use for testing, but as a first step, just accelerate time and wait for the background worker to run and inspect the logs.
+
+The issue is not related to the battery optimization, that is a quirk of the emulator.
+
+Then can you take a look at the logs and give some ideas what the issue is? We want to make this super robust. Try to do this as simply, modularly and robustly as possible. Think hard.
 
 ---
 
@@ -270,6 +274,21 @@ Please research the ideal implementation of the unmissable alarm notification fe
 
 ---
 
-We want to edit the full screen functionality so that it never actually displays anything. When it is tapped, either from the lock screen or the notifications tray, it takes the user to the app preview section, and dismisses the notification.
+Replace WorkManager with AlarmManager for background refresh
 
 We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.
+
+Can you test that the new functionality works by checking the logs? 
+
+To do this easily you need to add a background refresh interval of 1 minute and set it as the default, but ONLY for dev builds. In prod builds the default should be 30 minutes and 1 minute interval should not be an option.
+
+With this setting, then you can clear the logs, inspect the logs and wait a minute to see if the background refresh AlarmManager fires, finds any new matching calendar events, and sets alarms correctly. 
+
+Make a plan first. Think hard.
+
+
+I added a rule and closed the app. I just added a new calendar event that matches the rule. Can you clear the logs, wait three minutes, and verify that:
+- The background refresh triggers at least twice
+- The background refresh tries to fetch any new calendar events
+- The background refresh checks the rules against all calendar events
+- The background refresh schedules any alarms that match this new rule

@@ -3,15 +3,12 @@ package com.example.calendaralarmscheduler.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.example.calendaralarmscheduler.CalendarAlarmApplication
 import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class BootReceiver : BroadcastReceiver() {
     
@@ -31,8 +28,8 @@ class BootReceiver : BroadcastReceiver() {
                     try {
                         rescheduleAllAlarms(context)
                         
-                        // Also schedule the periodic worker in case it's not running
-                        schedulePeriodicWorker(context)
+                        // Also schedule the periodic background refresh in case it's not running
+                        schedulePeriodicBackgroundRefresh(context)
                         
                         Logger.i("BootReceiver_onReceive", "Alarm re-registration completed")
                         
@@ -85,20 +82,22 @@ class BootReceiver : BroadcastReceiver() {
         }
     }
     
-    private fun schedulePeriodicWorker(context: Context) {
+    private fun schedulePeriodicBackgroundRefresh(context: Context) {
         try {
-            // Schedule calendar refresh worker to start in 1 minute
-            // This ensures the device has fully booted before starting background work
-            val refreshWorkRequest = OneTimeWorkRequestBuilder<com.example.calendaralarmscheduler.workers.CalendarRefreshWorker>()
-                .setInitialDelay(1, TimeUnit.MINUTES)
-                .build()
+            val app = context.applicationContext as CalendarAlarmApplication
+            val backgroundRefreshManager = app.backgroundRefreshManager
+            val settingsRepository = app.settingsRepository
             
-            WorkManager.getInstance(context).enqueue(refreshWorkRequest)
+            // Get the user's configured refresh interval
+            val refreshInterval = settingsRepository.getRefreshIntervalMinutes()
             
-            Logger.d("BootReceiver_scheduleWorker", "Scheduled calendar refresh worker to start in 1 minute")
+            // Schedule periodic background refresh
+            backgroundRefreshManager.schedulePeriodicRefresh(refreshInterval)
+            
+            Logger.d("BootReceiver_scheduleBackgroundRefresh", "Scheduled periodic background refresh with ${refreshInterval}-minute interval")
             
         } catch (e: Exception) {
-            Logger.e("BootReceiver_scheduleWorker", "Error scheduling periodic worker", e)
+            Logger.e("BootReceiver_scheduleBackgroundRefresh", "Error scheduling periodic background refresh", e)
         }
     }
 }

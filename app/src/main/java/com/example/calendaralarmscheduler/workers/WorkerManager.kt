@@ -1,41 +1,53 @@
 package com.example.calendaralarmscheduler.workers
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import android.os.SystemClock
+import com.example.calendaralarmscheduler.BuildConfig
+import com.example.calendaralarmscheduler.receivers.BackgroundRefreshReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
-import java.time.Duration
-import java.util.concurrent.TimeUnit
 
-class WorkerManager(private val context: Context) {
+class BackgroundRefreshManager(private val context: Context) {
     
     companion object {
-        private const val CALENDAR_REFRESH_WORK_NAME = "calendar_refresh_work"
-        private const val IMMEDIATE_REFRESH_WORK_NAME = "immediate_refresh_work"
+        private const val PERIODIC_REFRESH_REQUEST_CODE = 1001
+        private const val IMMEDIATE_REFRESH_REQUEST_CODE = 1002
         
-        // Available refresh intervals in minutes
+        // Available refresh intervals in minutes (now supporting 1 minute with AlarmManager for debug)
+        const val INTERVAL_1_MINUTE = 1
         const val INTERVAL_5_MINUTES = 5
         const val INTERVAL_15_MINUTES = 15
         const val INTERVAL_30_MINUTES = 30
         const val INTERVAL_60_MINUTES = 60
-        const val DEFAULT_INTERVAL_MINUTES = INTERVAL_30_MINUTES
         
-        val AVAILABLE_INTERVALS = listOf(
-            INTERVAL_5_MINUTES,
-            INTERVAL_15_MINUTES,
-            INTERVAL_30_MINUTES,
-            INTERVAL_60_MINUTES
-        )
+        // Build-specific default: 1 minute for debug builds, 30 minutes for release
+        val DEFAULT_INTERVAL_MINUTES = if (BuildConfig.DEBUG) INTERVAL_1_MINUTE else INTERVAL_30_MINUTES
+        
+        // Build-specific available intervals: Include 1 minute only in debug builds
+        val AVAILABLE_INTERVALS = if (BuildConfig.DEBUG) {
+            listOf(
+                INTERVAL_1_MINUTE,
+                INTERVAL_5_MINUTES,
+                INTERVAL_15_MINUTES,
+                INTERVAL_30_MINUTES,
+                INTERVAL_60_MINUTES
+            )
+        } else {
+            listOf(
+                INTERVAL_5_MINUTES,
+                INTERVAL_15_MINUTES,
+                INTERVAL_30_MINUTES,
+                INTERVAL_60_MINUTES
+            )
+        }
     }
     
-    private val workManager = WorkManager.getInstance(context)
+    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     
     /**
@@ -43,31 +55,40 @@ class WorkerManager(private val context: Context) {
      */
     fun schedulePeriodicRefresh(intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES) {
         try {
-            Logger.i("WorkerManager", "Scheduling periodic calendar refresh with interval: ${intervalMinutes} minutes")
+            Logger.i("BackgroundRefreshManager", "Scheduling periodic calendar refresh with interval: ${intervalMinutes} minutes")
             
             if (!AVAILABLE_INTERVALS.contains(intervalMinutes)) {
-                Logger.w("WorkerManager", "Invalid interval: $intervalMinutes. Using default: $DEFAULT_INTERVAL_MINUTES")
+                Logger.w("BackgroundRefreshManager", "Invalid interval: $intervalMinutes. Using default: $DEFAULT_INTERVAL_MINUTES")
             }
             
             val validInterval = if (AVAILABLE_INTERVALS.contains(intervalMinutes)) intervalMinutes else DEFAULT_INTERVAL_MINUTES
             
-            // Create constraints for background work
-            val constraints = createWorkConstraints()
+            // Cancel any existing periodic refresh
+            cancelPeriodicRefresh()
             
-            val workRequest = PeriodicWorkRequestBuilder<CalendarRefreshWorker>(
-                validInterval.toLong(), TimeUnit.MINUTES
+            // Create intent for periodic refresh
+            val intent = Intent(context, BackgroundRefreshReceiver::class.java).apply {
+                action = BackgroundRefreshReceiver.ACTION_PERIODIC_REFRESH
+            }
+            
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                PERIODIC_REFRESH_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-                .setConstraints(constraints)
-                .build()
             
-            // Use REPLACE policy to update the interval if it changed
-            workManager.enqueueUniquePeriodicWork(
-                CALENDAR_REFRESH_WORK_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                workRequest
+            // Schedule first alarm
+            val intervalMillis = validInterval * 60 * 1000L
+            val nextTriggerTime = SystemClock.elapsedRealtime() + intervalMillis
+            
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                nextTriggerTime,
+                pendingIntent
             )
             
-            Logger.i("WorkerManager", "Periodic calendar refresh scheduled successfully with ${validInterval}-minute interval")
+            Logger.i("BackgroundRefreshManager", "Periodic calendar refresh scheduled successfully with ${validInterval}-minute interval")
             
             // Check battery optimization status and warn if needed
             checkBatteryOptimizationStatus()
@@ -76,7 +97,7 @@ class WorkerManager(private val context: Context) {
             checkDozeCompatibility()
             
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Failed to schedule periodic calendar refresh", e)
+            Logger.e("BackgroundRefreshManager", "Failed to schedule periodic calendar refresh", e)
         }
     }
     
@@ -85,11 +106,28 @@ class WorkerManager(private val context: Context) {
      */
     fun cancelPeriodicRefresh() {
         try {
-            Logger.i("WorkerManager", "Cancelling periodic calendar refresh")
-            workManager.cancelUniqueWork(CALENDAR_REFRESH_WORK_NAME)
-            Logger.i("WorkerManager", "Periodic calendar refresh cancelled successfully")
+            Logger.i("BackgroundRefreshManager", "Cancelling periodic calendar refresh")
+            
+            val intent = Intent(context, BackgroundRefreshReceiver::class.java).apply {
+                action = BackgroundRefreshReceiver.ACTION_PERIODIC_REFRESH
+            }
+            
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                PERIODIC_REFRESH_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            if (pendingIntent != null) {
+                alarmManager.cancel(pendingIntent)
+                pendingIntent.cancel()
+                Logger.i("BackgroundRefreshManager", "Periodic calendar refresh cancelled successfully")
+            } else {
+                Logger.d("BackgroundRefreshManager", "No periodic refresh alarm was scheduled")
+            }
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Failed to cancel periodic calendar refresh", e)
+            Logger.e("BackgroundRefreshManager", "Failed to cancel periodic calendar refresh", e)
         }
     }
     
@@ -97,7 +135,7 @@ class WorkerManager(private val context: Context) {
      * Reschedule with new interval (cancels old work and creates new)
      */
     fun reschedulePeriodicRefresh(newIntervalMinutes: Int) {
-        Logger.i("WorkerManager", "Rescheduling periodic refresh from current to ${newIntervalMinutes} minutes")
+        Logger.i("BackgroundRefreshManager", "Rescheduling periodic refresh from current to ${newIntervalMinutes} minutes")
         schedulePeriodicRefresh(newIntervalMinutes)
     }
     
@@ -106,25 +144,32 @@ class WorkerManager(private val context: Context) {
      */
     fun enqueueImmediateRefresh() {
         try {
-            Logger.i("WorkerManager", "Enqueuing immediate calendar refresh")
+            Logger.i("BackgroundRefreshManager", "Enqueuing immediate calendar refresh")
             
-            val constraints = createWorkConstraints()
+            val intent = Intent(context, BackgroundRefreshReceiver::class.java).apply {
+                action = BackgroundRefreshReceiver.ACTION_IMMEDIATE_REFRESH
+            }
             
-            val workRequest = OneTimeWorkRequestBuilder<CalendarRefreshWorker>()
-                .setConstraints(constraints)
-                .build()
-            
-            // Use REPLACE policy to ensure only one immediate refresh runs at a time
-            workManager.enqueueUniqueWork(
-                IMMEDIATE_REFRESH_WORK_NAME,
-                ExistingWorkPolicy.REPLACE,
-                workRequest
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                IMMEDIATE_REFRESH_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             
-            Logger.i("WorkerManager", "Immediate calendar refresh enqueued successfully")
+            // Schedule immediate execution (1 second delay to ensure proper context)
+            val triggerTime = SystemClock.elapsedRealtime() + 1000
+            
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+            
+            Logger.i("BackgroundRefreshManager", "Immediate calendar refresh scheduled successfully")
             
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Failed to enqueue immediate calendar refresh", e)
+            Logger.e("BackgroundRefreshManager", "Failed to enqueue immediate calendar refresh", e)
         }
     }
     
@@ -133,41 +178,30 @@ class WorkerManager(private val context: Context) {
      */
     fun getWorkStatus(): WorkStatus {
         return try {
-            val workInfos = workManager.getWorkInfosForUniqueWork(CALENDAR_REFRESH_WORK_NAME).get()
-            if (workInfos.isNotEmpty()) {
-                val workInfo = workInfos.first()
-                WorkStatus(
-                    isScheduled = workInfo.state != androidx.work.WorkInfo.State.CANCELLED,
-                    state = workInfo.state.name,
-                    runAttemptCount = workInfo.runAttemptCount,
-                    nextScheduleTimeMillis = null // WorkInfo doesn't provide this directly
-                )
-            } else {
-                WorkStatus(isScheduled = false, state = "NOT_SCHEDULED")
+            val intent = Intent(context, BackgroundRefreshReceiver::class.java).apply {
+                action = BackgroundRefreshReceiver.ACTION_PERIODIC_REFRESH
             }
+            
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                PERIODIC_REFRESH_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            val isScheduled = pendingIntent != null
+            WorkStatus(
+                isScheduled = isScheduled,
+                state = if (isScheduled) "SCHEDULED" else "NOT_SCHEDULED",
+                runAttemptCount = 0, // Not tracked with AlarmManager
+                nextScheduleTimeMillis = null // Not easily available with AlarmManager
+            )
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Error getting work status", e)
+            Logger.e("BackgroundRefreshManager", "Error getting work status", e)
             WorkStatus(isScheduled = false, state = "ERROR", errorMessage = e.message)
         }
     }
     
-    /**
-     * Create work constraints optimized for calendar refresh
-     */
-    private fun createWorkConstraints(): Constraints {
-        return Constraints.Builder()
-            // No network required - we're reading local calendar provider
-            .setRequiredNetworkType(androidx.work.NetworkType.NOT_REQUIRED)
-            // Allow work during device idle (battery optimization compatibility)
-            .setRequiresDeviceIdle(false)
-            // Don't require charging - calendar refresh is lightweight
-            .setRequiresCharging(false)
-            // Work can run when battery is low - critical for alarm reliability
-            .setRequiresBatteryNotLow(false)
-            // Work can run in all storage states
-            .setRequiresStorageNotLow(false)
-            .build()
-    }
     
     /**
      * Check battery optimization status and log information
@@ -177,13 +211,13 @@ class WorkerManager(private val context: Context) {
             val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
             
             if (isWhitelisted) {
-                Logger.i("WorkerManager", "✅ App is whitelisted from battery optimization - background work should run reliably")
+                Logger.i("BackgroundRefreshManager", "✅ App is whitelisted from battery optimization - background refresh should run reliably")
             } else {
-                Logger.w("WorkerManager", "⚠️ App is NOT whitelisted from battery optimization - background work may be delayed")
+                Logger.w("BackgroundRefreshManager", "⚠️ App is NOT whitelisted from battery optimization - background refresh may be delayed")
             }
             
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Failed to check battery optimization status", e)
+            Logger.e("BackgroundRefreshManager", "Failed to check battery optimization status", e)
         }
     }
     
@@ -204,7 +238,7 @@ class WorkerManager(private val context: Context) {
     fun isBatteryOptimizationIgnored(): Boolean {
         val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
         
-        Logger.d("WorkerManager", "Battery optimization check: ${if (isWhitelisted) "Whitelisted" else "Not whitelisted"}")
+        Logger.d("BackgroundRefreshManager", "Battery optimization check: ${if (isWhitelisted) "Whitelisted" else "Not whitelisted"}")
         
         return isWhitelisted
     }
@@ -221,7 +255,8 @@ class WorkerManager(private val context: Context) {
      */
     fun getIntervalDescription(intervalMinutes: Int): String {
         return when (intervalMinutes) {
-            INTERVAL_5_MINUTES -> "5 minutes (High frequency - may impact battery)"
+            INTERVAL_1_MINUTE -> "1 minute (Debug only - very high battery usage)"
+            INTERVAL_5_MINUTES -> "5 minutes (High frequency - more battery usage)"
             INTERVAL_15_MINUTES -> "15 minutes (Balanced frequency)"
             INTERVAL_30_MINUTES -> "30 minutes (Default - recommended)"
             INTERVAL_60_MINUTES -> "60 minutes (Low frequency - better battery)"
@@ -243,15 +278,47 @@ class WorkerManager(private val context: Context) {
             val isWhitelisted = PermissionUtils.isBatteryOptimizationWhitelisted(context)
             
             if (isDozeMode && !isWhitelisted) {
-                Logger.w("WorkerManager", "⚠️ Device is in Doze mode and app is not whitelisted - background work may be restricted")
+                Logger.w("BackgroundRefreshManager", "⚠️ Device is in Doze mode and app is not whitelisted - background refresh may be restricted")
             } else if (isWhitelisted) {
-                Logger.i("WorkerManager", "✅ App is whitelisted - should work reliably even in Doze mode")
+                Logger.i("BackgroundRefreshManager", "✅ App is whitelisted - should work reliably even in Doze mode")
             } else {
-                Logger.d("WorkerManager", "Device not in Doze mode - background work should proceed normally")
+                Logger.d("BackgroundRefreshManager", "Device not in Doze mode - background refresh should proceed normally")
             }
             
         } catch (e: Exception) {
-            Logger.e("WorkerManager", "Failed to check Doze mode", e)
+            Logger.e("BackgroundRefreshManager", "Failed to check Doze mode", e)
+        }
+    }
+    
+    /**
+     * Schedule the next periodic refresh (used by receiver after execution)
+     */
+    fun scheduleNextPeriodicRefresh(intervalMinutes: Int) {
+        try {
+            val intent = Intent(context, BackgroundRefreshReceiver::class.java).apply {
+                action = BackgroundRefreshReceiver.ACTION_PERIODIC_REFRESH
+            }
+            
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                PERIODIC_REFRESH_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            val intervalMillis = intervalMinutes * 60 * 1000L
+            val nextTriggerTime = SystemClock.elapsedRealtime() + intervalMillis
+            
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                nextTriggerTime,
+                pendingIntent
+            )
+            
+            Logger.i("BackgroundRefreshManager", "Next periodic refresh scheduled for ${intervalMinutes} minutes from now")
+            
+        } catch (e: Exception) {
+            Logger.e("BackgroundRefreshManager", "Failed to schedule next periodic refresh", e)
         }
     }
     

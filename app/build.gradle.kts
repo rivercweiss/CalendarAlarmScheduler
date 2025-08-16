@@ -27,6 +27,15 @@ android {
         buildConfig = true
     }
     
+    signingConfigs {
+        create("release") {
+            storeFile = file("release-key.keystore")
+            storePassword = "android"
+            keyAlias = "release-key"
+            keyPassword = "android"
+        }
+    }
+    
     buildTypes {
         debug {
             buildConfigField("boolean", "SHOW_DEBUG_FEATURES", "true")
@@ -34,6 +43,7 @@ android {
         release {
             isMinifyEnabled = false
             buildConfigField("boolean", "SHOW_DEBUG_FEATURES", "false")
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -78,8 +88,6 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     
-    // WorkManager for background tasks
-    implementation(libs.work.runtime.ktx)
     
     // Lifecycle and ViewModels
     implementation(libs.lifecycle.viewmodel.ktx)
@@ -99,7 +107,6 @@ dependencies {
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.hilt.work)
     
     // Google Play Billing for in-app purchases
     implementation("com.android.billingclient:billing-ktx:7.0.0")
@@ -113,7 +120,6 @@ dependencies {
     testImplementation(libs.arch.core.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.work.testing)
     
     // Comprehensive E2E Testing Framework
     androidTestImplementation(libs.truth)

@@ -3,6 +3,7 @@ package com.example.calendaralarmscheduler.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.format.DateFormat
+import com.example.calendaralarmscheduler.BuildConfig
 import com.example.calendaralarmscheduler.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +50,7 @@ class SettingsRepository(
         private const val KEY_PREMIUM_PURCHASED = "premium_purchased"
         
         // Default values
-        const val DEFAULT_REFRESH_INTERVAL_MINUTES = 30
+        val DEFAULT_REFRESH_INTERVAL_MINUTES = if (BuildConfig.DEBUG) 1 else 30
         const val DEFAULT_ALL_DAY_HOUR = 20
         const val DEFAULT_ALL_DAY_MINUTE = 0
     }

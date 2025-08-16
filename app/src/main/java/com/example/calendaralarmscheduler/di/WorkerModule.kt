@@ -1,7 +1,7 @@
 package com.example.calendaralarmscheduler.di
 
 import android.content.Context
-import com.example.calendaralarmscheduler.workers.WorkerManager
+import com.example.calendaralarmscheduler.workers.BackgroundRefreshManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,11 +11,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object WorkerModule {
+object BackgroundRefreshModule {
 
     @Provides
     @Singleton
-    fun provideWorkerManager(@ApplicationContext context: Context): WorkerManager {
-        return WorkerManager(context)
+    fun provideBackgroundRefreshManager(@ApplicationContext context: Context): BackgroundRefreshManager {
+        return BackgroundRefreshManager(context)
     }
 }

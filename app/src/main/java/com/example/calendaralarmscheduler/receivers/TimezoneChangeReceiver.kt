@@ -52,7 +52,7 @@ class TimezoneChangeReceiver : BroadcastReceiver() {
                 rescheduleAllAlarms(context)
                 
                 // Trigger immediate calendar refresh to catch any new events
-                app.workerManager.enqueueImmediateRefresh()
+                app.backgroundRefreshManager.enqueueImmediateRefresh()
                 
                 Logger.i("TimezoneChangeReceiver", "Timezone change handling completed for zone: ${currentZone.id}")
                 
@@ -78,7 +78,7 @@ class TimezoneChangeReceiver : BroadcastReceiver() {
                 rescheduleAllAlarms(context)
                 
                 // Trigger calendar refresh to handle any date-boundary crossings
-                app.workerManager.enqueueImmediateRefresh()
+                app.backgroundRefreshManager.enqueueImmediateRefresh()
                 
                 Logger.i("TimezoneChangeReceiver", "System time change handling completed")
                 
