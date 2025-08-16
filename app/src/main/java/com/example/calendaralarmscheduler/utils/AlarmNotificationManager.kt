@@ -125,7 +125,7 @@ class AlarmNotificationManager(
                     .bigText(when {
                         isTestAlarm -> "Test alarm for: $eventTitle"
                         isPremium -> "Calendar event: $eventTitle"
-                        else -> "Calendar event alarm. Upgrade to see event details."
+                        else -> "Upgrade to see event details in this notification."
                     }))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
