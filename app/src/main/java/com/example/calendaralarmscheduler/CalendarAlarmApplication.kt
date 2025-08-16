@@ -27,7 +27,7 @@ class CalendarAlarmApplication : Application() {
     @Inject
     lateinit var backgroundRefreshManager: BackgroundRefreshManager
     
-    // Additional injected dependencies for legacy components (BootReceiver, BackgroundRefreshReceiver)
+    // Additional injected dependencies for receiver components (BootReceiver, BackgroundRefreshReceiver)
     @Inject
     lateinit var alarmRepository: com.example.calendaralarmscheduler.data.AlarmRepository
     
@@ -112,7 +112,7 @@ class CalendarAlarmApplication : Application() {
                 onRefreshIntervalChanged(newIntervalMinutes)
             }
             
-            // Schedule background calendar refresh with user-configured interval
+            // Schedule background calendar refresh using AlarmManager with user-configured interval
             try {
                 val refreshInterval = settingsRepository.getRefreshIntervalMinutes()
                 backgroundRefreshManager.schedulePeriodicRefresh(refreshInterval)

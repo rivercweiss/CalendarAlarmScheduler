@@ -46,7 +46,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **AlarmModule.kt** - Hilt module providing alarm-related dependencies
 - **DatabaseModule.kt** - Hilt module providing Room database dependencies
 - **RepositoryModule.kt** - Hilt module providing repository and billing manager dependencies
-- **WorkerModule.kt** - Hilt module providing worker-related dependencies
+- **BackgroundRefreshModule.kt** - Hilt module providing background refresh manager dependencies
 
 ### Services (`services/`)
 - **DayResetService.kt** - Manages midnight reset alarms for day tracking boundaries
@@ -54,7 +54,8 @@ This index provides a quick overview of all source files in the codebase to help
 ### Broadcast Receivers (`receivers/`)
 - **AlarmReceiver.kt** - Handles fired alarms and triggers notification system with premium content gating
 - **AlarmDismissReceiver.kt** - Handles alarm dismissal actions from notifications
-- **BootReceiver.kt** - Reschedules alarms after device boot or app update
+- **BackgroundRefreshReceiver.kt** - Handles background calendar refresh via AlarmManager broadcasts
+- **BootReceiver.kt** - Reschedules alarms and background refresh after device boot or app update
 - **DayResetReceiver.kt** - Handles midnight reset broadcasts for day tracking
 - **TimezoneChangeReceiver.kt** - Handles timezone changes to reschedule alarms
 
@@ -101,8 +102,7 @@ This index provides a quick overview of all source files in the codebase to help
 - **TimezoneUtils.kt** - Essential timezone display and change detection utilities
 
 ### Background Workers (`workers/`)
-- **CalendarRefreshWorker.kt** - Simple background worker for calendar scanning and alarm scheduling
-- **WorkerManager.kt** - Manages WorkManager scheduling with battery optimization checking
+- **BackgroundRefreshManager.kt** - Manages AlarmManager-based background refresh with exact timing guarantees
 
 ## Key Architecture Patterns
 
@@ -111,12 +111,20 @@ This index provides a quick overview of all source files in the codebase to help
 3. **Dependency Injection** - Hilt for dependency management
 4. **Clean Architecture** - Clear separation between data, domain, and UI layers
 5. **Reactive Programming** - StateFlow and Flow for reactive updates
-6. **Background Processing** - WorkManager for reliable background tasks
+6. **Background Processing** - AlarmManager for guaranteed exact timing in background tasks
 7. **Premium Features** - Google Play Billing integration with content gating and debug support
 
-## Recent Additions (Premium Features)
+## Recent Major Changes
 
-- **BillingManager.kt** - NEW: Google Play Billing integration for $2 premium upgrade
+### AlarmManager Migration (Latest)
+- **Replaced WorkManager** with AlarmManager for guaranteed background refresh timing
+- **BackgroundRefreshManager.kt** - NEW: Exact alarm scheduling with `setExactAndAllowWhileIdle()`
+- **BackgroundRefreshReceiver.kt** - NEW: Handles periodic and immediate refresh broadcasts
+- **Removed WorkManager dependency** - Simplified architecture with better reliability
+- **Build-specific intervals** - 1-minute debug, 30-minute release defaults
+
+### Premium Features
+- **BillingManager.kt** - Google Play Billing integration for $2 premium upgrade
 - **Premium UI** - Enhanced settings screen with upgrade section and debug toggle
 - **Content Gating** - Notifications show event details only for premium users
 - **Build Configuration** - Debug/release build types with premium debug controls

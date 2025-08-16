@@ -93,7 +93,9 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 
 2. **Google Calendar Integration**
    * Uses `CalendarContract` content provider to query local Google Calendar events.
-   * Supports **background refresh** with `WorkManager` (user-configurable: 5, 15, 30, 60 minutes, default 30).
+   * Supports **background refresh** with `AlarmManager` (user-configurable: 1, 5, 15, 30, 60 minutes, default varies by build).
+   * **Debug builds**: Default 1-minute interval with all options available for testing
+   * **Release builds**: Default 30-minute interval, excludes 1-minute option for battery preservation
    * **Lookahead window**: 2 days from current time.
 
 3. **Rule Engine**
@@ -115,10 +117,14 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. **Premium section at top** with upgrade/purchase flow and debug toggle (debug builds only).
    * **Permission Onboarding** – Step-by-step permission granting with explanations.
 
-6. **Background Worker**
-   * Periodically scans for new/changed calendar events using `LAST_MODIFIED` field.
-   * Updates alarms without requiring the app to be open.
-   * Handles timezone changes reactively via dedicated TimezoneChangeReceiver.
+6. **Background Refresh System**
+   * **BackgroundRefreshManager**: Uses `AlarmManager.setExactAndAllowWhileIdle()` for guaranteed timing
+   * **BackgroundRefreshReceiver**: Handles periodic and immediate refresh requests via broadcast receiver
+   * Periodically scans for new/changed calendar events using `LAST_MODIFIED` field
+   * Updates alarms without requiring the app to be open
+   * **Self-rescheduling**: Each refresh automatically schedules the next refresh cycle
+   * **Exact timing**: Bypasses Doze mode and battery optimization restrictions
+   * Handles timezone changes reactively via dedicated TimezoneChangeReceiver
 
 7. **Battery Management**
    * Simple battery optimization whitelist detection and management.
@@ -207,17 +213,21 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
 
 ## 10. Background Refresh Configuration
 
-**WorkManager Setup:**
-* Periodic work request with user-configurable intervals: 5, 15, 30, 60 minutes
-* Default: 30 minutes
-* No network constraints (reading local calendar provider)
-* Battery optimization warning if delays detected
+**AlarmManager Setup:**
+* **BackgroundRefreshManager**: Exact alarm scheduling with `setExactAndAllowWhileIdle()`
+* **Available intervals**: 1, 5, 15, 30, 60 minutes (1-minute debug-only)
+* **Debug builds**: Default 1-minute interval for rapid testing
+* **Release builds**: Default 30-minute interval for battery optimization
+* **Self-scheduling**: Each refresh schedules the next cycle automatically
+* **Reliability**: Bypasses Doze mode and battery optimization restrictions
 
 **Refresh Logic:**
-1. Query events in next 2 days with `lastModified > lastSyncTime`
-2. Apply all enabled rules to find matches
-3. Schedule new alarms, update changed ones, clean up obsolete ones
-4. Update `lastSyncTime`
+1. **BackgroundRefreshReceiver** triggers on AlarmManager broadcast
+2. Query events in next 2 days with `lastModified > lastSyncTime`
+3. Apply all enabled rules to find matches
+4. Schedule new alarms, update changed ones, clean up obsolete ones
+5. Update `lastSyncTime`
+6. **Auto-schedule**: Next refresh alarm set for configured interval
 
 ---
 
@@ -240,7 +250,8 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" &
 
 **Notes:**
 - Build output: `app/build/outputs/apk/debug/app-debug.apk`
-- Build time: ~13s for clean build, ~1s for incremental
+- Build time: ~7s for clean build, ~3s for incremental
+- **Removed WorkManager dependency** - now uses pure AlarmManager for background operations
 - Premium features require Google Play Billing dependency (already included)
 
 ---
@@ -259,6 +270,8 @@ All app logs use prefix `CalendarAlarmScheduler_` with categories:
 - `*_ErrorNotificationManager`: Generic error notification events
 - `*_BillingManager`: Premium purchase flow and state changes
 - `*_SettingsFragment`: Premium UI updates and debug toggles
+- `*_BackgroundRefreshManager`: AlarmManager scheduling and status
+- `*_BackgroundRefreshReceiver`: Background refresh execution and timing
 
 **Note**: All logging goes to Android logcat only (no file logging for simplicity).
 
@@ -268,10 +281,13 @@ For efficient debugging and log collection during development:
 **Basic Log Monitoring:**
 ```bash
 # Monitor specific components in real-time
-/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat | grep -E "CalendarAlarmScheduler|CalendarRepository|BillingManager"
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat | grep -E "CalendarAlarmScheduler|CalendarRepository|BackgroundRefresh"
 
 # Check recent logs from device buffer (faster than real-time)
 /Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep "CalendarRepository" | tail -20
+
+# Monitor background refresh activity specifically
+/Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep -E "BackgroundRefreshReceiver|BackgroundRefreshManager|periodic refresh" | tail -15
 
 # Monitor premium/billing activity specifically
 /Users/riverweiss/Library/Android/sdk/platform-tools/adb logcat -d | grep -E "BillingManager|SettingsFragment.*Premium" | tail -10

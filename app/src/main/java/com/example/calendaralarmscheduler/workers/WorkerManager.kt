@@ -12,6 +12,10 @@ import com.example.calendaralarmscheduler.receivers.BackgroundRefreshReceiver
 import com.example.calendaralarmscheduler.utils.PermissionUtils
 import com.example.calendaralarmscheduler.utils.Logger
 
+/**
+ * Manages background calendar refresh using AlarmManager for guaranteed exact timing.
+ * Replaces WorkManager to bypass Doze mode and battery optimization restrictions.
+ */
 class BackgroundRefreshManager(private val context: Context) {
     
     companion object {
@@ -51,7 +55,8 @@ class BackgroundRefreshManager(private val context: Context) {
     private val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     
     /**
-     * Schedule periodic calendar refresh with specified interval
+     * Schedule periodic calendar refresh using AlarmManager.setExactAndAllowWhileIdle()
+     * for guaranteed timing that bypasses Doze mode and battery optimization.
      */
     fun schedulePeriodicRefresh(intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES) {
         try {
@@ -132,7 +137,7 @@ class BackgroundRefreshManager(private val context: Context) {
     }
     
     /**
-     * Reschedule with new interval (cancels old work and creates new)
+     * Reschedule with new interval (cancels old alarm and creates new)
      */
     fun reschedulePeriodicRefresh(newIntervalMinutes: Int) {
         Logger.i("BackgroundRefreshManager", "Rescheduling periodic refresh from current to ${newIntervalMinutes} minutes")
@@ -140,7 +145,8 @@ class BackgroundRefreshManager(private val context: Context) {
     }
     
     /**
-     * Enqueue immediate one-time calendar refresh (e.g., for timezone changes)
+     * Schedule immediate one-time calendar refresh (e.g., for timezone changes)
+     * using AlarmManager with minimal delay for guaranteed execution.
      */
     fun enqueueImmediateRefresh() {
         try {
@@ -174,7 +180,8 @@ class BackgroundRefreshManager(private val context: Context) {
     }
     
     /**
-     * Get current work status information
+     * Get current background refresh status by checking PendingIntent existence.
+     * AlarmManager doesn't provide detailed status like WorkManager did.
      */
     fun getWorkStatus(): WorkStatus {
         return try {

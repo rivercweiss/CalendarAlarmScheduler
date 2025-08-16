@@ -13,6 +13,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * Handles background calendar refresh triggered by AlarmManager.
+ * Replaces CalendarRefreshWorker for guaranteed exact timing that bypasses
+ * Doze mode and battery optimization restrictions.
+ */
 class BackgroundRefreshReceiver : BroadcastReceiver() {
     
     companion object {

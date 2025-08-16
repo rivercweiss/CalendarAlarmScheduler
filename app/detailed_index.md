@@ -199,8 +199,8 @@ This index provides comprehensive documentation of all functions in the codebase
 - `provideSettingsRepository(@ApplicationContext context: Context): SettingsRepository` - **@Provides** **@Singleton** - Provide Settings Repository
 - `provideBillingManager(@ApplicationContext context: Context, settingsRepository: SettingsRepository): BillingManager` - **@Provides** **@Singleton** - Provide Google Play Billing Manager
 
-### WorkerModule.kt
-- `provideWorkerManager(@ApplicationContext context: Context): WorkerManager` - **@Provides** **@Singleton** - Provide Worker Manager
+### BackgroundRefreshModule.kt
+- `provideBackgroundRefreshManager(@ApplicationContext context: Context): BackgroundRefreshManager` - **@Provides** **@Singleton** - Provide Background Refresh Manager
 
 ## Domain Layer
 
@@ -260,10 +260,15 @@ This index provides comprehensive documentation of all functions in the codebase
 ### AlarmDismissReceiver.kt
 - Functions not detailed in provided content
 
+### BackgroundRefreshReceiver.kt
+- `onReceive(context: Context, intent: Intent)` - **override** - Handle background refresh broadcasts (periodic and immediate)
+- `performRefresh(context: Context, isPeriodicRefresh: Boolean)` - **private** - Execute calendar refresh and alarm scheduling
+- `scheduleNextRefreshIfNeeded(backgroundRefreshManager: BackgroundRefreshManager, settingsRepository: SettingsRepository, isPeriodicRefresh: Boolean)` - **private** **suspend** - Schedule next refresh cycle for periodic refreshes
+
 ### BootReceiver.kt
 - `onReceive(context: Context?, intent: Intent?)` - **override** - Handle boot/update broadcasts
 - `rescheduleAllAlarms()` - **private** **suspend** - Re-register all active alarms with AlarmManager
-- `schedulePeriodicWorker()` - **private** - Restart periodic calendar refresh worker
+- `schedulePeriodicBackgroundRefresh()` - **private** - Restart periodic background refresh with AlarmManager
 
 ### TimezoneChangeReceiver.kt
 - Functions not detailed in provided content
@@ -392,19 +397,16 @@ This index provides comprehensive documentation of all functions in the codebase
 
 ## Workers
 
-### CalendarRefreshWorker.kt
-- `doWork(): Result` - **override** **suspend** - Simple calendar refresh and alarm scheduling
-
-### WorkerManager.kt
-- `schedulePeriodicRefresh(intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES)` - Schedule periodic calendar refresh with specified interval
-- `cancelPeriodicRefresh()` - Cancel periodic calendar refresh
-- `reschedulePeriodicRefresh(newIntervalMinutes: Int)` - Reschedule with new interval
-- `enqueueImmediateRefresh()` - Enqueue immediate one-time calendar refresh
-- `getWorkStatus(): WorkStatus` - Get current work status information
-- `createWorkConstraints(): Constraints` - **private** - Create work constraints optimized for calendar refresh
-- `checkBatteryOptimizationStatus()` - **private** - Check battery optimization status and log information
+### BackgroundRefreshManager.kt
+- `schedulePeriodicRefresh(intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES)` - Schedule periodic calendar refresh using AlarmManager with exact timing
+- `cancelPeriodicRefresh()` - Cancel periodic calendar refresh alarm
+- `reschedulePeriodicRefresh(newIntervalMinutes: Int)` - Reschedule with new interval (cancels old, creates new)
+- `enqueueImmediateRefresh()` - Schedule immediate one-time calendar refresh with 1-second delay
+- `getWorkStatus(): WorkStatus` - Get current background refresh status using PendingIntent existence check
+- `scheduleNextPeriodicRefresh(intervalMinutes: Int)` - Schedule the next periodic refresh (used by receiver after execution)
+- `checkBatteryOptimizationStatus()` - **private** - Check battery optimization status and log warnings
 - `isDeviceInDozeMode(): Boolean` - Check if the device is in Doze mode (API 23+)
 - `isBatteryOptimizationIgnored(): Boolean` - Check if battery optimization is ignored (app is whitelisted)
-- `validateInterval(intervalMinutes: Int): Boolean` - Validate interval value
-- `getIntervalDescription(intervalMinutes: Int): String` - Get human-readable interval description
-- `checkDozeCompatibility()` - **private** - Check battery optimization status and log compatibility warnings
+- `validateInterval(intervalMinutes: Int): Boolean` - Validate interval value against build-specific available intervals
+- `getIntervalDescription(intervalMinutes: Int): String` - Get human-readable interval description with build-specific options
+- `checkDozeCompatibility()` - **private** - Check battery optimization compatibility and log warnings
