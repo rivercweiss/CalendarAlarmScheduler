@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlin.math.abs
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.ui.AlarmActivity
 import com.example.calendaralarmscheduler.utils.Logger
@@ -39,8 +40,7 @@ class AlarmNotificationManager(
     }
     
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+        val channel = NotificationChannel(
                 ALARM_CHANNEL_ID,
                 ALARM_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
@@ -66,13 +66,13 @@ class AlarmNotificationManager(
                 vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
             }
             
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-            
-            Logger.d("AlarmNotificationManager", "Created unmissable alarm notification channel")
-        }
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+        
+        Logger.d("AlarmNotificationManager", "Created unmissable alarm notification channel")
     }
     
+    @Suppress("UNUSED_PARAMETER")
     fun showAlarmNotification(
         alarmId: String,
         eventTitle: String,
@@ -125,7 +125,7 @@ class AlarmNotificationManager(
                     .bigText(when {
                         isTestAlarm -> "Test alarm for: $eventTitle"
                         isPremium -> "Calendar event: $eventTitle"
-                        else -> "Upgrade to see event details in this notification."
+                        else -> "Calendar event alarm. Upgrade to see event details."
                     }))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -143,14 +143,16 @@ class AlarmNotificationManager(
                     "Dismiss",
                     dismissPendingIntent
                 )
-                
-                
                 .build()
             
-            // Show the notification
+            // Show the notification with permission check
             val notificationId = generateNotificationId(alarmId)
-            with(NotificationManagerCompat.from(context)) {
-                notify(notificationId, notification)
+            val notificationManager = NotificationManagerCompat.from(context)
+            
+            if (notificationManager.areNotificationsEnabled()) {
+                notificationManager.notify(notificationId, notification)
+            } else {
+                Logger.w("AlarmNotificationManager", "❌ Notifications are disabled for this app - alarm may not be visible")
             }
             
             Logger.i("AlarmNotificationManager", "✅ Unmissable alarm notification shown with ID: $notificationId")
@@ -161,7 +163,7 @@ class AlarmNotificationManager(
     }
     
     private fun generateNotificationId(alarmId: String): Int {
-        return ALARM_NOTIFICATION_ID_BASE + Math.abs(alarmId.hashCode() % 1000)
+        return ALARM_NOTIFICATION_ID_BASE + abs(alarmId.hashCode() % 1000)
     }
     
     fun dismissAlarmNotification(alarmId: String) {
