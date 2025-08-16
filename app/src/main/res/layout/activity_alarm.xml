@@ -4,8 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp"
-    android:background="@android:color/holo_red_dark"
+    android:padding="@dimen/spacing_xl"
+    android:background="@color/error"
     android:keepScreenOn="true">
 
     <!-- Current Time Display -->
@@ -15,9 +15,10 @@
         android:layout_height="wrap_content"
         android:text="12:34 AM"
         android:textSize="48sp"
+        android:textAppearance="@style/TextAppearance.App.Headline"
+        android:textColor="@color/white"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/spacing_lg" />
 
     <!-- Alarm Label -->
     <TextView
@@ -25,18 +26,19 @@
         android:layout_height="wrap_content"
         android:text="ALARM"
         android:textSize="24sp"
+        android:textAppearance="@style/TextAppearance.App.Title"
+        android:textColor="@color/white"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
         android:alpha="0.9"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="@dimen/spacing_xxl" />
 
     <!-- Event Details Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@android:color/white"
-        android:padding="20dp"
+        android:background="?attr/colorSurface"
+        android:padding="@dimen/padding"
         android:layout_marginBottom="48dp"
         android:elevation="8dp">
 
@@ -46,11 +48,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Event Title"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textAppearance="@style/TextAppearance.App.Title"
             android:gravity="center"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="@dimen/spacing_sm" />
 
         <!-- Event Time -->
         <TextView
@@ -58,10 +58,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Event Time"
-            android:textSize="16sp"
-            android:textColor="#666666"
+            android:textAppearance="@style/TextAppearance.App.Body"
             android:gravity="center"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="@dimen/spacing_xs" />
 
         <!-- Rule Info -->
         <TextView
@@ -69,8 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Rule: Unknown"
-            android:textSize="14sp"
-            android:textColor="#999999"
+            android:textAppearance="@style/TextAppearance.App.Caption"
             android:gravity="center" />
 
     </LinearLayout>
@@ -90,11 +88,8 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:text="Snooze 5min"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@android:color/white"
-            android:textColor="@android:color/black"
-            android:layout_marginEnd="8dp"
+            style="@style/Button.App.Outlined"
+            android:layout_marginEnd="@dimen/spacing_sm"
             android:elevation="2dp" />
 
         <!-- Dismiss Button -->
@@ -104,11 +99,8 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:text="Dismiss"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@color/purple_500"
-            android:textColor="@android:color/white"
-            android:layout_marginStart="8dp"
+            style="@style/Button.App"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:elevation="2dp" />
 
     </LinearLayout>

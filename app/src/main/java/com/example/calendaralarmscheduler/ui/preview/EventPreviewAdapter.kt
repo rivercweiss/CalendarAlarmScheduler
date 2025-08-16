@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.calendaralarmscheduler.R
+import com.google.android.material.color.MaterialColors
 import com.example.calendaralarmscheduler.databinding.ItemEventPreviewBinding
 import com.example.calendaralarmscheduler.domain.models.CalendarEvent
 import com.example.calendaralarmscheduler.data.database.entities.ScheduledAlarm
@@ -96,12 +97,12 @@ class EventPreviewAdapter(
             when {
                 alarms.isEmpty() -> {
                     binding.textAlarmStatus.text = "No alarms scheduled"
-                    binding.textAlarmStatus.setTextColor(itemView.context.getColor(R.color.text_secondary))
+                    binding.textAlarmStatus.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOnSurfaceVariant))
                     binding.textAlarmDetails.visibility = android.view.View.GONE
                 }
                 alarms.all { it.userDismissed } -> {
                     binding.textAlarmStatus.text = "${alarms.size} alarm(s) dismissed"
-                    binding.textAlarmStatus.setTextColor(itemView.context.getColor(R.color.warning))
+                    binding.textAlarmStatus.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorError))
                     binding.textAlarmDetails.visibility = android.view.View.GONE
                 }
                 else -> {
@@ -111,7 +112,7 @@ class EventPreviewAdapter(
                     when {
                         activeAlarms.isNotEmpty() -> {
                             binding.textAlarmStatus.text = "${activeAlarms.size} active alarm(s)"
-                            binding.textAlarmStatus.setTextColor(itemView.context.getColor(R.color.success))
+                            binding.textAlarmStatus.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorPrimary))
                             
                             // Show next alarm time
                             val nextAlarm = activeAlarms.minByOrNull { it.alarmTimeUtc }
@@ -124,12 +125,12 @@ class EventPreviewAdapter(
                         }
                         pastAlarms.isNotEmpty() -> {
                             binding.textAlarmStatus.text = "${pastAlarms.size} past alarm(s)"
-                            binding.textAlarmStatus.setTextColor(itemView.context.getColor(R.color.text_secondary))
+                            binding.textAlarmStatus.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOnSurfaceVariant))
                             binding.textAlarmDetails.visibility = android.view.View.GONE
                         }
                         else -> {
                             binding.textAlarmStatus.text = "No active alarms"
-                            binding.textAlarmStatus.setTextColor(itemView.context.getColor(R.color.text_secondary))
+                            binding.textAlarmStatus.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOnSurfaceVariant))
                             binding.textAlarmDetails.visibility = android.view.View.GONE
                         }
                     }
@@ -139,10 +140,10 @@ class EventPreviewAdapter(
             // Event status (past/future)
             if (event.isInPast()) {
                 binding.cardEvent.alpha = 0.7f
-                binding.textEventTitle.setTextColor(itemView.context.getColor(R.color.text_secondary))
+                binding.textEventTitle.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOnSurfaceVariant))
             } else {
                 binding.cardEvent.alpha = 1.0f
-                binding.textEventTitle.setTextColor(itemView.context.getColor(R.color.text_primary))
+                binding.textEventTitle.setTextColor(MaterialColors.getColor(itemView, com.google.android.material.R.attr.colorOnSurface))
             }
 
             // Click listeners

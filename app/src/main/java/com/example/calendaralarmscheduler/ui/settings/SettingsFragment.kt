@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import com.google.android.material.color.MaterialColors
 import com.example.calendaralarmscheduler.ui.BaseFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -322,15 +323,15 @@ class SettingsFragment : BaseFragment() {
     ) {
         if (hasPermission) {
             iconView.setImageResource(R.drawable.ic_check_circle)
-            iconView.setColorFilter(ContextCompat.getColor(requireContext(), R.color.success_green))
+            iconView.setColorFilter(MaterialColors.getColor(iconView, com.google.android.material.R.attr.colorSecondary))
             textView.text = grantedText
             buttonView.visibility = View.GONE
         } else {
             val iconRes = if (isWarning) R.drawable.ic_warning else R.drawable.ic_error
-            val colorRes = if (isWarning) R.color.warning_orange else R.color.error_red
+            val colorAttr = if (isWarning) com.google.android.material.R.attr.colorSecondaryContainer else com.google.android.material.R.attr.colorError
             
             iconView.setImageResource(iconRes)
-            iconView.setColorFilter(ContextCompat.getColor(requireContext(), colorRes))
+            iconView.setColorFilter(MaterialColors.getColor(iconView, colorAttr))
             textView.text = deniedText
             buttonView.visibility = View.VISIBLE
         }
@@ -342,27 +343,27 @@ class SettingsFragment : BaseFragment() {
         when {
             !status.isScheduled -> {
                 binding.iconWorkStatus.setImageResource(R.drawable.ic_error)
-                binding.iconWorkStatus.setColorFilter(ContextCompat.getColor(context, R.color.error_red))
+                binding.iconWorkStatus.setColorFilter(MaterialColors.getColor(binding.iconWorkStatus, com.google.android.material.R.attr.colorError))
                 binding.textWorkStatus.text = "Background refresh is not scheduled"
             }
             status.state == "RUNNING" -> {
                 binding.iconWorkStatus.setImageResource(R.drawable.ic_sync)
-                binding.iconWorkStatus.setColorFilter(ContextCompat.getColor(context, R.color.primary))
+                binding.iconWorkStatus.setColorFilter(MaterialColors.getColor(binding.iconWorkStatus, com.google.android.material.R.attr.colorPrimary))
                 binding.textWorkStatus.text = "Background refresh is currently running"
             }
             status.state == "ENQUEUED" -> {
                 binding.iconWorkStatus.setImageResource(R.drawable.ic_check_circle)
-                binding.iconWorkStatus.setColorFilter(ContextCompat.getColor(context, R.color.success_green))
+                binding.iconWorkStatus.setColorFilter(MaterialColors.getColor(binding.iconWorkStatus, com.google.android.material.R.attr.colorSecondary))
                 binding.textWorkStatus.text = "Background refresh is scheduled and ready"
             }
             status.errorMessage != null -> {
                 binding.iconWorkStatus.setImageResource(R.drawable.ic_warning)
-                binding.iconWorkStatus.setColorFilter(ContextCompat.getColor(context, R.color.warning_orange))
+                binding.iconWorkStatus.setColorFilter(MaterialColors.getColor(binding.iconWorkStatus, com.google.android.material.R.attr.colorSecondaryContainer))
                 binding.textWorkStatus.text = "Background refresh had issues: ${status.errorMessage}"
             }
             else -> {
                 binding.iconWorkStatus.setImageResource(R.drawable.ic_check_circle)
-                binding.iconWorkStatus.setColorFilter(ContextCompat.getColor(context, R.color.success_green))
+                binding.iconWorkStatus.setColorFilter(MaterialColors.getColor(binding.iconWorkStatus, com.google.android.material.R.attr.colorSecondary))
                 binding.textWorkStatus.text = "Background refresh is running normally"
             }
         }
@@ -666,22 +667,23 @@ class SettingsFragment : BaseFragment() {
     /**
      * Updates premium section UI based on purchase state.
      * 
-     * Premium users get exciting "PREMIUM ACTIVE" styling with green colors.
+     * Premium users get exciting "PREMIUM ACTIVE" styling with Material 3 themed colors.
      * Free users get clear upgrade CTA with $2 pricing.
+     * All colors use MaterialColors.getColor() for automatic theme adaptation.
      * Debug toggle shown only in debug builds for testing.
      */
     private fun updatePremiumUI(isPremium: Boolean) {
         if (isPremium) {
-            // Premium Active State - Exciting UI with celebration styling
+            // Premium Active State - Material 3 themed celebration styling
             binding.iconPremiumStatus.setImageResource(R.drawable.ic_check_circle)
-            binding.iconPremiumStatus.setColorFilter(ContextCompat.getColor(requireContext(), R.color.success_green))
+            binding.iconPremiumStatus.setColorFilter(MaterialColors.getColor(binding.iconPremiumStatus, com.google.android.material.R.attr.colorSecondary))
             binding.textPremiumTitle.text = "✨ PREMIUM ACTIVE"
-            binding.textPremiumTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.success_green))
+            binding.textPremiumTitle.setTextColor(MaterialColors.getColor(binding.textPremiumTitle, com.google.android.material.R.attr.colorSecondary))
             binding.textPremiumStatus.text = "Event details are now shown in all alarm notifications!"
             binding.btnPremiumPurchase.visibility = View.GONE
             
-            // Add premium styling to the card
-            val primaryColor = ContextCompat.getColor(requireContext(), R.color.success_green)
+            // Apply Material 3 themed premium styling to the card
+            val primaryColor = MaterialColors.getColor(binding.cardPremium, com.google.android.material.R.attr.colorSecondary)
             binding.cardPremium.apply {
                 strokeColor = primaryColor
                 strokeWidth = 6

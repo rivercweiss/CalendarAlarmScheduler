@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- Typography Styles -->
+    <style name="TextAppearance.App.Headline" parent="@style/TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="TextAppearance.App.Title" parent="@style/TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="TextAppearance.App.Body" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+    
+    <style name="TextAppearance.App.BodySecondary" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+    
+    <style name="TextAppearance.App.Caption" parent="@style/TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+    
+    <!-- Card Styles -->
+    <style name="CardView.App" parent="@style/Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="android:layout_marginHorizontal">@dimen/spacing_lg</item>
+        <item name="android:layout_marginVertical">@dimen/spacing_sm</item>
+    </style>
+    
+    <style name="CardView.App.Settings" parent="CardView.App">
+        <item name="cardElevation">1dp</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_md</item>
+        <item name="android:layout_marginHorizontal">0dp</item>
+    </style>
+    
+    <!-- Button Styles -->
+    <style name="Button.App" parent="@style/Widget.Material3.Button">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="Button.App.Outlined" parent="@style/Widget.Material3.Button.OutlinedButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="Button.App.Text" parent="@style/Widget.Material3.Button.TextButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    
+    <!-- Spacing Dimensions -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">24dp</dimen>
+    <dimen name="spacing_xxl">32dp</dimen>
+    
+    <!-- Layout Dimensions -->
+    <dimen name="padding">16dp</dimen>
+    <dimen name="icon_margin">12dp</dimen>
+    
+</resources>

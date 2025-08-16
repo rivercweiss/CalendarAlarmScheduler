@@ -7,14 +7,14 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:padding="16dp">
+    android:padding="@dimen/spacing_lg">
 
     <!-- Color Indicator -->
     <View
         android:id="@+id/view_color_indicator"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="@dimen/spacing_md"
         app:layout_constraintBottom_toBottomOf="@id/text_calendar_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/text_calendar_name"
@@ -25,8 +25,8 @@
         android:id="@+id/text_calendar_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:layout_marginEnd="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.App.Title"
         app:layout_constraintEnd_toStartOf="@id/checkbox_selected"
         app:layout_constraintStart_toEndOf="@id/view_color_indicator"
         app:layout_constraintTop_toTopOf="parent"
@@ -37,11 +37,9 @@
         android:id="@+id/text_account_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:alpha="0.6"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:layout_marginEnd="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.App.BodySecondary"
         app:layout_constraintEnd_toStartOf="@id/checkbox_selected"
         app:layout_constraintStart_toEndOf="@id/view_color_indicator"
         app:layout_constraintTop_toBottomOf="@id/text_calendar_name"

@@ -1,13 +1,30 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Dark theme -->
     <style name="Theme.CalendarAlarmScheduler" parent="Theme.Material3.DayNight">
-        <!-- Material 3 color system for dark mode -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <!-- Customize your theme here. -->
+        <!-- Primary Colors (Dark) -->
+        <item name="colorPrimary">@color/primary_200</item>
+        <item name="colorOnPrimary">@color/primary_800</item>
+        <item name="colorPrimaryContainer">@color/primary_700</item>
+        <item name="colorOnPrimaryContainer">@color/primary_100</item>
+        
+        <!-- Secondary Colors (Dark) -->
+        <item name="colorSecondary">@color/secondary_200</item>
+        <item name="colorOnSecondary">@color/secondary_800</item>
+        <item name="colorSecondaryContainer">@color/secondary_700</item>
+        <item name="colorOnSecondaryContainer">@color/secondary_100</item>
+        
+        <!-- Surface Colors (Dark) -->
+        <item name="colorSurface">#FF121212</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorOnSurfaceVariant">#FFAAAAAA</item>
+        
+        <!-- Error Colors (Dark) -->
+        <item name="colorError">#FFCF6679</item>
+        <item name="colorOnError">#FF000000</item>
+        
+        <!-- System UI (Dark) -->
+        <item name="android:statusBarColor">@color/primary_800</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
     </style>
 </resources>

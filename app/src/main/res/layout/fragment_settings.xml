@@ -11,32 +11,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/padding">
 
         <!-- Upgrade to Premium -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_premium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_md"
             app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="2dp">
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Support Development and Upgrade!"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:textAppearance="@style/TextAppearance.App.Headline"
+                    android:layout_marginBottom="@dimen/spacing_md" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -48,7 +47,7 @@
                         android:id="@+id/icon_premium_status"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/icon_margin"
                         android:contentDescription="Premium status"
                         tools:src="@drawable/ic_star" />
 
@@ -63,8 +62,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Event Details in Notifications"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textAppearance="@style/TextAppearance.App.Title"
                             android:textStyle="bold" />
 
                         <TextView
@@ -100,7 +98,7 @@
                             android:layout_height="wrap_content"
                             android:text="Debug: Toggle"
                             android:textSize="10sp"
-                            android:padding="4dp"
+                            android:padding="@dimen/spacing_xs"
                             android:visibility="gone" />
 
                     </LinearLayout>
@@ -115,7 +113,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_md"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -123,15 +121,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Permission Status"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:textAppearance="@style/TextAppearance.App.Headline"
+                    android:layout_marginBottom="@dimen/spacing_md" />
 
                 <!-- Calendar Permission -->
                 <LinearLayout
@@ -139,13 +136,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <ImageView
                         android:id="@+id/icon_calendar_permission"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/icon_margin"
                         android:contentDescription="Calendar permission status"
                         tools:src="@drawable/ic_check_circle" />
 
@@ -159,16 +156,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Calendar Access"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_calendar_permission"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="Required to read calendar events" />
 
                     </LinearLayout>
@@ -189,13 +183,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <ImageView
                         android:id="@+id/icon_notification_permission"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/icon_margin"
                         android:contentDescription="Notification permission status"
                         tools:src="@drawable/ic_check_circle" />
 
@@ -209,16 +203,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Notification Access"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_notification_permission"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="Required for alarm notifications on Android 13+" />
 
                     </LinearLayout>
@@ -239,13 +230,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <ImageView
                         android:id="@+id/icon_exact_alarm_permission"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/icon_margin"
                         android:contentDescription="Exact alarm permission status"
                         tools:src="@drawable/ic_check_circle" />
 
@@ -259,16 +250,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Exact Alarm Scheduling"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_exact_alarm_permission"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="Required for precise alarm timing on Android 12+" />
 
                     </LinearLayout>
@@ -295,7 +283,7 @@
                         android:id="@+id/icon_battery_optimization"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/icon_margin"
                         android:contentDescription="Battery optimization status"
                         tools:src="@drawable/ic_warning" />
 
@@ -309,16 +297,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Battery Optimization"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_battery_optimization"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="Recommended for reliable background operation" />
 
                     </LinearLayout>
@@ -341,7 +326,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_md"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -349,22 +334,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Background Refresh"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:textAppearance="@style/TextAppearance.App.Headline"
+                    android:layout_marginBottom="@dimen/spacing_md" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -376,16 +360,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Refresh Interval"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_refresh_interval_description"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="30 minutes (Default - recommended)" />
 
                     </LinearLayout>
@@ -434,7 +415,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_md"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -442,22 +423,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="All-Day Events"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:textAppearance="@style/TextAppearance.App.Headline"
+                    android:layout_marginBottom="@dimen/spacing_md" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -469,16 +449,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Default Alarm Time"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="@style/TextAppearance.App.Title" />
 
                         <TextView
                             android:id="@+id/text_all_day_time_description"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="?attr/colorOnSurface"
-                            android:alpha="0.6"
+                            android:textAppearance="@style/TextAppearance.App.BodySecondary"
                             tools:text="8:00 PM (applied before lead time calculation)" />
 
                     </LinearLayout>
@@ -509,7 +486,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_md"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -517,15 +494,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="System Information"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:textAppearance="@style/TextAppearance.App.Headline"
+                    android:layout_marginBottom="@dimen/spacing_md" />
 
                 <!-- Timezone Info -->
                 <LinearLayout
@@ -533,7 +509,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <ImageView
                         android:layout_width="20dp"
@@ -562,7 +538,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/spacing_sm">
 
                     <ImageView
                         android:layout_width="20dp"

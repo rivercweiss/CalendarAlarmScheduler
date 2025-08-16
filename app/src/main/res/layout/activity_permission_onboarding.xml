@@ -19,32 +19,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="@dimen/spacing_xl">
 
             <!-- Header Section -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/spacing_sm"
                 android:gravity="center"
                 android:text="Setup Calendar Alarm Scheduler"
-                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textAppearance="@style/TextAppearance.App.Headline"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="@dimen/spacing_xxl"
                 android:gravity="center"
                 android:text="Grant permissions for reliable alarm scheduling"
-                android:textAppearance="?attr/textAppearanceBodyLarge"
-                android:alpha="0.7" />
+                android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
             <!-- Calendar Permission Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/spacing_lg"
                 app:cardElevation="2dp"
                 app:cardCornerRadius="12dp">
 
@@ -52,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -63,7 +62,7 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="16dp"
+                            android:layout_marginEnd="@dimen/spacing_lg"
                             android:src="@android:drawable/ic_menu_my_calendar" />
 
                         <LinearLayout
@@ -76,16 +75,14 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Calendar Access"
-                                android:textAppearance="?attr/textAppearanceBodyLarge"
-                                android:textStyle="bold" />
+                                android:textAppearance="@style/TextAppearance.App.Title" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/spacing_xs"
                                 android:text="Read calendar events to schedule alarms"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:alpha="0.7" />
+                                android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
                         </LinearLayout>
 
@@ -95,8 +92,8 @@
                         android:id="@+id/text_calendar_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:textStyle="bold"
                         tools:text="❌ Permission required" />
 
@@ -105,7 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/spacing_md"
                         android:text="Grant Permission"
                         android:visibility="gone"
                         tools:visibility="visible" />
@@ -118,7 +115,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/spacing_lg"
                 app:cardElevation="2dp"
                 app:cardCornerRadius="12dp">
 
@@ -126,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -137,7 +134,7 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="16dp"
+                            android:layout_marginEnd="@dimen/spacing_lg"
                             android:src="@android:drawable/ic_popup_reminder" />
 
                         <LinearLayout
@@ -150,16 +147,14 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Notification Access"
-                                android:textAppearance="?attr/textAppearanceBodyLarge"
-                                android:textStyle="bold" />
+                                android:textAppearance="@style/TextAppearance.App.Title" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/spacing_xs"
                                 android:text="Show alarm notifications (Android 13+)"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:alpha="0.7" />
+                                android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
                         </LinearLayout>
 
@@ -169,8 +164,8 @@
                         android:id="@+id/text_notification_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:textStyle="bold"
                         tools:text="❌ Permission required" />
 
@@ -179,7 +174,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/spacing_md"
                         android:text="Grant Permission"
                         android:visibility="gone"
                         tools:visibility="visible" />
@@ -192,7 +187,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/spacing_lg"
                 app:cardElevation="2dp"
                 app:cardCornerRadius="12dp">
 
@@ -200,7 +195,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -211,7 +206,7 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="16dp"
+                            android:layout_marginEnd="@dimen/spacing_lg"
                             android:src="@android:drawable/ic_lock_idle_alarm" />
 
                         <LinearLayout
@@ -224,16 +219,14 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Exact Alarm Scheduling"
-                                android:textAppearance="?attr/textAppearanceBodyLarge"
-                                android:textStyle="bold" />
+                                android:textAppearance="@style/TextAppearance.App.Title" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/spacing_xs"
                                 android:text="Schedule precise alarms (Android 12+)"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:alpha="0.7" />
+                                android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
                         </LinearLayout>
 
@@ -243,8 +236,8 @@
                         android:id="@+id/text_exact_alarm_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:textStyle="bold"
                         tools:text="❌ Permission required" />
 
@@ -253,7 +246,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/spacing_md"
                         android:text="Open Settings"
                         android:visibility="gone"
                         tools:visibility="visible" />
@@ -266,7 +259,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="@dimen/spacing_xxl"
                 app:cardElevation="2dp"
                 app:cardCornerRadius="12dp">
 
@@ -274,7 +267,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -285,7 +278,7 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="16dp"
+                            android:layout_marginEnd="@dimen/spacing_lg"
                             android:src="@android:drawable/ic_menu_manage" />
 
                         <LinearLayout
@@ -298,16 +291,14 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Battery Optimization"
-                                android:textAppearance="?attr/textAppearanceBodyLarge"
-                                android:textStyle="bold" />
+                                android:textAppearance="@style/TextAppearance.App.Title" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/spacing_xs"
                                 android:text="Whitelist app for reliable background operation"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:alpha="0.7" />
+                                android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
                         </LinearLayout>
 
@@ -317,8 +308,8 @@
                         android:id="@+id/text_battery_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:textStyle="bold"
                         tools:text="⚠️ Recommended to disable" />
 
@@ -327,7 +318,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/spacing_md"
                         android:text="Whitelist App"
                         android:visibility="gone"
                         tools:visibility="visible" />
@@ -345,10 +336,10 @@
         android:id="@+id/button_continue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
+        android:layout_margin="@dimen/spacing_xl"
+        style="@style/Button.App"
         android:enabled="false"
         android:text="Continue to App"
-        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

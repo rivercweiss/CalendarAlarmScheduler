@@ -266,29 +266,18 @@ We want to make this super robust. Try to do this as simply, modularly and robus
 
 ---
 
-Currently, the alarm notification disappears from view after a small amount of time.
-
-We want the notification to continue to persist in view until dismissed. We want you to determine if this is possible.
-
-Please research the ideal implementation of the unmissable alarm notification feature. Think hard.
-
----
-
-Replace WorkManager with AlarmManager for background refresh
-
-We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.
-
-Can you test that the new functionality works by checking the logs? 
-
-To do this easily you need to add a background refresh interval of 1 minute and set it as the default, but ONLY for dev builds. In prod builds the default should be 30 minutes and 1 minute interval should not be an option.
-
-With this setting, then you can clear the logs, inspect the logs and wait a minute to see if the background refresh AlarmManager fires, finds any new matching calendar events, and sets alarms correctly. 
-
-Make a plan first. Think hard.
-
-
 I added a rule and closed the app. I just added a new calendar event that matches the rule. Can you clear the logs, wait three minutes, and verify that:
 - The background refresh triggers at least twice
 - The background refresh tries to fetch any new calendar events
 - The background refresh checks the rules against all calendar events
 - The background refresh schedules any alarms that match this new rule
+
+---
+
+We want to make the UI clean and modern. It should be as simple and sexy as possible, while adhering to best modern Android app UI practices.
+
+We want to make the UI super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.
+
+The rules cards do not match the other cards.
+
+Can we remove all backwards compatibility from the UI? Try to do this while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.

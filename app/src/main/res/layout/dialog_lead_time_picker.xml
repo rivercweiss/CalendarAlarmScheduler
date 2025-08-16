@@ -4,16 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="@dimen/spacing_lg">
 
     <!-- Title -->
     <TextView
         android:id="@+id/text_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="@dimen/spacing_xl"
         android:text="Set Lead Time"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textAppearance="@style/TextAppearance.App.Headline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,7 +23,7 @@
         android:id="@+id/input_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/spacing_lg"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
@@ -35,11 +35,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/spacing_md"
             android:hint="Enter value"
             android:inputType="number"
             android:imeOptions="actionDone"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textAppearance="@style/TextAppearance.App.Body"
             android:selectAllOnFocus="true" />
 
         <Spinner
@@ -55,8 +55,8 @@
         android:id="@+id/text_preview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.App.Body"
         android:textColor="?attr/colorPrimary"
         tools:text="Total: 30 minutes"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,9 +68,9 @@
         android:id="@+id/text_helper"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/spacing_sm"
         android:text="Enter 1 minute to 2 days"
-        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textAppearance="@style/TextAppearance.App.Caption"
         android:textColor="?attr/colorOnSurfaceVariant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -81,8 +81,8 @@
         android:id="@+id/text_error"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:layout_marginBottom="@dimen/spacing_lg"
+        android:textAppearance="@style/TextAppearance.App.Caption"
         android:textColor="?attr/colorError"
         android:visibility="gone"
         tools:text="Please enter a valid value"
@@ -94,7 +94,7 @@
     <!-- Buttons -->
     <Button
         android:id="@+id/button_cancel"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Button.App.Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/cancel"
@@ -104,9 +104,10 @@
 
     <Button
         android:id="@+id/button_ok"
+        style="@style/Button.App"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/spacing_sm"
         android:text="OK"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

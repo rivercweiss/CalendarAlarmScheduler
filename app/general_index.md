@@ -113,18 +113,3 @@ This index provides a quick overview of all source files in the codebase to help
 5. **Reactive Programming** - StateFlow and Flow for reactive updates
 6. **Background Processing** - AlarmManager for guaranteed exact timing in background tasks
 7. **Premium Features** - Google Play Billing integration with content gating and debug support
-
-## Recent Major Changes
-
-### AlarmManager Migration (Latest)
-- **Replaced WorkManager** with AlarmManager for guaranteed background refresh timing
-- **BackgroundRefreshManager.kt** - NEW: Exact alarm scheduling with `setExactAndAllowWhileIdle()`
-- **BackgroundRefreshReceiver.kt** - NEW: Handles periodic and immediate refresh broadcasts
-- **Removed WorkManager dependency** - Simplified architecture with better reliability
-- **Build-specific intervals** - 1-minute debug, 30-minute release defaults
-
-### Premium Features
-- **BillingManager.kt** - Google Play Billing integration for $2 premium upgrade
-- **Premium UI** - Enhanced settings screen with upgrade section and debug toggle
-- **Content Gating** - Notifications show event details only for premium users
-- **Build Configuration** - Debug/release build types with premium debug controls

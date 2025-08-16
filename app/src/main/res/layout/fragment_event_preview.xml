@@ -15,7 +15,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_margin="@dimen/spacing_lg"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
             app:strokeWidth="0dp">
@@ -24,9 +24,9 @@
                 android:id="@+id/switch_filter_matching"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:padding="@dimen/spacing_lg"
                 android:text="Show only active alarms"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
+                android:textAppearance="@style/TextAppearance.App.Body" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingTop="8dp"
+                android:paddingTop="@dimen/spacing_sm"
                 android:paddingBottom="80dp"
                 tools:listitem="@layout/item_event_preview" />
 
@@ -53,13 +53,13 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="32dp"
+                android:padding="@dimen/spacing_xxl"
                 android:visibility="gone">
 
                 <ImageView
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="@dimen/spacing_xl"
                     android:alpha="0.6"
                     android:src="@drawable/ic_preview"
                     app:tint="?attr/colorOnSurface" />
@@ -70,9 +70,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:lineSpacingMultiplier="1.4"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/colorOnSurface"
-                    android:alpha="0.7"
+                    android:textAppearance="@style/TextAppearance.App.BodySecondary"
                     android:text="No upcoming events found in the next 2 days.\n\nMake sure you have calendar events scheduled." />
 
             </LinearLayout>
@@ -90,15 +88,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:indeterminate="true"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="@dimen/spacing_lg" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Loading events..."
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:alpha="0.6" />
+                    android:textAppearance="@style/TextAppearance.App.BodySecondary" />
 
             </LinearLayout>
 
@@ -106,14 +102,14 @@
 
     </LinearLayout>
 
-    <!-- Refresh FAB -->
+    <!-- Material 3 Refresh FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_sync"
-        app:backgroundTint="?attr/colorPrimary" />
+        android:layout_margin="@dimen/spacing_lg"
+        android:contentDescription="Refresh events"
+        android:src="@drawable/ic_sync" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

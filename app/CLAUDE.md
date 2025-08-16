@@ -111,11 +111,13 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Tracks scheduled and user-dismissed alarms to avoid duplicates.
    * **Premium Feature**: Event details in notifications are gated behind $2 in-app purchase.
 
-5. **UI Layer**
-   * **Rule Management Screen** – Add/edit/delete keyword-based rules with calendar filters.
-   * **Calendar Event Preview** – Shows future events for the next 2 days with a single toggle to filter between "all upcoming events" and "events matching rules only". Displays scheduled alarms with timezone info.
-   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. **Premium section at top** with upgrade/purchase flow and debug toggle (debug builds only).
-   * **Permission Onboarding** – Step-by-step permission granting with explanations.
+5. **Modern UI Layer**
+   * **Material 3 Design**: Clean, modern interface following latest Android design guidelines with automatic light/dark theme support.
+   * **Rule Management Screen** – Add/edit/delete keyword-based rules with calendar filters. Features floating action button for intuitive rule creation.
+   * **Calendar Event Preview** – Shows future events for the next 2 days with a single toggle to filter between "all upcoming events" and "events matching rules only". Displays scheduled alarms with timezone info. Includes refresh FAB for manual sync.
+   * **Settings Screen** – Configure refresh interval, all-day event default time, permissions status. **Premium section at top** with upgrade/purchase flow and debug toggle (debug builds only). All settings organized in clean card-based layout.
+   * **Permission Onboarding** – Step-by-step permission granting with modern explanations and visual feedback.
+   * **Consistent Theming**: All UI components use standardized spacing, typography, and color system with no backwards compatibility cruft.
 
 6. **Background Refresh System**
    * **BackgroundRefreshManager**: Uses `AlarmManager.setExactAndAllowWhileIdle()` for guaranteed timing
@@ -149,7 +151,16 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Battery optimization completion tracking.
    * Premium purchase state tracking.
 
-11. **Premium Features & Billing**
+11. **UI Architecture & Design System**
+   * **Modern Material 3**: Complete Material You design implementation with automatic theming
+   * **Color System**: Professional blue/green palette with semantic colors (success, warning, error)
+   * **Typography**: Standardized text appearances with proper hierarchy and accessibility
+   * **Spacing System**: Consistent dimension tokens (4dp, 8dp, 12dp, 16dp, 24dp, 32dp)
+   * **Component Library**: Reusable button styles, card layouts, and icon standards
+   * **Theme-Aware**: All UI elements automatically adapt to light/dark mode
+   * **MaterialColors Integration**: All color references use theme-aware `MaterialColors.getColor()` for consistency
+
+12. **Premium Features & Billing**
    * **Google Play Billing**: $2 one-time in-app purchase for event details in notifications.
    * **BillingManager**: Handles purchase flow, state management, and error handling.
    * **Notification Gating**: Free users see "Calendar Event", premium users see actual event titles.
