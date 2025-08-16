@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.calendaralarmscheduler.data.SettingsRepository
+import com.example.calendaralarmscheduler.ui.AlarmActivity
 import com.example.calendaralarmscheduler.utils.Logger
 
 /**
@@ -100,6 +101,21 @@ class AlarmNotificationManager(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             
+            // Create full-screen alarm intent for lock screen display
+            val alarmActivityIntent = Intent(context, AlarmActivity::class.java).apply {
+                putExtra(AlarmActivity.EXTRA_ALARM_ID, alarmId)
+                putExtra(AlarmActivity.EXTRA_EVENT_TITLE, eventTitle)
+                putExtra(AlarmActivity.EXTRA_IS_TEST_ALARM, isTestAlarm)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            
+            val fullScreenPendingIntent = PendingIntent.getActivity(
+                context,
+                generateNotificationId(alarmId) + 1, // Offset to avoid ID collision
+                alarmActivityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
             // Build unmissable notification
             val notification = NotificationCompat.Builder(context, ALARM_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
@@ -116,6 +132,7 @@ class AlarmNotificationManager(
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setAutoCancel(false)
                 .setOngoing(true)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
                 
                 // Tapping notification dismisses it
                 .setContentIntent(dismissPendingIntent)

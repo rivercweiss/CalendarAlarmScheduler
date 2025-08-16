@@ -268,3 +268,8 @@ We want the notification to continue to persist in view until dismissed. We want
 
 Please research the ideal implementation of the unmissable alarm notification feature. Think hard.
 
+---
+
+We want to edit the full screen functionality so that it never actually displays anything. When it is tapped, either from the lock screen or the notifications tray, it takes the user to the app preview section, and dismisses the notification.
+
+We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard.
