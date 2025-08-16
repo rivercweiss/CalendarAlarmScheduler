@@ -19,6 +19,7 @@ This index provides a quick overview of all source files in the codebase to help
 #### Repositories
 - **AlarmRepository.kt** - Manages scheduled alarms persistence and lifecycle with auto-cleanup and tracking
 - **CalendarRepository.kt** - Fetches and manages Google Calendar events with change detection and filtering
+- **DayTrackingRepository.kt** - Tracks which rules have triggered today for "first event of day only" functionality
 - **RuleRepository.kt** - Manages alarm rules persistence with calendar filters and pattern validation
 - **SettingsRepository.kt** - Simple app settings management with reactive StateFlows
 
@@ -47,10 +48,14 @@ This index provides a quick overview of all source files in the codebase to help
 - **RepositoryModule.kt** - Hilt module providing repository dependencies
 - **WorkerModule.kt** - Hilt module providing worker-related dependencies
 
+### Services (`services/`)
+- **DayResetService.kt** - Manages midnight reset alarms for day tracking boundaries
+
 ### Broadcast Receivers (`receivers/`)
 - **AlarmReceiver.kt** - Handles fired alarms and triggers notification system
 - **AlarmDismissReceiver.kt** - Handles alarm dismissal actions from notifications
 - **BootReceiver.kt** - Reschedules alarms after device boot or app update
+- **DayResetReceiver.kt** - Handles midnight reset broadcasts for day tracking
 - **TimezoneChangeReceiver.kt** - Handles timezone changes to reschedule alarms
 
 ### UI Layer (`ui/`)

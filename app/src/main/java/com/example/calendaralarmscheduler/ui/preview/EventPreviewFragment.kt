@@ -66,9 +66,9 @@ class EventPreviewFragment : Fragment() {
         }
         
         binding.switchFilterMatching.setOnCheckedChangeListener { _, isChecked ->
-            Logger.d("EventPreviewFragment", "Filter toggle clicked: showOnlyMatching=$isChecked")
-            viewModel.toggleMatchingRulesFilter()
-            // No need to call refreshEvents() - toggleMatchingRulesFilter() already updates the UI
+            Logger.d("EventPreviewFragment", "Filter toggle clicked: showOnlyActiveAlarms=$isChecked")
+            viewModel.toggleActiveAlarmsFilter()
+            // No need to call refreshEvents() - toggleActiveAlarmsFilter() already updates the UI
         }
         
         // Long press on refresh FAB for test alarm
@@ -120,9 +120,16 @@ class EventPreviewFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.currentFilter.collect { filter ->
                 // Avoid UI updates during memory pressure - only update if state actually changed
-                if (binding.switchFilterMatching.isChecked != filter.showOnlyMatchingRules) {
+                if (binding.switchFilterMatching.isChecked != filter.showOnlyActiveAlarms) {
                     try {
-                        binding.switchFilterMatching.isChecked = filter.showOnlyMatchingRules
+                        // Temporarily remove listener to prevent infinite loop
+                        binding.switchFilterMatching.setOnCheckedChangeListener(null)
+                        binding.switchFilterMatching.isChecked = filter.showOnlyActiveAlarms
+                        // Restore listener
+                        binding.switchFilterMatching.setOnCheckedChangeListener { _, isChecked ->
+                            Logger.d("EventPreviewFragment", "Filter toggle clicked: showOnlyActiveAlarms=$isChecked")
+                            viewModel.toggleActiveAlarmsFilter()
+                        }
                     } catch (e: OutOfMemoryError) {
                         // Skip UI update if memory is exhausted - the switch state is not critical
                         android.util.Log.w("EventPreviewFragment", "Skipping switch update due to memory pressure", e)
@@ -157,8 +164,8 @@ class EventPreviewFragment : Fragment() {
         // Update empty message based on filter state
         val filter = viewModel.currentFilter.value
         
-        val message = if (filter.showOnlyMatchingRules) {
-            "No events matching your rules in the next 2 days.\n\nTry toggling off the filter to see all upcoming events."
+        val message = if (filter.showOnlyActiveAlarms) {
+            "No events with active alarms in the next 2 days.\n\nTry toggling off the filter to see all upcoming events."
         } else {
             "No upcoming events found in the next 2 days.\n\nMake sure you have calendar events scheduled."
         }

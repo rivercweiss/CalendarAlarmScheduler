@@ -11,7 +11,7 @@ import com.example.calendaralarmscheduler.utils.CrashHandler
 
 @Database(
     entities = [Rule::class, ScheduledAlarm::class],
-    version = 2,
+    version = 1,
     exportSchema = true
 )
 @TypeConverters(Rule.Converters::class)
@@ -78,8 +78,8 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // Database version 2: Collision-resistant request codes
-        // No migration needed - database will be recreated with new schema
+        // Database version 1: Initial schema
+        // No migration needed
 
         fun destroyInstance() {
             Logger.i("AppDatabase", "Destroying database instance")

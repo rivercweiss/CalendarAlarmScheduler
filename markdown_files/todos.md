@@ -222,7 +222,27 @@ Lets execute XXX and update the index files to reflect reality. Try to do this a
 
 ---
 
-Consolidate onboarding onto one page, making it super robust and easy for the user to grant all permissions. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard 
+Add a toggle to the rule creation which allows the rule to only trigger an alarm for the first matching event of the day. 
+
+To make this work we need to consider what counts as a day, how we will handle time zone changes, as well as a robust logic core.
+
+We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard 
+
+---
+
+We are getting an issue where there is a popup which says Calendar Alarms Scheduler isn’t responding. 
+
+Can you take a look at the logs and give some ideas what the issue is? Think hard.
+
+---
+
+We want to make this app have an in app purchase to unlock a small piece of functionality.
+
+We want to gate the notification showing the specific event name/description on an in app purchase of $2 dollars. 
+
+Please determine a plan to implement these changes, the UI, the core logic, and the simplest possible integration with an in app purchase. 
+
+We want to make this super robust. Try to do this as simply, modularly and robustly as possible, while deleting as much code as possible, while maintaining core functionality. Make a plan first. Think hard 
 
 ---
 
@@ -230,4 +250,4 @@ Build the code and fix any issues. Remember, try to do this as simply, modularly
 
 ---
 
-Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality. For example DozeCompatibility was deleted and there are still references.
+Update all documentation, the CLAUDE.md, the index files, and the comments in the code to reflect the current reality and any key context.

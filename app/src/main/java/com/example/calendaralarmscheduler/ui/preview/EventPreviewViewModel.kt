@@ -58,7 +58,7 @@ data class EventWithAlarms(
 )
 
 data class EventFilter(
-    val showOnlyMatchingRules: Boolean = false
+    val showOnlyActiveAlarms: Boolean = false
 )
 
 data class AlarmSystemStatus(
@@ -246,9 +246,10 @@ class EventPreviewViewModel @Inject constructor(
                 return@filter false
             }
             
-            // Filter by matching rules if toggle is on
-            if (filter.showOnlyMatchingRules) {
-                if (eventWithAlarms.matchingRules.isEmpty()) {
+            // Filter by active alarms if toggle is on
+            if (filter.showOnlyActiveAlarms) {
+                val hasActiveAlarms = eventWithAlarms.alarms.any { it.isActive() }
+                if (!hasActiveAlarms) {
                     return@filter false
                 }
             }
@@ -258,7 +259,7 @@ class EventPreviewViewModel @Inject constructor(
     }
     
     fun updateFilter(newFilter: EventFilter) {
-        android.util.Log.d("EventPreviewViewModel", "updateFilter: showOnlyMatching=${newFilter.showOnlyMatchingRules}, unfilteredEvents.size=${unfilteredEvents.size}")
+        android.util.Log.d("EventPreviewViewModel", "updateFilter: showOnlyActiveAlarms=${newFilter.showOnlyActiveAlarms}, unfilteredEvents.size=${unfilteredEvents.size}")
         _currentFilter.value = newFilter
         
         // Apply filter to ORIGINAL unfiltered data to ensure proper toggle behavior
@@ -273,10 +274,10 @@ class EventPreviewViewModel @Inject constructor(
         }
     }
     
-    fun toggleMatchingRulesFilter() {
+    fun toggleActiveAlarmsFilter() {
         val current = _currentFilter.value
-        android.util.Log.d("EventPreviewViewModel", "toggleMatchingRulesFilter: ${current.showOnlyMatchingRules} -> ${!current.showOnlyMatchingRules}")
-        updateFilter(current.copy(showOnlyMatchingRules = !current.showOnlyMatchingRules))
+        android.util.Log.d("EventPreviewViewModel", "toggleActiveAlarmsFilter: ${current.showOnlyActiveAlarms} -> ${!current.showOnlyActiveAlarms}")
+        updateFilter(current.copy(showOnlyActiveAlarms = !current.showOnlyActiveAlarms))
     }
     
     fun clearError() {

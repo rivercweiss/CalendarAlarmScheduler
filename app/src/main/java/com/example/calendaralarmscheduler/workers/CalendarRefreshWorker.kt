@@ -29,7 +29,8 @@ class CalendarRefreshWorker(
             val alarmRepository = app.alarmRepository
             val alarmScheduler = app.alarmScheduler
             val settingsRepository = app.settingsRepository
-            val ruleAlarmManager = RuleAlarmManager(ruleRepository, alarmRepository, alarmScheduler, calendarRepository)
+            val dayTrackingRepository = app.dayTrackingRepository
+            val ruleAlarmManager = RuleAlarmManager(ruleRepository, alarmRepository, alarmScheduler, calendarRepository, dayTrackingRepository)
             
             // Get enabled rules
             val enabledRules = ruleRepository.getEnabledRules().first()
@@ -52,7 +53,7 @@ class CalendarRefreshWorker(
             }
             
             // Find matches and schedule alarms
-            val ruleMatcher = RuleMatcher()
+            val ruleMatcher = RuleMatcher(dayTrackingRepository)
             val matches = ruleMatcher.findMatchingRules(events, enabledRules)
             
             val result = ruleAlarmManager.processMatchesAndScheduleAlarms(matches, TAG)

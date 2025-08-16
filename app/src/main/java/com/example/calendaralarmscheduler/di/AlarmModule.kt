@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.content.Context
 import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
+import com.example.calendaralarmscheduler.data.DayTrackingRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.domain.AlarmScheduler
 import com.example.calendaralarmscheduler.domain.RuleAlarmManager
@@ -38,13 +39,15 @@ object AlarmModule {
         ruleRepository: RuleRepository,
         alarmRepository: AlarmRepository,
         alarmScheduler: AlarmScheduler,
-        calendarRepository: CalendarRepository
+        calendarRepository: CalendarRepository,
+        dayTrackingRepository: DayTrackingRepository
     ): RuleAlarmManager {
         return RuleAlarmManager(
             ruleRepository,
             alarmRepository,
             alarmScheduler,
-            calendarRepository
+            calendarRepository,
+            dayTrackingRepository
         )
     }
 }

@@ -18,7 +18,8 @@ class RuleAlarmManager(
     private val ruleRepository: RuleRepository,
     private val alarmRepository: AlarmRepository,
     private val alarmScheduler: AlarmScheduler,
-    private val calendarRepository: CalendarRepository
+    private val calendarRepository: CalendarRepository,
+    private val dayTrackingRepository: com.example.calendaralarmscheduler.data.DayTrackingRepository
 ) {
     
     data class RuleUpdateResult(
@@ -152,7 +153,7 @@ class RuleAlarmManager(
             }
             
             // Find matching events for this specific rule
-            val ruleMatcher = RuleMatcher()
+            val ruleMatcher = RuleMatcher(dayTrackingRepository)
             val matchResults = ruleMatcher.findMatchingEventsForRule(updatedRule, events)
             Logger.d(logPrefix, "Found ${matchResults.size} matching events for rule '${rule.name}'")
             
@@ -384,6 +385,13 @@ class RuleAlarmManager(
                             leadTimeMinutes = rule.leadTimeMinutes,
                             lastEventModified = event.lastModified
                         )
+                        
+                        // Mark rule as triggered today if it's a "first event of day only" rule
+                        if (rule.firstEventOfDayOnly) {
+                            dayTrackingRepository.markRuleTriggeredToday(rule.id)
+                            Logger.d(logPrefix, "Marked first-event-only rule '${rule.name}' as triggered today")
+                        }
+                        
                         scheduledCount++
                         Logger.d(logPrefix, "Scheduled new alarm for event: ${event.title}")
                     } else {

@@ -117,6 +117,17 @@ This index provides comprehensive documentation of all functions in the codebase
 - `getRefreshIntervalDescription(): String` - Get refresh interval description
 - `resetToDefaults()` - Reset all settings to defaults
 
+### DayTrackingRepository.kt
+- `markRuleTriggeredToday(ruleId: String)` - Mark a rule as having triggered an alarm today
+- `hasRuleTriggeredToday(ruleId: String): Boolean` - Check if a rule has already triggered an alarm today
+- `getRulesTriggeredToday(): Set<String>` - Get all rules that have triggered today
+- `forceReset()` - Force reset of day tracking (for testing or timezone changes)
+- `handleTimezoneChange()` - Handle timezone change by forcing a reset
+- `getDebugInfo(): Map<String, Any>` - Get current tracking status for debugging
+- `getCurrentLocalDateString(): String` - **private** - Get current local date as string
+- `checkAndResetForNewDay()` - **private** - Check if we've moved to a new day and reset tracking if so
+- `resetDayTracking(newDate: String)` - **private** - Reset all day tracking for a new day
+
 ### Database DAOs
 
 #### AlarmDao.kt
@@ -208,9 +219,10 @@ This index provides comprehensive documentation of all functions in the codebase
 - `processMatchesAndScheduleAlarms(matches: List<RuleMatcher.MatchResult>, logPrefix: String = "RuleAlarmManager"): SchedulingResult` - **suspend** - Process rule matches and schedule alarms with integrated result tracking
 
 ### RuleMatcher.kt
-- `findMatchingRules(events: List<CalendarEvent>, rules: List<Rule>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching rules for events
-- `findMatchingRulesForEvent(event: CalendarEvent, rules: List<Rule>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching rules for a single event
-- `findMatchingEventsForRule(rule: Rule, events: List<CalendarEvent>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching events for a single rule
+- `findMatchingRules(events: List<CalendarEvent>, rules: List<Rule>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching rules for events with first-event-of-day checking
+- `findMatchingRulesForEvent(event: CalendarEvent, rules: List<Rule>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching rules for a single event with first-event-of-day checking
+- `findMatchingEventsForRule(rule: Rule, events: List<CalendarEvent>, defaultAllDayHour: Int = 20, defaultAllDayMinute: Int = 0): List<MatchResult>` - Find matching events for a single rule with first-event-of-day logic
+- `markRuleTriggeredToday(ruleId: String)` - Mark a rule as triggered for today (called when alarm is actually scheduled)
 - `validateRulePattern(pattern: String, isRegex: Boolean): ValidationResult` - Validate rule pattern
 - `testRuleAgainstEvent(rule: Rule, event: CalendarEvent): Boolean` - Test rule against event
 - `findDuplicateAlarms(newMatches: List<MatchResult>, existingAlarms: List<ScheduledAlarm>): List<ScheduledAlarm>` - Find duplicate alarms
@@ -334,6 +346,28 @@ This index provides comprehensive documentation of all functions in the codebase
 - **CrashHandler.kt** - Simplified global exception handling with basic crash logging
 - **ErrorNotificationManager.kt** - Generic error notification system with consolidated error handling
 - **TimezoneUtils.kt** - Essential timezone functions: DST detection, display names, change listeners
+
+## Services
+
+### DayResetService.kt
+- `scheduleNextMidnightReset()` - Schedule the next midnight reset alarm
+- `cancelMidnightReset()` - Cancel any existing midnight reset alarm
+- `performDayReset()` - Perform the actual day reset and schedule the next one
+- `handleTimezoneChange()` - Handle timezone change by cancelling and rescheduling reset
+- `getNextMidnightInLocalTime(): ZonedDateTime` - **private** - Get the next midnight in local time
+- `isResetAlarmScheduled(): Boolean` - Check if reset alarm is scheduled (for debugging)
+- `getDebugInfo(): Map<String, String>` - Get debug information about next reset time
+
+## Broadcast Receivers
+
+### DayResetReceiver.kt
+- `onReceive(context: Context, intent: Intent)` - **override** - Handle midnight reset broadcasts
+
+### TimezoneChangeReceiver.kt (updated)
+- `onReceive(context: Context, intent: Intent)` - **override** - Handle timezone and time change broadcasts
+- `handleTimezoneChange(context: Context)` - **private** - Handle timezone changes including day tracking reset
+- `handleTimeChange(context: Context)` - **private** - Handle system time changes
+- `rescheduleAllAlarms(context: Context)` - **private** **suspend** - Reschedule all alarms after timezone/time change
 
 ## Workers
 

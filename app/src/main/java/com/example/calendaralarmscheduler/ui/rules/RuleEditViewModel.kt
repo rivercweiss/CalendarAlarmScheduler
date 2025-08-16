@@ -124,7 +124,7 @@ class RuleEditViewModel @Inject constructor(
         _leadTimeMinutes.value = minutes
     }
     
-    fun saveRule(name: String, pattern: String, enabled: Boolean) {
+    fun saveRule(name: String, pattern: String, enabled: Boolean, firstEventOfDayOnly: Boolean = false) {
         viewModelScope.launch {
             _isLoading.value = true
             
@@ -162,7 +162,8 @@ class RuleEditViewModel @Inject constructor(
                             isRegex = isRegex,
                             calendarIds = selectedCalendarIds,
                             leadTimeMinutes = leadTime,
-                            enabled = enabled
+                            enabled = enabled,
+                            firstEventOfDayOnly = firstEventOfDayOnly
                         )
                     } else {
                         _saveResult.emit(SaveResult.Error("Rule not found"))
@@ -178,6 +179,7 @@ class RuleEditViewModel @Inject constructor(
                         calendarIds = selectedCalendarIds,
                         leadTimeMinutes = leadTime,
                         enabled = enabled,
+                        firstEventOfDayOnly = firstEventOfDayOnly,
                         createdAt = System.currentTimeMillis()
                     )
                 }

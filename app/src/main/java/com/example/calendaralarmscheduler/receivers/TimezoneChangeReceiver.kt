@@ -42,6 +42,12 @@ class TimezoneChangeReceiver : BroadcastReceiver() {
                 // Reset last sync time to force full calendar rescan
                 app.settingsRepository.handleTimezoneChange()
                 
+                // Reset day tracking due to timezone change (day boundaries change)
+                app.dayTrackingRepository.handleTimezoneChange()
+                
+                // Reschedule midnight reset alarm for new timezone
+                app.dayResetService.handleTimezoneChange()
+                
                 // Reschedule all active alarms with new timezone
                 rescheduleAllAlarms(context)
                 

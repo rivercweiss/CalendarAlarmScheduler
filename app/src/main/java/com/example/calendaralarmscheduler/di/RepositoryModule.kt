@@ -3,10 +3,12 @@ package com.example.calendaralarmscheduler.di
 import android.content.Context
 import com.example.calendaralarmscheduler.data.AlarmRepository
 import com.example.calendaralarmscheduler.data.CalendarRepository
+import com.example.calendaralarmscheduler.data.DayTrackingRepository
 import com.example.calendaralarmscheduler.data.RuleRepository
 import com.example.calendaralarmscheduler.data.SettingsRepository
 import com.example.calendaralarmscheduler.data.database.AlarmDao
 import com.example.calendaralarmscheduler.data.database.RuleDao
+import com.example.calendaralarmscheduler.services.DayResetService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,5 +45,20 @@ object RepositoryModule {
             context = context,
             onRefreshIntervalChanged = null // Will be set up in Application class
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideDayTrackingRepository(@ApplicationContext context: Context): DayTrackingRepository {
+        return DayTrackingRepository(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDayResetService(
+        @ApplicationContext context: Context,
+        dayTrackingRepository: DayTrackingRepository
+    ): DayResetService {
+        return DayResetService(context, dayTrackingRepository)
     }
 }

@@ -40,6 +40,12 @@ class CalendarAlarmApplication : Application() {
     @Inject
     lateinit var ruleRepository: com.example.calendaralarmscheduler.data.RuleRepository
     
+    @Inject
+    lateinit var dayTrackingRepository: com.example.calendaralarmscheduler.data.DayTrackingRepository
+    
+    @Inject
+    lateinit var dayResetService: com.example.calendaralarmscheduler.services.DayResetService
+    
     // Timezone change listener
     private var timezoneChangeReceiver: BroadcastReceiver? = null
     
@@ -120,6 +126,13 @@ class CalendarAlarmApplication : Application() {
             // Set up timezone change handling
             setupTimezoneChangeHandling()
             
+            // Schedule daily reset for "first event of day only" rules
+            try {
+                dayResetService.scheduleNextMidnightReset()
+                Logger.i("Application", "Daily reset alarm scheduled successfully")
+            } catch (e: Exception) {
+                Logger.e("Application", "Failed to schedule daily reset alarm", e)
+            }
             
             // Clean up expired alarms on app start to prevent database bloat
             applicationScope.launch {

@@ -87,6 +87,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Day Reset Receiver for midnight day tracking reset -->
+        <receiver
+            android:name=".receivers.DayResetReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.calendaralarmscheduler.DAY_RESET" />
+            </intent-filter>
+        </receiver>
+
         <!-- Calendar Refresh Worker -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"

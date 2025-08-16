@@ -100,6 +100,7 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Stores user-defined rules (keyword match + lead time + calendar filter + lead time before event start).
    * Auto-detects regex vs simple case-insensitive contains matching.
    * **Per-rule calendar filtering** - users select which calendars each rule monitors.
+   * **First Event of Day Only** - optional toggle to limit rules to trigger only for the first matching event per day.
 
 4. **Alarm Scheduler**
    * Uses `AlarmManager.setExactAndAllowWhileIdle()` to set exact alarms.
@@ -124,25 +125,22 @@ This app only runs on min SDK version of 26, with a target of 34, so please opti
    * Generic OEM guidance for common manufacturers.
    * Battery optimization setup tracking.
 
-8. **Error Handling & Reliability**
+8. **Day Tracking System**
+   * **DayTrackingRepository**: Tracks which rules have triggered today for "first event of day only" functionality.
+   * **DayResetService**: Schedules midnight alarms to reset day tracking at local timezone boundaries.
+   * **DayResetReceiver**: Handles midnight reset broadcasts to clear day tracking state.
+   * Timezone-aware day boundary calculations with automatic reset on timezone changes.
+
+9. **Error Handling & Reliability**
    * **ErrorNotificationManager**: Simple generic error notification system.
    * **CrashHandler**: Basic uncaught exception handling with Android logcat logging.
    * **Logger**: Centralized logging with performance metrics.
 
-9. **Settings System**
+10. **Settings System**
    * Simple SharedPreferences-based settings storage.
    * Settings for refresh interval, all-day event default time, and onboarding status.
    * Battery optimization completion tracking.
 
----
-
-### Onboarding Flow
-1. **Welcome Screen** - Explain app purpose and alarm reliability requirement
-2. **Calendar Permission** - Request READ_CALENDAR with rationale
-3. **Exact Alarm Permission** - Take user to system settings for SCHEDULE_EXACT_ALARM
-4. **Battery Optimization** - Guide user to whitelist app with clear benefits explanation
-5. **Permission Status Dashboard** - Always visible indicator of permission health
-Could be one screen.
 ---
 
 ## 7. Core Features & Edge Cases
@@ -173,6 +171,15 @@ Could be one screen.
 * This allows users to set up multiple alarms with different lead times for important events
 * Each alarm gets unique `pendingIntentRequestCode` based on `(eventId + ruleId).hashCode()`
 * Example: If you have rules for "Meeting" (30 min lead) and "Important" (60 min lead), and an event titled "Important Meeting" matches both rules, you'll get two alarms: one 60 minutes before and one 30 minutes before the event
+
+### First Event of Day Only Rules
+* **Purpose**: Allow rules to trigger only for the first matching event per calendar day
+* **Use Case**: Morning routine alarms, daily standup reminders, first appointment notifications
+* **Implementation**: Uses `DayTrackingRepository` to track which rules have triggered today
+* **Day Boundaries**: Calculated using local timezone with automatic reset at midnight
+* **Timezone Handling**: Day tracking resets when timezone changes to maintain correct day boundaries
+* **Persistence**: Uses SharedPreferences with date-based keys for reliable cross-reboot tracking
+* **Reset Mechanism**: `DayResetService` schedules exact midnight alarms using `AlarmManager.setExactAndAllowWhileIdle()`
 
 ### Device Reboot
 * `BootReceiver` queries active alarms from database

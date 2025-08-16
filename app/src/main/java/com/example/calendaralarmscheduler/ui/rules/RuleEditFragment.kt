@@ -94,6 +94,7 @@ class RuleEditFragment : Fragment(), MenuProvider {
                         editTextRuleName.setText(rule.name)
                         editTextKeywordPattern.setText(rule.keywordPattern)
                         switchEnabled.isChecked = rule.enabled
+                        switchFirstEventOnly.isChecked = rule.firstEventOfDayOnly
                     }
                 }
             }
@@ -169,6 +170,7 @@ class RuleEditFragment : Fragment(), MenuProvider {
         val name = binding.editTextRuleName.text.toString().trim()
         val pattern = binding.editTextKeywordPattern.text.toString().trim()
         val enabled = binding.switchEnabled.isChecked
+        val firstEventOfDayOnly = binding.switchFirstEventOnly.isChecked
         
         if (name.isEmpty()) {
             binding.editTextRuleName.error = "Rule name is required"
@@ -180,7 +182,7 @@ class RuleEditFragment : Fragment(), MenuProvider {
             return
         }
         
-        viewModel.saveRule(name, pattern, enabled)
+        viewModel.saveRule(name, pattern, enabled, firstEventOfDayOnly)
     }
 
     private fun formatLeadTime(minutes: Int): String {

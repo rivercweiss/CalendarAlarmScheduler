@@ -18,6 +18,7 @@ data class Rule(
     val calendarIds: List<Long>,             // Per-rule calendar filter
     val leadTimeMinutes: Int,                // 1 minute to 7 days
     val enabled: Boolean = true,
+    val firstEventOfDayOnly: Boolean = false, // Only trigger for first matching event per day
     val createdAt: Long = System.currentTimeMillis()
 ) {
     class Converters {
